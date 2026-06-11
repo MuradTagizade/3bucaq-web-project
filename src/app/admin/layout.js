@@ -6,6 +6,8 @@ import { usePathname, useRouter } from 'next/navigation';
 import styles from './admin.module.css';
 import Logo from '@/components/layout/Logo';
 import ThemeToggle from '@/components/ui/ThemeToggle';
+import LanguageToggle from '@/components/ui/LanguageToggle';
+import { useTranslation } from '@/lib/store/languageStore';
 import { LayoutDashboard, Users, ClipboardCheck, ScrollText, LogOut, Wallet, ArrowDownToLine, MoreVertical, ShieldCheck, Shield } from 'lucide-react';
 import { useAuthStore } from '@/lib/store/authStore';
 import { logoutUser } from '@/lib/supabase/auth';
@@ -41,6 +43,7 @@ function hasPermission(user, path) {
 export default function AdminLayout({ children }) {
   const pathname = usePathname();
   const router = useRouter();
+  const { t } = useTranslation();
   const { user, loading: authLoading, setUser, setLoading } = useAuthStore();
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef(null);
@@ -117,9 +120,10 @@ export default function AdminLayout({ children }) {
       <header className={styles.mobileHeader}>
         <div className={styles.mobileHeaderLeft}>
           <Logo size={28} />
-          <span className={styles.adminBadge}>ADMIN</span>
+          <span className={styles.adminBadge}>{t('admin_panel', 'ADMIN')}</span>
         </div>
         <div className={styles.mobileHeaderRight}>
+          <LanguageToggle size={15} />
           <ThemeToggle size={18} />
           <div className={styles.mobileMenuWrapper} ref={menuRef}>
             <button
@@ -135,6 +139,7 @@ export default function AdminLayout({ children }) {
               {filteredNavItems.map((item) => {
                 const Icon = item.icon;
                 const isActive = pathname === item.href;
+                const translationKey = item.href === '/admin' ? 'dashboard' : item.href.split('/').pop();
                 return (
                   <Link
                     key={item.href}
@@ -143,7 +148,7 @@ export default function AdminLayout({ children }) {
                     onClick={() => setMenuOpen(false)}
                   >
                     <Icon size={18} />
-                    <span>{item.label}</span>
+                    <span>{t(translationKey, item.label)}</span>
                   </Link>
                 );
               })}
@@ -153,7 +158,7 @@ export default function AdminLayout({ children }) {
                 className={`${styles.dropdownItem} ${styles.dropdownLogout}`}
               >
                 <LogOut size={18} />
-                <span>Çıxış</span>
+                <span>{t('logout', 'Çıxış')}</span>
               </button>
             </div>
           )}
@@ -165,13 +170,14 @@ export default function AdminLayout({ children }) {
       <aside className={styles.sidebar}>
         <div className={styles.sidebarTop}>
           <Logo size={36} />
-          <span className={styles.adminBadge}>ADMIN</span>
+          <span className={styles.adminBadge}>{t('admin_panel', 'ADMIN')}</span>
         </div>
 
         <nav className={styles.nav}>
           {filteredNavItems.map((item) => {
             const Icon = item.icon;
             const isActive = pathname === item.href;
+            const translationKey = item.href === '/admin' ? 'dashboard' : item.href.split('/').pop();
             return (
               <Link
                 key={item.href}
@@ -179,7 +185,7 @@ export default function AdminLayout({ children }) {
                 className={`${styles.navItem} ${isActive ? styles.navActive : ''}`}
               >
                 <Icon size={20} />
-                <span>{item.label}</span>
+                <span>{t(translationKey, item.label)}</span>
               </Link>
             );
           })}
@@ -187,10 +193,11 @@ export default function AdminLayout({ children }) {
 
         <div className={styles.sidebarBottom}>
           <div className={styles.footerButtons}>
+            <LanguageToggle size={15} />
             <ThemeToggle size={18} />
             <button onClick={handleLogout} className={styles.navItem} style={{ background: 'none', border: 'none', cursor: 'pointer', flex: 1 }}>
               <LogOut size={20} />
-              <span>Çıxış</span>
+              <span>{t('logout', 'Çıxış')}</span>
             </button>
           </div>
         </div>
