@@ -37,7 +37,25 @@ export async function registerUser(email, password, { fullName, login, country, 
 }
 
 export async function resetPassword(email) {
-  const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
+  const normalizedEmail = email.trim().toLowerCase();
+
+  // 1. Check if email exists in profiles table
+  const { data: profile, error: profileError } = await supabase
+    .from('profiles')
+    .select('id')
+    .eq('email', normalizedEmail)
+    .maybeSingle();
+
+  if (profileError) {
+    throw new Error('Xəta baş verdi. Zəhmət olmasa bir az sonra yenidən cəhd edin.');
+  }
+
+  if (!profile) {
+    throw new Error('Bu email ünvanı sistemdə tapılmadı. Keçərli bir email daxil edin.');
+  }
+
+  // 2. Call resetPasswordForEmail
+  const { data, error } = await supabase.auth.resetPasswordForEmail(normalizedEmail, {
     redirectTo: `${window.location.origin}/login`,
   });
 
