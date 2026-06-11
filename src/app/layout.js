@@ -1,4 +1,5 @@
 import './globals.css';
+import Script from 'next/script';
 import AuthProvider from '@/components/providers/AuthProvider';
 import ThemeProvider from '@/components/providers/ThemeProvider';
 
@@ -35,7 +36,9 @@ export default function RootLayout({ children }) {
           href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap"
           rel="stylesheet"
         />
-        <script
+        <Script
+          id="theme-initializer"
+          strategy="beforeInteractive"
           dangerouslySetInnerHTML={{
             __html: `
               (function() {
@@ -51,7 +54,7 @@ export default function RootLayout({ children }) {
           }}
         />
       </head>
-      <body>
+      <body suppressHydrationWarning>
         <AuthProvider>
           <ThemeProvider>
             {children}
