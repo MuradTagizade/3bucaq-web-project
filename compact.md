@@ -98,6 +98,10 @@ Lokal yoxlamalar üçün istifadə olunan test giriş məlumatları:
     *   **Email:** `admin@3bucaq.com`
     *   **Şifrə:** `Admin123!`
     *   **Login:** `admin`
+*   **Yeni Zəngin Mock Admin Hesabı:**
+    *   **Email:** `mockadmin@3bucaq.com`
+    *   **Şifrə:** `Mockadmin123!`
+    *   **Login:** `mockadmin`
 *   **Adi İstifadəçi Hesabı:**
     *   **Email:** `user@3bucaq.com`
     *   **Şifrə:** `User123!`
