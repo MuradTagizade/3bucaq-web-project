@@ -102,6 +102,10 @@ Lokal yoxlamalar üçün istifadə olunan test giriş məlumatları:
     *   **Email:** `user@3bucaq.com`
     *   **Şifrə:** `User123!`
     *   **Login:** `testuser`
+*   **Yeni Zəngin Mock İstifadəçi Hesabı:**
+    *   **Email:** `testmock@3bucaq.com`
+    *   **Şifrə:** `Testmock123!`
+    *   **Login:** `mockuser`
 
 ---
 
