@@ -6,7 +6,9 @@ import { usePathname } from 'next/navigation';
 import styles from './Sidebar.module.css';
 import Logo from './Logo';
 import ThemeToggle from '@/components/ui/ThemeToggle';
+import LanguageToggle from '@/components/ui/LanguageToggle';
 import { useAuthStore } from '@/lib/store/authStore';
+import { useTranslation } from '@/lib/store/languageStore';
 import {
   Triangle,
   ArrowLeftRight,
@@ -38,6 +40,7 @@ const SIDEBAR_ITEMS = [
 export default function Sidebar({ userName, transferBalance, referralLink, onLogout }) {
   const pathname = usePathname();
   const { user } = useAuthStore();
+  const { t, language } = useTranslation();
   const [copied, setCopied] = useState(false);
 
   const balance = user?.balance || 0;
@@ -67,11 +70,11 @@ export default function Sidebar({ userName, transferBalance, referralLink, onLog
         
         <div className={styles.balances}>
           <div className={styles.balanceItem}>
-            <span className={styles.balanceLabel}>Əsas Balans</span>
+            <span className={styles.balanceLabel}>{t('main_balance', 'Əsas Balans')}</span>
             <span className={styles.balanceValue}>{formatCurrency(balance)}</span>
           </div>
           <div className={styles.balanceItem}>
-            <span className={styles.balanceLabel}>Transfer Balansı</span>
+            <span className={styles.balanceLabel}>{t('transfer_balance', 'Transfer Balansı')}</span>
             <span className={styles.balanceValue}>{formatCurrency(transferBalance)}</span>
           </div>
         </div>
@@ -82,6 +85,7 @@ export default function Sidebar({ userName, transferBalance, referralLink, onLog
         {SIDEBAR_ITEMS.map((item) => {
           const Icon = item.icon;
           const isActive = pathname === item.href;
+          const translationKey = item.id === 'personalInfo' ? 'personal_info' : item.id === 'home' ? 'home' : item.id;
 
           return (
             <Link
@@ -90,7 +94,7 @@ export default function Sidebar({ userName, transferBalance, referralLink, onLog
               className={`${styles.navItem} ${isActive ? styles.navActive : ''}`}
             >
               <Icon size={18} />
-              <span>{item.label}</span>
+              <span>{t(translationKey, item.label)}</span>
               {isActive && <span className={styles.activeIndicator} />}
             </Link>
           );
@@ -103,7 +107,7 @@ export default function Sidebar({ userName, transferBalance, referralLink, onLog
             className={`${styles.navItem} ${styles.adminLink}`}
           >
             <Shield size={18} color="var(--color-error)" />
-            <span>Admin Panel</span>
+            <span>{t('admin_panel', 'Admin Panel')}</span>
           </Link>
         )}
       </nav>
@@ -112,7 +116,7 @@ export default function Sidebar({ userName, transferBalance, referralLink, onLog
       <div className={styles.footer}>
         <div className={styles.refBox}>
           <div className={styles.refHeader}>
-            <span className={styles.refTitle}>Referal Linkiniz</span>
+            <span className={styles.refTitle}>{t('your_ref_link', 'Referal Linkiniz')}</span>
             <button className={styles.copyBtn} onClick={handleCopyLink} aria-label="Kopyala">
               {copied ? <Check size={14} color="var(--color-success)" /> : <Copy size={14} />}
             </button>
@@ -123,10 +127,11 @@ export default function Sidebar({ userName, transferBalance, referralLink, onLog
         </div>
 
         <div className={styles.footerButtons}>
+          <LanguageToggle size={15} />
           <ThemeToggle size={18} className={styles.themeToggleSidebar} />
           <button className={styles.logoutBtn} onClick={onLogout}>
             <LogOut size={18} />
-            <span>Çıxış</span>
+            <span>{t('logout', 'Çıxış')}</span>
           </button>
         </div>
       </div>

@@ -10,6 +10,7 @@ import { LEVELS, PACKAGES } from '@/lib/utils/constants';
 import { formatUSDT, formatPoints, formatCurrency, getKYCStatusLabel, getKYCStatusVariant } from '@/lib/utils/formatters';
 import { Trophy, ChevronRight, Lock, Check, Clock, Wallet, Copy, Shield, DollarSign, ArrowDownToLine } from 'lucide-react';
 import { useAuthStore } from '@/lib/store/authStore';
+import { useTranslation } from '@/lib/store/languageStore';
 import { createLevelClaim, getUserClaimedLevels, getUserByUid } from '@/lib/supabase/database';
 
 export default function DashboardPage() {
@@ -18,7 +19,10 @@ export default function DashboardPage() {
   const [claimedLevels, setClaimedLevels] = useState([]);
   const [submitting, setSubmitting] = useState(false);
 
-  const { user: authUser, setUser } = useAuthStore();
+  const { t } = useTranslation();
+  const { authUser, setUser } = useAuthStore();
+  
+  // Resolve authUser from store
   const user = {
     login: authUser?.displayLogin || 'User',
     balance: authUser?.balance || 0,
@@ -34,10 +38,11 @@ export default function DashboardPage() {
   };
 
   useEffect(() => {
+    const activeUser = useAuthStore.getState().user;
     async function loadClaimed() {
-      if (!authUser?.uid) return;
+      if (!activeUser?.uid) return;
       try {
-        const levels = await getUserClaimedLevels(authUser.uid);
+        const levels = await getUserClaimedLevels(activeUser.uid);
         setClaimedLevels(levels);
       } catch (err) {
         console.error('Failed to load claimed levels:', err);
@@ -59,33 +64,34 @@ export default function DashboardPage() {
   const handleReceiveClick = (level) => {
     const status = checkLevelStatus(level);
     if (status.isClaimed) {
-      showToast('Bu səviyyə artıq istifadə olunub');
+      showToast(t('level_claimed_already', 'Bu səviyyə artıq istifadə olunub'));
       return;
     }
     if (!status.isReady) {
-      showToast('Şərtlər yerinə yetirilməyib');
+      showToast(t('requirements_not_met', 'Şərtlər yerinə yetirilməyib'));
       return;
     }
     setReceiveModal({ open: true, level });
   };
 
   const handleSubmitClaim = async () => {
-    if (!receiveModal.level) return;
+    const activeUser = useAuthStore.getState().user;
+    if (!receiveModal.level || !activeUser?.uid) return;
 
     setSubmitting(true);
     try {
       await createLevelClaim(
-        authUser.uid,
+        activeUser.uid,
         receiveModal.level.level,
         receiveModal.level.bonus,
         'balance'
       );
 
       // Fetch updated user profile and update Zustand store
-      const updatedProfile = await getUserByUid(authUser.uid);
+      const updatedProfile = await getUserByUid(activeUser.uid);
       if (updatedProfile) {
         setUser({
-          ...authUser,
+          ...activeUser,
           balance: Number(updatedProfile.balance),
           transferBalance: Number(updatedProfile.transfer_balance),
           totalPoints: Number(updatedProfile.total_points),
@@ -97,9 +103,11 @@ export default function DashboardPage() {
       setClaimedLevels((prev) => [...prev, receiveModal.level.level]);
       setReceiveModal({ open: false, level: null });
 
-      showToast(`${formatUSDT(receiveModal.level.bonus)} balansınıza əlavə edildi!`);
+      const successMsg = t('bonus_added_to_balance', '{{bonus}} balansınıza əlavə edildi!')
+        .replace('{{bonus}}', formatUSDT(receiveModal.level.bonus));
+      showToast(successMsg);
     } catch (err) {
-      showToast('Xəta: ' + err.message);
+      showToast(t('error', 'Xəta') + ': ' + err.message);
     } finally {
       setSubmitting(false);
     }
@@ -122,7 +130,7 @@ export default function DashboardPage() {
   const handleCopyRef = async () => {
     try {
       await navigator.clipboard.writeText(referralLink);
-      showToast('Referal link kopyalandı!');
+      showToast(t('ref_link_copied', 'Referal link kopyalandı!'));
     } catch { /* ignore */ }
   };
 
@@ -137,24 +145,24 @@ export default function DashboardPage() {
           <div className={styles.userGreeting}>
             <span className={styles.userLogin}>@{user.login}</span>
             <Badge variant={getKYCStatusVariant(user.kycStatus)} size="sm">
-              KYC: {getKYCStatusLabel(user.kycStatus)}
+              KYC: {t(user.kycStatus, getKYCStatusLabel(user.kycStatus))}
             </Badge>
           </div>
         </div>
         <div className={styles.balanceRow}>
           <div className={styles.balanceBox}>
-            <span className={styles.balanceLabel}>Əsas Balans</span>
+            <span className={styles.balanceLabel}>{t('main_balance', 'Əsas Balans')}</span>
             <span className={styles.balanceAmount}>{formatCurrency(user.balance)}</span>
           </div>
           <div className={styles.balanceBox}>
-            <span className={styles.balanceLabel}>Transfer Balans</span>
+            <span className={styles.balanceLabel}>{t('transfer_balance', 'Transfer Balansı')}</span>
             <span className={styles.balanceAmount}>{formatCurrency(user.transferBalance)}</span>
           </div>
         </div>
         <div className={styles.refRow}>
-          <span className={styles.refLabel}>Referal: {user.referralCode}</span>
+          <span className={styles.refLabel}>{t('referral_code', 'Referal Kodu')}: {user.referralCode}</span>
           <button className={styles.refCopyBtn} onClick={handleCopyRef}>
-            <Copy size={14} /> Kopyala
+            <Copy size={14} /> {t('copy', 'Kopyala')}
           </button>
         </div>
       </div>
@@ -166,7 +174,7 @@ export default function DashboardPage() {
             <Trophy size={24} />
           </div>
           <div>
-            <div className={styles.summaryLabel}>Ümumi Xallar</div>
+            <div className={styles.summaryLabel}>{t('total_points_label', 'Ümumi Xallar')}</div>
             <div className={styles.summaryValue}>{Number(user.totalPoints).toFixed(1)}</div>
           </div>
         </div>
@@ -175,7 +183,7 @@ export default function DashboardPage() {
             <Shield size={24} color="var(--color-accent)" />
           </div>
           <div>
-            <div className={styles.summaryLabel}>Aktiv Paketlər</div>
+            <div className={styles.summaryLabel}>{t('active_packages', 'Aktiv Paketlər')}</div>
             <div className={styles.summaryValue}>
               {Object.values(user.activePackages).filter(Boolean).length} / 6
             </div>
@@ -184,7 +192,7 @@ export default function DashboardPage() {
       </div>
 
       {/* Level Table */}
-      <h2 className={styles.sectionTitle}>Çıxarış Səviyyələri</h2>
+      <h2 className={styles.sectionTitle}>{t('withdrawal_levels', 'Çıxarış Səviyyələri')}</h2>
       <div className={styles.levelList}>
         {LEVELS.map((level) => {
           const status = checkLevelStatus(level);
@@ -229,7 +237,7 @@ export default function DashboardPage() {
                     <Check size={12} color="var(--color-success)" />
                   )}
                   <span>
-                    Tələb: {getRequiredPackageNames(level.requiredPkgs)}
+                    {t('required', 'Tələb')}: {getRequiredPackageNames(level.requiredPkgs)}
                   </span>
                 </div>
               )}
@@ -237,7 +245,7 @@ export default function DashboardPage() {
               {/* Action */}
               <div className={styles.levelAction}>
                 {status.isClaimed ? (
-                  <Badge variant="success" size="sm">İstifadə olunub ✓</Badge>
+                  <Badge variant="success" size="sm">{t('claimed', 'İstifadə olunub')} ✓</Badge>
                 ) : (
                   <Button
                     size="sm"
@@ -245,7 +253,7 @@ export default function DashboardPage() {
                     onClick={() => handleReceiveClick(level)}
                     disabled={!status.isReady}
                   >
-                    {status.isReady ? 'Receive' : 'Kilidli'}
+                    {status.isReady ? 'Receive' : t('locked', 'Kilidli')}
                   </Button>
                 )}
               </div>
@@ -258,7 +266,7 @@ export default function DashboardPage() {
       <Modal
         isOpen={receiveModal.open}
         onClose={() => setReceiveModal({ open: false, level: null })}
-        title="Səviyyə Bonusunu Al"
+        title={t('claim_level_bonus', 'Səviyyə Bonusunu Al')}
         size="sm"
       >
         {receiveModal.level && (
@@ -268,7 +276,9 @@ export default function DashboardPage() {
               <span>LVL {receiveModal.level.level} — {formatUSDT(receiveModal.level.bonus)}</span>
             </div>
             <p style={{ fontSize: 14, color: 'var(--text-secondary)', margin: '16px 0', textAlign: 'center' }}>
-              Bu səviyyəni aktiv etmək istəyirsiniz? Səviyyə üçün tələb olunan <strong>{receiveModal.level.points} point</strong> balansınızdan çıxılacaq və <strong>{formatUSDT(receiveModal.level.bonus)}</strong> bonus dərhal USDT balansınıza əlavə olunacaq.
+              {t('claim_modal_desc', 'Bu səviyyəni aktiv etmək istəyirsiniz? Səviyyə üçün tələb olunan {{points}} point balansınızdan çıxılacaq və {{bonus}} bonus dərhal USDT balansınıza əlavə olunacaq.')
+                .replace('{{points}}', receiveModal.level.points)
+                .replace('{{bonus}}', formatUSDT(receiveModal.level.bonus))}
             </p>
             <Button
               fullWidth
@@ -276,7 +286,7 @@ export default function DashboardPage() {
               onClick={handleSubmitClaim}
               loading={submitting}
             >
-              Təsdiqlə və Aktiv Et
+              {t('confirm_and_activate', 'Təsdiqlə və Aktiv Et')}
             </Button>
           </div>
         )}

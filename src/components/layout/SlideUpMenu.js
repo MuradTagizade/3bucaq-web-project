@@ -2,6 +2,7 @@
 
 import styles from './SlideUpMenu.module.css';
 import { useUIStore } from '@/lib/store/uiStore';
+import { useTranslation } from '@/lib/store/languageStore';
 import {
   KeyRound, History, Link2, LogOut, X, Copy, Share2,
   Wallet, Star, User, ShieldCheck,
@@ -11,6 +12,7 @@ import Link from 'next/link';
 
 export default function SlideUpMenu({ referralLink = '', onLogout }) {
   const { menuOpen, closeMenu } = useUIStore();
+  const { t } = useTranslation();
   const [copied, setCopied] = useState(false);
 
   const handleCopy = async () => {
@@ -42,10 +44,10 @@ export default function SlideUpMenu({ referralLink = '', onLogout }) {
   if (!menuOpen) return null;
 
   const menuLinks = [
-    { href: '/dashboard/deposit', label: 'Depozit', icon: Wallet },
-    { href: '/dashboard/history', label: 'USDT Tarixçə', icon: History },
-    { href: '/dashboard/personal-info', label: 'Şəxsi Məlumat', icon: User },
-    { href: '/dashboard/kyc', label: 'KYC', icon: ShieldCheck },
+    { href: '/dashboard/deposit', label: t('deposit', 'Depozit'), icon: Wallet },
+    { href: '/dashboard/history', label: t('history', 'USDT Tarixçə'), icon: History },
+    { href: '/dashboard/personal-info', label: t('personal_info', 'Şəxsi Məlumat'), icon: User },
+    { href: '/dashboard/kyc', label: t('kyc', 'KYC'), icon: ShieldCheck },
   ];
 
   return (
@@ -53,7 +55,7 @@ export default function SlideUpMenu({ referralLink = '', onLogout }) {
       <div className={styles.overlay} onClick={closeMenu} />
       <div className={styles.menu}>
         <div className={styles.header}>
-          <h3 className={styles.title}>Menyu</h3>
+          <h3 className={styles.title}>{t('menu', 'Menyu')}</h3>
           <button className={styles.closeBtn} onClick={closeMenu}>
             <X size={20} />
           </button>
@@ -72,18 +74,18 @@ export default function SlideUpMenu({ referralLink = '', onLogout }) {
           <div className={styles.refSection}>
             <div className={styles.item} style={{ cursor: 'default' }}>
               <Link2 size={20} />
-              <span>Referal Link</span>
+              <span>{t('referral_link', 'Referal Link')}</span>
             </div>
             <div className={styles.refActions}>
-              <div className={styles.refLink}>{referralLink || 'Yüklənir...'}</div>
+              <div className={styles.refLink}>{referralLink || t('loading', 'Yüklənir...')}</div>
               <div className={styles.refBtns}>
                 <button className={styles.refBtn} onClick={handleCopy}>
                   <Copy size={16} />
-                  {copied ? 'Kopyalandı!' : 'Kopyala'}
+                  {copied ? t('copied', 'Kopyalandı!') : t('copy', 'Kopyala')}
                 </button>
                 <button className={styles.refBtn} onClick={handleShare}>
                   <Share2 size={16} />
-                  Paylaş
+                  {t('share', 'Paylaş')}
                 </button>
               </div>
             </div>
@@ -91,7 +93,7 @@ export default function SlideUpMenu({ referralLink = '', onLogout }) {
           <div className={styles.divider} />
           <button className={`${styles.item} ${styles.logout}`} onClick={onLogout}>
             <LogOut size={20} />
-            <span>Çıxış</span>
+            <span>{t('logout', 'Çıxış')}</span>
           </button>
         </div>
       </div>

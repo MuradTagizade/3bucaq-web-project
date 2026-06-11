@@ -1,0 +1,58 @@
+.langBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background: var(--bg-card, rgba(30, 41, 59, 0.5));
+  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.1));
+  color: var(--text-primary, #ffffff);
+  padding: 6px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  user-select: none;
+  height: 32px;
+  box-sizing: border-box;
+}
+
+.langBtnPlaceholder {
+  width: 52px;
+  height: 32px;
+  background: transparent;
+}
+
+.langBtn:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: var(--color-primary, #10b981);
+  color: var(--color-primary, #10b981);
+}
+
+:global([data-theme='light']) .langBtn {
+  background: var(--bg-card, #ffffff);
+  color: var(--text-primary, #0f172a);
+}
+
+:global([data-theme='light']) .langBtn:hover {
+  background: rgba(0, 0, 0, 0.02);
+  border-color: var(--color-primary, #059669);
+  color: var(--color-primary, #059669);
+}
+
+.globeIcon {
+  flex-shrink: 0;
+  opacity: 0.8;
+  transition: transform 0.3s ease;
+}
+
+.langBtn:hover .globeIcon {
+  transform: rotate(15deg);
+  opacity: 1;
+}
+
+.label {
+  letter-spacing: 0.5px;
+  font-weight: 700;
+}

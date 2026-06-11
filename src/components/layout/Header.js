@@ -5,6 +5,7 @@ import Logo from './Logo';
 import { Menu } from 'lucide-react';
 import { useUIStore } from '@/lib/store/uiStore';
 import ThemeToggle from '@/components/ui/ThemeToggle';
+import LanguageToggle from '@/components/ui/LanguageToggle';
 
 export default function Header({ userName }) {
   const openMenu = useUIStore((s) => s.openMenu);
@@ -17,6 +18,7 @@ export default function Header({ userName }) {
           Hi: <span className={styles.name}>{userName || 'User'}</span>
         </div>
         <div className={styles.actions}>
+          <LanguageToggle size={15} />
           <ThemeToggle size={18} />
           <button className={styles.menuBtn} onClick={openMenu} aria-label="Menyu">
             <Menu size={22} />
