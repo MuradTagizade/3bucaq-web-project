@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /dashboard/
+Disallow: /verify
+Disallow: /api/
+
+Sitemap: https://3bucaq.com/sitemap.xml

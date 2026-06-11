@@ -1,0 +1,385 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import styles from './deposit.module.css';
+import Input from '@/components/ui/Input';
+import Button from '@/components/ui/Button';
+import Badge from '@/components/ui/Badge';
+import Modal from '@/components/ui/Modal';
+import { Wallet, ArrowDown, Clock, CheckCircle2, XCircle, Copy, Upload, CreditCard, Image as ImageIcon } from 'lucide-react';
+import { formatCurrency, formatDateTime } from '@/lib/utils/formatters';
+import { validateAmount } from '@/lib/utils/validators';
+import { useAuthStore } from '@/lib/store/authStore';
+import { createDeposit, getDeposits, getSystemSetting } from '@/lib/supabase/database';
+import { supabase } from '@/lib/supabase/config';
+
+export default function DepositPage() {
+  const { user: authUser } = useAuthStore();
+  const [activeTab, setActiveTab] = useState('usdt'); // 'usdt' or 'card'
+  const [isCardActive, setIsCardActive] = useState(false); // Enable/Disable card payment setting
+  
+  // USDT form state
+  const [amount, setAmount] = useState('');
+  const [txHash, setTxHash] = useState('');
+  const [network, setNetwork] = useState('TRC20');
+  
+  // Card form state
+  const [cardAmount, setCardAmount] = useState('');
+  const [userCardNumber, setUserCardNumber] = useState('');
+  const [receiptFile, setReceiptFile] = useState(null);
+  const [adminCardNumber, setAdminCardNumber] = useState('Yüklənir...');
+  
+  const [loading, setLoading] = useState(false);
+  const [toast, setToast] = useState(null);
+  const [deposits, setDeposits] = useState([]);
+  const [loadingHistory, setLoadingHistory] = useState(true);
+
+  // Receipt Modal viewer
+  const [viewerReceiptUrl, setViewerReceiptUrl] = useState(null);
+
+  useEffect(() => {
+    async function loadData() {
+      if (!authUser?.uid) return;
+      try {
+        const [historyData, activeCard, cardActiveSetting] = await Promise.all([
+          getDeposits(authUser.uid),
+          getSystemSetting('admin_deposit_card'),
+          getSystemSetting('card_payment_active')
+        ]);
+        setDeposits(historyData);
+        if (activeCard) {
+          setAdminCardNumber(activeCard);
+        } else {
+          setAdminCardNumber('Təyin edilməyib');
+        }
+        setIsCardActive(cardActiveSetting === 'true');
+        // Force USDT if card system is disabled
+        if (cardActiveSetting !== 'true') {
+          setActiveTab('usdt');
+        }
+      } catch (err) {
+        console.error('Failed to load deposit data:', err);
+      } finally {
+        setLoadingHistory(false);
+      }
+    }
+    loadData();
+  }, [authUser?.uid]);
+
+  const showToast = (msg) => {
+    setToast(msg);
+    setTimeout(() => setToast(null), 3000);
+  };
+
+  const handleCopyCard = async () => {
+    try {
+      await navigator.clipboard.writeText(adminCardNumber);
+      showToast('Kart nömrəsi kopyalandı!');
+    } catch (err) {
+      showToast('Kopyalamaq alınmadı');
+    }
+  };
+
+  // Upload file to Supabase storage bucket
+  const uploadReceiptFile = async (file) => {
+    const fileExt = file.name.split('.').pop();
+    const fileName = `deposit_${Date.now()}.${fileExt}`;
+    const filePath = `receipts/${authUser.uid}/${fileName}`;
+    
+    const { data, error } = await supabase.storage
+      .from('kyc-documents')
+      .upload(filePath, file, { upsert: true });
+      
+    if (error) throw new Error(error.message);
+    return data.path;
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (activeTab === 'usdt') {
+      const amountErr = validateAmount(amount);
+      if (amountErr) {
+        showToast(amountErr);
+        return;
+      }
+
+      if (!txHash.trim()) {
+        showToast('Transaction Hash daxil edin');
+        return;
+      }
+
+      setLoading(true);
+      try {
+        await createDeposit(authUser.uid, amount, txHash, network, 'usdt');
+        showToast('Depozit sorğusu göndərildi! Admin təsdiq edəcək.');
+        setAmount('');
+        setTxHash('');
+        const data = await getDeposits(authUser.uid);
+        setDeposits(data);
+      } catch (err) {
+        showToast('Xəta: ' + err.message);
+      } finally {
+        setLoading(false);
+      }
+    } else {
+      // Security check if card payments were deactivated in background
+      if (!isCardActive) {
+        showToast('Kart ilə ödəniş hazırda aktiv deyil.');
+        return;
+      }
+
+      // Bank Card submission
+      const amountErr = validateAmount(cardAmount);
+      if (amountErr) {
+        showToast(amountErr);
+        return;
+      }
+
+      const formattedCard = userCardNumber.replace(/\s+/g, '');
+      if (formattedCard.length !== 16 || isNaN(Number(formattedCard))) {
+        showToast('Kart nömrəsi 16 rəqəmdən ibarət olmalıdır');
+        return;
+      }
+
+      if (!receiptFile) {
+        showToast('Ödəniş qəbzi şəklini yükləyin');
+        return;
+      }
+
+      setLoading(true);
+      try {
+        const receiptPath = await uploadReceiptFile(receiptFile);
+        await createDeposit(authUser.uid, cardAmount, null, null, 'card', formattedCard, receiptPath);
+        showToast('Kart ilə depozit sorğusu göndərildi! Admin təsdiq edəcək.');
+        setCardAmount('');
+        setUserCardNumber('');
+        setReceiptFile(null);
+        const data = await getDeposits(authUser.uid);
+        setDeposits(data);
+      } catch (err) {
+        showToast('Xəta: ' + err.message);
+      } finally {
+        setLoading(false);
+      }
+    }
+  };
+
+  const getStatusBadge = (status) => {
+    const map = {
+      pending: { variant: 'warning', label: 'Gözləyir' },
+      approved: { variant: 'success', label: 'Təsdiqlənib' },
+      rejected: { variant: 'error', label: 'Rədd' },
+    };
+    const s = map[status] || { variant: 'info', label: status };
+    return <Badge variant={s.variant} size="sm">{s.label}</Badge>;
+  };
+
+  // Helper to resolve receipt public url
+  const handleViewReceipt = (receiptPath) => {
+    const { data } = supabase.storage.from('kyc-documents').getPublicUrl(receiptPath);
+    setViewerReceiptUrl(data.publicUrl);
+  };
+
+  return (
+    <div className={styles.page}>
+      <h2 className={styles.title}>
+        <Wallet size={22} color="var(--color-primary)" />
+        Depozit
+      </h2>
+
+      {/* Payment Method Tabs (Only show if card payments are active in system_settings) */}
+      {isCardActive && (
+        <div className={styles.tabs}>
+          <button
+            type="button"
+            className={`${styles.tab} ${activeTab === 'usdt' ? styles.tabActive : ''}`}
+            onClick={() => setActiveTab('usdt')}
+          >
+            <Wallet size={16} />
+            <span>USDT TRC20</span>
+          </button>
+          <button
+            type="button"
+            className={`${styles.tab} ${activeTab === 'card' ? styles.tabActive : ''}`}
+            onClick={() => setActiveTab('card')}
+          >
+            <CreditCard size={16} />
+            <span>Bank Kartı (Manuel)</span>
+          </button>
+        </div>
+      )}
+
+      {activeTab === 'usdt' ? (
+        <div className={styles.infoCard}>
+          <div className={styles.infoIcon}>
+            <ArrowDown size={20} />
+          </div>
+          <div>
+            <strong>USDT TRC20</strong>
+            <p>Kripto vasitəsilə balansınızı artırın. Transaction hash-i daxil edin, admin təsdiq edəcək.</p>
+          </div>
+        </div>
+      ) : (
+        <div className={styles.infoCard}>
+          <div className={styles.infoIcon} style={{ background: 'rgba(0, 230, 118, 0.1)' }}>
+            <CreditCard size={20} color="var(--color-primary)" />
+          </div>
+          <div>
+            <strong>Bank Kartı ilə Mədaxil</strong>
+            <p>Aşağıda qeyd olunan bank kartına pulu göndərib, ödəniş qəbzi şəklini və kart nömrənizi daxil edin.</p>
+          </div>
+        </div>
+      )}
+
+      <form onSubmit={handleSubmit} className={styles.form}>
+        {activeTab === 'usdt' ? (
+          <>
+            <Input
+              label="Məbləğ (USD)"
+              type="number"
+              placeholder="100.00"
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+              icon={<Wallet size={18} />}
+            />
+
+            <Input
+              label="Transaction Hash"
+              placeholder="Ödəniş hash-i daxil edin"
+              value={txHash}
+              onChange={(e) => setTxHash(e.target.value)}
+            />
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+              <label style={{ fontSize: 13, color: 'var(--text-muted)', fontWeight: 500 }}>Şəbəkə</label>
+              <select
+                value={network}
+                onChange={(e) => setNetwork(e.target.value)}
+                className={styles.select}
+              >
+                <option value="TRC20">USDT TRC20</option>
+                <option value="ERC20">USDT ERC20</option>
+                <option value="BEP20">USDT BEP20</option>
+              </select>
+            </div>
+          </>
+        ) : (
+          <>
+            <div className={styles.cardDisplay}>
+              <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Göndəriləcək Kart Hesabı</span>
+              <div className={styles.cardNumRow}>
+                <span className={styles.cardNum}>{adminCardNumber}</span>
+                <button type="button" className={styles.copyBtn} onClick={handleCopyCard}>
+                  <Copy size={12} />
+                  <span>Kopyala</span>
+                </button>
+              </div>
+            </div>
+
+            <Input
+              label="Məbləğ (USD)"
+              type="number"
+              placeholder="100.00"
+              value={cardAmount}
+              onChange={(e) => setCardAmount(e.target.value)}
+              icon={<Wallet size={18} />}
+            />
+
+            <Input
+              label="Göndərən Kart Nömrəniz (16 rəqəmli)"
+              placeholder="1234 5678 1234 5678"
+              value={userCardNumber}
+              maxLength={19}
+              onChange={(e) => {
+                const val = e.target.value.replace(/\D/g, '');
+                const formatted = val.match(/.{1,4}/g)?.join(' ') || val;
+                setUserCardNumber(formatted.slice(0, 19));
+              }}
+              icon={<CreditCard size={18} />}
+            />
+
+            <div className={styles.fileUploadGroup}>
+              <span className={styles.fileUploadLabel}>Ödəniş Qəbzi (Foto)</span>
+              <label className={styles.fileUploader}>
+                <Upload size={18} color="var(--color-primary)" />
+                <span>{receiptFile ? receiptFile.name : 'Qəbzin şəklini seçin...'}</span>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => setReceiptFile(e.target.files[0])}
+                  hidden
+                />
+              </label>
+            </div>
+          </>
+        )}
+
+        <Button type="submit" fullWidth size="lg" loading={loading}>
+          Depozit Sorğusu Göndər
+        </Button>
+      </form>
+
+      {/* Deposit History */}
+      <h3 className={styles.historyTitle}>Depozit Tarixçəsi</h3>
+      {loadingHistory ? (
+        <div style={{ textAlign: 'center', padding: 20 }}>Yüklənir...</div>
+      ) : deposits.length === 0 ? (
+        <div className={styles.empty}>Hələ depozit yoxdur</div>
+      ) : (
+        <div className={styles.historyList}>
+          {deposits.map((d) => (
+            <div key={d.id} className={styles.historyItem}>
+              <div className={styles.historyInfo}>
+                <span className={styles.historyAmount}>{formatCurrency(d.amount)}</span>
+                <span className={styles.historyDate}>{formatDateTime(d.created_at)}</span>
+                {d.payment_method === 'card' ? (
+                  <div className={styles.historyMethod}>
+                    <span>Kart: **** {d.card_number?.slice(-4)}</span>
+                    {d.receipt_url && (
+                      <div>
+                        <button
+                          type="button"
+                          className={styles.viewReceiptLink}
+                          onClick={() => handleViewReceipt(d.receipt_url)}
+                        >
+                          Qəbzə Bax
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <span className={styles.historyMethod}>USDT ({d.network || 'TRC20'})</span>
+                )}
+              </div>
+              {getStatusBadge(d.status)}
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Receipt Preview Modal */}
+      <Modal
+        isOpen={!!viewerReceiptUrl}
+        onClose={() => setViewerReceiptUrl(null)}
+        title="Depozit Ödəniş Qəbzi"
+        size="md"
+      >
+        {viewerReceiptUrl && (
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16 }}>
+            <img
+              src={viewerReceiptUrl}
+              alt="Receipt Preview"
+              style={{ maxWidth: '100%', maxHeight: '400px', borderRadius: 8, objectFit: 'contain', border: '1px solid var(--border-color)' }}
+            />
+            <Button onClick={() => window.open(viewerReceiptUrl, '_blank')}>
+              Tam Ekran Bax
+            </Button>
+          </div>
+        )}
+      </Modal>
+
+      {toast && <div className={styles.toast}>{toast}</div>}
+    </div>
+  );
+}

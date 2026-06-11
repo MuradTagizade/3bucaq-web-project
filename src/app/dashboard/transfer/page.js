@@ -1,0 +1,453 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import styles from './transfer.module.css';
+import Input from '@/components/ui/Input';
+import Button from '@/components/ui/Button';
+import Badge from '@/components/ui/Badge';
+import Modal from '@/components/ui/Modal';
+import { formatCurrency, formatDateTime } from '@/lib/utils/formatters';
+import { validateAmount, validateUSDTAddress } from '@/lib/utils/validators';
+import { ArrowUpRight, CheckCircle2, User, Wallet, ArrowDownToLine, CreditCard, Image as ImageIcon } from 'lucide-react';
+import { useAuthStore } from '@/lib/store/authStore';
+import { transferFunds, getUserByLogin, getUserByUid, createWithdrawal, getWithdrawals, getSystemSetting } from '@/lib/supabase/database';
+import { supabase } from '@/lib/supabase/config';
+
+export default function TransferPage() {
+  const { user: authUser, setUser } = useAuthStore();
+  const [activeTab, setActiveTab] = useState('transfer');
+
+  // Transfer state
+  const [recipient, setRecipient] = useState('');
+  const [amount, setAmount] = useState('');
+  const [recipientValid, setRecipientValid] = useState(null);
+  const [errors, setErrors] = useState({});
+  const [success, setSuccess] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  // Withdrawal state
+  const [wdMethod, setWdMethod] = useState('usdt'); // 'usdt' or 'card'
+  const [wdAmount, setWdAmount] = useState('');
+  const [wdAddress, setWdAddress] = useState('');
+  const [wdNetwork, setWdNetwork] = useState('TRC20');
+  const [wdCardNumber, setWdCardNumber] = useState('');
+  const [wdErrors, setWdErrors] = useState({});
+  const [wdLoading, setWdLoading] = useState(false);
+  const [wdSuccess, setWdSuccess] = useState(false);
+  const [withdrawals, setWithdrawals] = useState([]);
+  const [wdHistoryLoading, setWdHistoryLoading] = useState(true);
+  const [isCardActive, setIsCardActive] = useState(false);
+
+  // Receipt Modal viewer
+  const [viewerReceiptUrl, setViewerReceiptUrl] = useState(null);
+
+  const balance = authUser?.balance || 0;
+
+  useEffect(() => {
+    async function loadWd() {
+      if (!authUser?.uid) return;
+      try {
+        const [data, cardActiveSetting] = await Promise.all([
+          getWithdrawals(authUser.uid),
+          getSystemSetting('card_payment_active')
+        ]);
+        setWithdrawals(data);
+        const active = cardActiveSetting === 'true';
+        setIsCardActive(active);
+        if (!active) {
+          setWdMethod('usdt');
+        }
+      } catch (err) {
+        console.error('Failed to load withdrawals:', err);
+      } finally {
+        setWdHistoryLoading(false);
+      }
+    }
+    loadWd();
+  }, [authUser?.uid]);
+
+  // --- Transfer handlers ---
+  const handleRecipientChange = async (e) => {
+    const val = e.target.value;
+    setRecipient(val);
+
+    if (val.length >= 3) {
+      try {
+        const userFound = await getUserByLogin(val);
+        setRecipientValid(!!userFound && userFound.id !== authUser.uid);
+      } catch {
+        setRecipientValid(false);
+      }
+    } else {
+      setRecipientValid(null);
+    }
+    setErrors((prev) => ({ ...prev, recipient: null }));
+  };
+
+  const handleTransferSubmit = async (e) => {
+    e.preventDefault();
+    const newErrors = {};
+
+    if (!recipient.trim()) newErrors.recipient = 'Login yazın';
+    else if (!recipientValid) newErrors.recipient = 'Qəbul edən tapılmadı';
+
+    const amountErr = validateAmount(amount, balance);
+    if (amountErr) newErrors.amount = amountErr;
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      await transferFunds(authUser.uid, recipient, amount);
+
+      const updatedProfile = await getUserByUid(authUser.uid);
+      if (updatedProfile) {
+        setUser({
+          ...authUser,
+          balance: Number(updatedProfile.balance),
+          transferBalance: Number(updatedProfile.transfer_balance),
+        });
+      }
+
+      setSuccess(true);
+      setTimeout(() => {
+        setSuccess(false);
+        setRecipient('');
+        setAmount('');
+        setRecipientValid(null);
+      }, 2500);
+    } catch (err) {
+      setErrors({ amount: err.message });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // --- Withdrawal handlers ---
+  const handleWithdrawalSubmit = async (e) => {
+    e.preventDefault();
+    const newErrors = {};
+
+    const amountErr = validateAmount(wdAmount, balance);
+    if (amountErr) newErrors.amount = amountErr;
+
+    const formattedCard = wdCardNumber.replace(/\s+/g, '');
+
+    if (wdMethod === 'usdt') {
+      const addrErr = validateUSDTAddress(wdAddress);
+      if (addrErr) newErrors.address = addrErr;
+    } else {
+      if (!isCardActive) {
+        newErrors.cardNumber = 'Kart ilə çıxarış hazırda aktiv deyil.';
+      } else if (formattedCard.length !== 16 || isNaN(Number(formattedCard))) {
+        newErrors.cardNumber = 'Kart nömrəsi 16 rəqəmdən ibarət olmalıdır';
+      }
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setWdErrors(newErrors);
+      return;
+    }
+
+    setWdLoading(true);
+    try {
+      if (wdMethod === 'usdt') {
+        await createWithdrawal(authUser.uid, wdAmount, wdAddress, wdNetwork, 'usdt', null);
+      } else {
+        await createWithdrawal(authUser.uid, wdAmount, null, null, 'card', formattedCard);
+      }
+
+      const updatedProfile = await getUserByUid(authUser.uid);
+      if (updatedProfile) {
+        setUser({
+          ...authUser,
+          balance: Number(updatedProfile.balance),
+        });
+      }
+
+      setWdSuccess(true);
+      setTimeout(() => {
+        setWdSuccess(false);
+        setWdAmount('');
+        setWdAddress('');
+        setWdCardNumber('');
+      }, 2500);
+
+      const data = await getWithdrawals(authUser.uid);
+      setWithdrawals(data);
+    } catch (err) {
+      setWdErrors({ amount: err.message });
+    } finally {
+      setWdLoading(false);
+    }
+  };
+
+  const getStatusBadge = (status) => {
+    const map = {
+      pending: { variant: 'warning', label: 'Gözləyir' },
+      approved: { variant: 'info', label: 'Təsdiqlənib' },
+      done: { variant: 'success', label: 'Tamamlanıb' },
+      rejected: { variant: 'error', label: 'Rədd' },
+    };
+    const s = map[status] || { variant: 'info', label: status };
+    return <Badge variant={s.variant} size="sm">{s.label}</Badge>;
+  };
+
+  const handleViewReceipt = (receiptPath) => {
+    const { data } = supabase.storage.from('kyc-documents').getPublicUrl(receiptPath);
+    setViewerReceiptUrl(data.publicUrl);
+  };
+
+  return (
+    <div className={styles.transfer}>
+      {/* Balance Display */}
+      <div className={styles.balanceCard}>
+        <span className={styles.balanceLabel}>Ümumi Balans</span>
+        <span className={styles.balanceValue}>{formatCurrency(balance, '')}</span>
+        <span className={styles.balanceCurrency}>USD</span>
+      </div>
+
+      {/* Tabs */}
+      <div className={styles.tabs}>
+        <button
+          className={`${styles.tab} ${activeTab === 'transfer' ? styles.tabActive : ''}`}
+          onClick={() => setActiveTab('transfer')}
+        >
+          <ArrowUpRight size={16} /> Transfer
+        </button>
+        <button
+          className={`${styles.tab} ${activeTab === 'withdrawal' ? styles.tabActive : ''}`}
+          onClick={() => setActiveTab('withdrawal')}
+        >
+          <ArrowDownToLine size={16} /> Çıxarış
+        </button>
+      </div>
+
+      {/* Transfer Form */}
+      {activeTab === 'transfer' && (
+        <div className={styles.formCard}>
+          <h2 className={styles.formTitle}>Köçürmə</h2>
+          <form onSubmit={handleTransferSubmit} className={styles.form}>
+            <Input
+              label="Kimə"
+              placeholder="Qəbul edənin logini"
+              value={recipient}
+              onChange={handleRecipientChange}
+              error={errors.recipient}
+              success={recipientValid}
+              icon={<User size={18} />}
+            />
+
+            <Input
+              label="Məbləğ"
+              type="number"
+              placeholder="0.00"
+              value={amount}
+              onChange={(e) => {
+                setAmount(e.target.value);
+                setErrors((prev) => ({ ...prev, amount: null }));
+              }}
+              error={errors.amount}
+              icon={<ArrowUpRight size={18} />}
+            />
+
+            <Button type="submit" fullWidth size="lg" loading={loading}>
+              Göndər
+            </Button>
+          </form>
+        </div>
+      )}
+
+      {/* Withdrawal Form */}
+      {activeTab === 'withdrawal' && (
+        <>
+          <div className={styles.formCard}>
+            <h2 className={styles.formTitle}>Çıxarış Sorğusu</h2>
+            
+            {/* Withdrawal Method Toggles */}
+            {isCardActive && (
+              <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
+                <button
+                  type="button"
+                  onClick={() => { setWdMethod('usdt'); setWdErrors({}); }}
+                  style={{
+                    flex: 1, padding: '10px', borderRadius: 8, fontSize: 13, fontWeight: 600,
+                    background: wdMethod === 'usdt' ? 'rgba(124,77,255,0.08)' : 'var(--bg-secondary)',
+                    border: `1px solid ${wdMethod === 'usdt' ? 'var(--color-primary)' : 'var(--border-color)'}`,
+                    color: wdMethod === 'usdt' ? 'var(--color-primary)' : 'var(--text-secondary)', cursor: 'pointer',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6
+                  }}
+                >
+                  <Wallet size={14} />
+                  <span>USDT</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { setWdMethod('card'); setWdErrors({}); }}
+                  style={{
+                    flex: 1, padding: '10px', borderRadius: 8, fontSize: 13, fontWeight: 600,
+                    background: wdMethod === 'card' ? 'rgba(0, 230, 118, 0.08)' : 'var(--bg-secondary)',
+                    border: `1px solid ${wdMethod === 'card' ? 'var(--color-primary)' : 'var(--border-color)'}`,
+                    color: wdMethod === 'card' ? 'var(--color-primary)' : 'var(--text-secondary)', cursor: 'pointer',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6
+                  }}
+                >
+                  <CreditCard size={14} />
+                  <span>Bank Kartı</span>
+                </button>
+              </div>
+            )}
+
+            <form onSubmit={handleWithdrawalSubmit} className={styles.form}>
+              <Input
+                label="Məbləğ (USD)"
+                type="number"
+                placeholder="0.00"
+                value={wdAmount}
+                onChange={(e) => {
+                  setWdAmount(e.target.value);
+                  setWdErrors((prev) => ({ ...prev, amount: null }));
+                }}
+                error={wdErrors.amount}
+                icon={<Wallet size={18} />}
+              />
+
+              {wdMethod === 'usdt' ? (
+                <>
+                  <Input
+                    label="USDT Ünvanı"
+                    placeholder="T... və ya 0x..."
+                    value={wdAddress}
+                    onChange={(e) => {
+                      setWdAddress(e.target.value);
+                      setWdErrors((prev) => ({ ...prev, address: null }));
+                    }}
+                    error={wdErrors.address}
+                  />
+
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                    <label style={{ fontSize: 13, color: 'var(--text-muted)', fontWeight: 500 }}>Şəbəkə</label>
+                    <select
+                      value={wdNetwork}
+                      onChange={(e) => setWdNetwork(e.target.value)}
+                      style={{
+                        width: '100%', padding: '10px 12px', borderRadius: 8,
+                        background: 'var(--bg-secondary)', color: 'var(--text-primary)',
+                        border: '1px solid var(--border-color)', fontSize: 14,
+                      }}
+                    >
+                      <option value="TRC20">USDT TRC20</option>
+                      <option value="ERC20">USDT ERC20</option>
+                      <option value="BEP20">USDT BEP20</option>
+                    </select>
+                  </div>
+                </>
+              ) : (
+                <Input
+                  label="16 rəqəmli Bank Kart Nömrəniz"
+                  placeholder="1234 5678 1234 5678"
+                  value={wdCardNumber}
+                  maxLength={19}
+                  onChange={(e) => {
+                    const val = e.target.value.replace(/\D/g, '');
+                    const formatted = val.match(/.{1,4}/g)?.join(' ') || val;
+                    setWdCardNumber(formatted.slice(0, 19));
+                    setWdErrors((prev) => ({ ...prev, cardNumber: null }));
+                  }}
+                  error={wdErrors.cardNumber}
+                  icon={<CreditCard size={18} />}
+                />
+              )}
+
+              <Button type="submit" fullWidth size="lg" loading={wdLoading}>
+                Çıxarış Sorğusu Göndər
+              </Button>
+            </form>
+          </div>
+
+          {/* Withdrawal History */}
+          <h3 className={styles.historyTitle}>Çıxarış Tarixçəsi</h3>
+          {wdHistoryLoading ? (
+            <div style={{ textAlign: 'center', padding: 20 }}>Yüklənir...</div>
+          ) : withdrawals.length === 0 ? (
+            <div className={styles.empty}>Hələ çıxarış yoxdur</div>
+          ) : (
+            <div className={styles.historyList}>
+              {withdrawals.map((w) => (
+                <div key={w.id} className={styles.historyItem}>
+                  <div className={styles.historyInfo}>
+                    <span className={styles.historyAmount}>{formatCurrency(w.amount)}</span>
+                    <span className={styles.historyDate}>{formatDateTime(w.created_at)}</span>
+                    
+                    {w.payment_method === 'card' ? (
+                      <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>
+                        <span>Kart: **** {w.card_number?.slice(-4)}</span>
+                        {w.status === 'done' && w.receipt_url && (
+                          <div>
+                            <button
+                              type="button"
+                              onClick={() => handleViewReceipt(w.receipt_url)}
+                              style={{
+                                border: 'none', background: 'none', padding: 0,
+                                fontSize: 11, color: 'var(--color-primary)',
+                                textDecoration: 'underline', cursor: 'pointer', marginTop: 4
+                              }}
+                            >
+                              Ödəniş Qəbzinə Bax
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <span style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>
+                        USDT ({w.network || 'TRC20'})
+                      </span>
+                    )}
+                  </div>
+                  {getStatusBadge(w.status)}
+                </div>
+              ))}
+            </div>
+          )}
+        </>
+      )}
+
+      {/* Receipt Viewer Modal */}
+      <Modal
+        isOpen={!!viewerReceiptUrl}
+        onClose={() => setViewerReceiptUrl(null)}
+        title="Admin Ödəniş Qəbzi"
+        size="md"
+      >
+        {viewerReceiptUrl && (
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16 }}>
+            <img
+              src={viewerReceiptUrl}
+              alt="Receipt Preview"
+              style={{ maxWidth: '100%', maxHeight: '400px', borderRadius: 8, objectFit: 'contain', border: '1px solid var(--border-color)' }}
+            />
+            <Button onClick={() => window.open(viewerReceiptUrl, '_blank')}>
+              Tam Ekran Bax
+            </Button>
+          </div>
+        )}
+      </Modal>
+
+      {/* Success Popup */}
+      {(success || wdSuccess) && (
+        <div className={styles.successOverlay}>
+          <div className={styles.successPopup}>
+            <CheckCircle2 size={64} color="var(--color-success)" />
+            <span className={styles.successText}>
+              {success ? 'Transfer uğurlu!' : 'Sorğu göndərildi!'}
+            </span>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
