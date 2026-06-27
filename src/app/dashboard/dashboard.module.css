@@ -247,7 +247,7 @@
 
 .progressBar {
   height: 8px;
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--progress-track-bg);
   border-radius: var(--radius-full);
   overflow: hidden;
 }
