@@ -162,9 +162,9 @@
   --color-pending: hsl(48, 96%, 53%);
   --color-info: hsl(199, 89%, 48%);
 
-  --bg-primary: hsl(210, 40%, 98%);
-  --bg-secondary: hsl(210, 40%, 96.1%);
-  --bg-tertiary: hsl(214.3, 31.8%, 91.4%);
+  --bg-primary: linear-gradient(180deg, #ffffff 0%, #e8faf4 50%, #c4f2e3 100%);
+  --bg-secondary: #e8faf4;
+  --bg-tertiary: #d2f6ec;
   
   --bg-card: hsl(0, 0%, 100%);
   --bg-card-hover: hsl(210, 40%, 96.1%);
@@ -214,6 +214,8 @@ body {
   font-family: var(--font-primary);
   color: var(--text-primary);
   background: var(--bg-primary);
+  background-attachment: fixed;
+  background-repeat: no-repeat;
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
