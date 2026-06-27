@@ -1,12 +1,6 @@
 'use client';
 
 import React, { useEffect, useRef } from "react";
-import { clsx } from "clsx";
-import { twMerge } from "tailwind-merge";
-
-function cn(...inputs) {
-  return twMerge(clsx(inputs));
-}
 
 export default function NeuralBackground({
   className = "",
@@ -31,11 +25,21 @@ export default function NeuralBackground({
     let particles = [];
     let animationFrameId;
     let mouse = { x: -1000, y: -1000 };
+    let resolvedColor = "#3cedeb";
+
+    // Resolve color once at startup and keep it updated dynamically
+    const updateResolvedColor = () => {
+      if (color.startsWith("var(")) {
+        const varName = color.slice(4, -1);
+        resolvedColor = getComputedStyle(document.documentElement).getPropertyValue(varName).trim() || "#3cedeb";
+      } else {
+        resolvedColor = color;
+      }
+    };
 
     class Particle {
       constructor() {
         this.reset();
-        // Start at random age to stagger lifespans
         this.age = Math.random() * this.life;
       }
 
@@ -82,14 +86,7 @@ export default function NeuralBackground({
       }
 
       draw(context) {
-        // Resolve CSS variables dynamically
-        let drawColor = color;
-        if (color.startsWith("var(")) {
-          const varName = color.slice(4, -1);
-          drawColor = getComputedStyle(document.documentElement).getPropertyValue(varName).trim() || "#3cedeb";
-        }
-
-        context.fillStyle = drawColor;
+        context.fillStyle = resolvedColor;
         const alpha = 1 - Math.abs((this.age / this.life) - 0.5) * 2;
         context.globalAlpha = alpha;
         context.fillRect(this.x, this.y, 1.5, 1.5);
@@ -104,6 +101,8 @@ export default function NeuralBackground({
       canvas.style.width = `${width}px`;
       canvas.style.height = `${height}px`;
 
+      updateResolvedColor();
+
       particles = [];
       for (let i = 0; i < particleCount; i++) {
         particles.push(new Particle());
@@ -111,14 +110,16 @@ export default function NeuralBackground({
     };
 
     const animate = () => {
-      // Dynamic trail fade matching active theme background
-      const isLight = document.documentElement.getAttribute("data-theme") === "light";
-      ctx.fillStyle = isLight 
-        ? `rgba(240, 250, 244, ${trailOpacity})` 
-        : `rgba(2, 8, 17, ${trailOpacity})`; 
-
-      ctx.globalAlpha = 1;
+      // Fade out previous frame using destination-out to keep the background transparent
+      ctx.globalCompositeOperation = 'destination-out';
+      ctx.fillStyle = `rgba(0, 0, 0, ${trailOpacity})`;
       ctx.fillRect(0, 0, width, height);
+      
+      // Restore default composite operation for particle rendering
+      ctx.globalCompositeOperation = 'source-over';
+
+      // Update color in case the CSS variable changes (e.g. theme switches)
+      updateResolvedColor();
 
       particles.forEach((p) => {
         p.update();

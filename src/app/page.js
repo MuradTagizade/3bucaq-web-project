@@ -29,7 +29,7 @@ export default function LandingPage() {
             </Button>
           </Link>
           <Link href="/register">
-            <Button size="sm">
+            <Button size="sm" variant="ghost">
               {t('landing.create_account_btn', 'Hesab Yarat')}
             </Button>
           </Link>
