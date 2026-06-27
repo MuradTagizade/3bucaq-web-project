@@ -270,6 +270,6 @@
 @media (max-width: 480px) {
   .formRow {
     grid-template-columns: 1fr;
-    gap: 0;
+    gap: var(--space-md);
   }
 }

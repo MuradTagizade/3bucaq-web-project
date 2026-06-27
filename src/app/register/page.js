@@ -176,97 +176,103 @@ function RegisterForm() {
               />
             </div>
 
-            <Input
-              label={t('username', 'İstifadəçi adı')}
-              placeholder="istifadeci_adi"
-              value={form.login}
-              onChange={(e) => {
-                updateField('login', e.target.value);
-                checkLoginAvailability(e.target.value);
-              }}
-              error={errors.login}
-              success={loginAvailable === true}
-              icon={<User size={18} />}
-            />
+            <div className={styles.formRow}>
+              <Input
+                label={t('username', 'İstifadəçi adı')}
+                placeholder="istifadeci_adi"
+                value={form.login}
+                onChange={(e) => {
+                  updateField('login', e.target.value);
+                  checkLoginAvailability(e.target.value);
+                }}
+                error={errors.login}
+                success={loginAvailable === true}
+                icon={<User size={18} />}
+              />
 
-            <Input
-              label={t('email', 'Email')}
-              type="email"
-              placeholder="email@example.com"
-              value={form.email}
-              onChange={(e) => updateField('email', e.target.value)}
-              error={errors.email}
-              icon={<Mail size={18} />}
-            />
+              <Input
+                label={t('email', 'Email')}
+                type="email"
+                placeholder="email@example.com"
+                value={form.email}
+                onChange={(e) => updateField('email', e.target.value)}
+                error={errors.email}
+                icon={<Mail size={18} />}
+              />
+            </div>
 
-            <Input
-              label={t('password', 'Şifrə')}
-              type="password"
-              placeholder="Min 10 simvol, 1 böyük hərf, 1 rəqəm"
-              value={form.password}
-              onChange={(e) => updateField('password', e.target.value)}
-              error={errors.password}
-              icon={<Lock size={18} />}
-            />
+            <div className={styles.formRow}>
+              <Input
+                label={t('password', 'Şifrə')}
+                type="password"
+                placeholder="Min 10 simvol..."
+                value={form.password}
+                onChange={(e) => updateField('password', e.target.value)}
+                error={errors.password}
+                icon={<Lock size={18} />}
+              />
 
-            <Input
-              label={t('confirm_password', 'Şifrənin Təsdiqi')}
-              type="password"
-              placeholder={t('confirm_password_placeholder', 'Şifrəni yenidən yazın')}
-              value={form.confirmPassword}
-              onChange={(e) => updateField('confirmPassword', e.target.value)}
-              error={errors.confirmPassword}
-              icon={<Lock size={18} />}
-            />
+              <Input
+                label={t('confirm_password', 'Şifrənin Təsdiqi')}
+                type="password"
+                placeholder={t('confirm_password_placeholder', 'Şifrəni yenidən yazın')}
+                value={form.confirmPassword}
+                onChange={(e) => updateField('confirmPassword', e.target.value)}
+                error={errors.confirmPassword}
+                icon={<Lock size={18} />}
+              />
+            </div>
 
-            <Select
-              label={t('country', 'Ölkə')}
-              value={form.country}
-              onChange={(e) => {
-                const countryName = e.target.value;
-                updateField('country', countryName);
-                updateField('city', '');
-                const selected = COUNTRIES.find((c) => c.name === countryName);
-                if (selected) {
-                  setPhonePrefix(selected.phoneCode);
-                }
-              }}
-              error={errors.country}
-              icon={<Globe size={18} />}
-            >
-              <option value="">{t('select_country', 'Ölkə seçin')}</option>
-              {COUNTRIES.map((c) => (
-                <option key={c.name} value={c.name}>
-                  {c.name}
-                </option>
-              ))}
-            </Select>
-
-            {['Azərbaycan', 'Türkiyə', 'Rusiya'].includes(form.country) ? (
+            <div className={styles.formRow}>
               <Select
-                label={t('city', 'Şəhər')}
-                value={form.city}
-                onChange={(e) => updateField('city', e.target.value)}
-                error={errors.city}
-                icon={<MapPin size={18} />}
+                label={t('country', 'Ölkə')}
+                value={form.country}
+                onChange={(e) => {
+                  const countryName = e.target.value;
+                  updateField('country', countryName);
+                  updateField('city', '');
+                  const selected = COUNTRIES.find((c) => c.name === countryName);
+                  if (selected) {
+                    setPhonePrefix(selected.phoneCode);
+                  }
+                }}
+                error={errors.country}
+                icon={<Globe size={18} />}
               >
-                <option value="">{t('select_city', 'Şəhər seçin')}</option>
-                {(CITIES[form.country] || []).map((city) => (
-                  <option key={city} value={city}>
-                    {city}
+                <option value="">{t('select_country', 'Ölkə seçin')}</option>
+                {COUNTRIES.map((c) => (
+                  <option key={c.name} value={c.name}>
+                    {c.name}
                   </option>
                 ))}
               </Select>
-            ) : (
-              <Input
-                label={t('city', 'Şəhər')}
-                placeholder="Şəhər daxil edin"
-                value={form.city}
-                onChange={(e) => updateField('city', e.target.value)}
-                error={errors.city}
-                icon={<MapPin size={18} />}
-              />
-            )}
+
+              {['Azərbaycan', 'Türkiyə', 'Rusiya'].includes(form.country) ? (
+                <Select
+                  label={t('city', 'Şəhər')}
+                  value={form.city}
+                  onChange={(e) => updateField('city', e.target.value)}
+                  error={errors.city}
+                  icon={<MapPin size={18} />}
+                >
+                  <option value="">{t('select_city', 'Şəhər seçin')}</option>
+                  {(CITIES[form.country] || []).map((city) => (
+                    <option key={city} value={city}>
+                      {city}
+                    </option>
+                  ))}
+                </Select>
+              ) : (
+                <Input
+                  label={t('city', 'Şəhər')}
+                  placeholder="Şəhər daxil edin"
+                  value={form.city}
+                  onChange={(e) => updateField('city', e.target.value)}
+                  error={errors.city}
+                  icon={<MapPin size={18} />}
+                />
+              )}
+            </div>
 
             <div className={styles.phoneGroup}>
               <Select
