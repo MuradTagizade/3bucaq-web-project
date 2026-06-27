@@ -7,6 +7,7 @@ import Link from 'next/link';
 import { ArrowRight, TrendingUp, Users, Shield, Leaf } from 'lucide-react';
 import LanguageToggle from '@/components/ui/LanguageToggle';
 import ThemeToggle from '@/components/ui/ThemeToggle';
+import NeuralBackground from '@/components/ui/flow-field-background';
 import { useTranslation } from '@/lib/store/languageStore';
 
 export default function LandingPage() {
@@ -18,6 +19,7 @@ export default function LandingPage() {
       <div className={styles.bgGrid} />
       <div className={styles.bgGlow1} />
       <div className={styles.bgGlow2} />
+      <NeuralBackground color="var(--color-primary)" />
 
       <div className={styles.topBar}>
         <LanguageToggle size={15} />

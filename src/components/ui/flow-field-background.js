@@ -163,10 +163,28 @@ export default function NeuralBackground({
   return (
     <div 
       ref={containerRef} 
-      className={cn("fixed inset-0 w-full h-full overflow-hidden pointer-events-none", className)}
-      style={{ zIndex: 0 }}
+      className={className}
+      style={{
+        position: "fixed",
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        width: "100vw",
+        height: "100vh",
+        overflow: "hidden",
+        pointerEvents: "none",
+        zIndex: 0
+      }}
     >
-      <canvas ref={canvasRef} className="block w-full h-full" />
+      <canvas 
+        ref={canvasRef} 
+        style={{
+          display: "block",
+          width: "100%",
+          height: "100%"
+        }} 
+      />
     </div>
   );
 }
