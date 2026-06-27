@@ -7,14 +7,15 @@
 
 /* User Info Card */
 .userInfoCard {
-  background: var(--bg-card);
-  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
-  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
-  border: 1px solid var(--border-default);
+  background: var(--glass-card-bg);
+  backdrop-filter: var(--glass-card-blur);
+  -webkit-backdrop-filter: var(--glass-card-blur);
+  border: var(--glass-card-border);
   border-radius: var(--radius-xl);
   padding: 32px;
   position: relative;
   overflow: hidden;
+  box-shadow: var(--glass-card-shadow);
 }
 
 .userInfoCard::before {
@@ -67,12 +68,15 @@
 
 .balanceBox {
   padding: 20px;
-  background: var(--bg-glass);
-  border: 1px solid var(--border-subtle);
+  background: var(--glass-card-bg);
+  backdrop-filter: var(--glass-card-blur);
+  -webkit-backdrop-filter: var(--glass-card-blur);
+  border: var(--glass-card-border);
   border-radius: var(--radius-md);
   display: flex;
   flex-direction: column;
   gap: 8px;
+  box-shadow: var(--glass-card-shadow);
 }
 
 .balanceLabel {
@@ -132,14 +136,16 @@
 }
 
 .summaryCard {
-  background: var(--bg-card);
-  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
-  border: 1px solid var(--border-default);
+  background: var(--glass-card-bg);
+  backdrop-filter: var(--glass-card-blur);
+  -webkit-backdrop-filter: var(--glass-card-blur);
+  border: var(--glass-card-border);
   border-radius: var(--radius-lg);
   padding: 24px;
   display: flex;
   align-items: center;
   gap: 16px;
+  box-shadow: var(--glass-card-shadow);
 }
 
 .summaryIcon {
@@ -182,20 +188,23 @@
 }
 
 .levelCard {
-  background: var(--bg-glass);
-  border: 1px solid var(--border-subtle);
+  background: var(--glass-card-bg);
+  backdrop-filter: var(--glass-card-blur);
+  -webkit-backdrop-filter: var(--glass-card-blur);
+  border: var(--glass-card-border);
   border-radius: var(--radius-md);
   padding: 20px;
   display: flex;
   flex-direction: column;
   gap: 16px;
   transition: all var(--transition-base);
+  box-shadow: var(--glass-card-shadow);
 }
 
 .levelReady {
-  background: rgba(0, 255, 163, 0.05);
-  border-color: rgba(0, 255, 163, 0.3);
-  box-shadow: 0 0 20px rgba(0, 255, 163, 0.05);
+  background: var(--color-primary-subtle) !important;
+  border-color: var(--color-primary) !important;
+  box-shadow: 0 0 20px var(--color-primary-glow) !important;
 }
 
 .levelClaimed {
