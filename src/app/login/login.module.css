@@ -191,8 +191,8 @@
 }
 
 .link:hover {
-  color: #fff;
-  text-shadow: 0 0 10px var(--color-secondary-glow);
+  color: var(--color-link-hover, #fff);
+  text-shadow: var(--link-hover-glow, 0 0 10px var(--color-secondary-glow));
 }
 
 .divider {

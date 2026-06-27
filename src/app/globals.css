@@ -13,6 +13,9 @@
   --color-primary-dark: #1c3d5f;
   --color-primary-glow: rgba(60, 237, 235, 0.4);
   --color-primary-subtle: rgba(60, 237, 235, 0.08);
+  --primary-foreground: #020205;
+  --color-link-hover: #ffffff;
+  --link-hover-glow: 0 0 10px var(--color-secondary-glow);
 
   /* Secondary — Emerald Green */
   --color-secondary: #2bcc85;
@@ -144,18 +147,21 @@
    LIGHT MODE — Cyber White
    ============================================ */
 [data-theme="light"] {
-  --color-primary: hsl(221, 83%, 53%);
-  --color-primary-light: hsl(217, 91%, 60%);
-  --color-primary-dark: hsl(221, 83%, 33%);
-  --color-primary-glow: rgba(37, 99, 235, 0.2);
-  --color-primary-subtle: rgba(37, 99, 235, 0.08);
+  --color-primary: hsl(158, 100%, 28%);
+  --color-primary-light: hsl(158, 100%, 35%);
+  --color-primary-dark: hsl(158, 100%, 20%);
+  --color-primary-glow: rgba(0, 143, 90, 0.2);
+  --color-primary-subtle: rgba(0, 143, 90, 0.08);
+  --primary-foreground: #ffffff;
+  --color-link-hover: var(--color-primary-dark);
+  --link-hover-glow: none;
 
   --color-secondary: hsl(162, 72%, 40%);
   --color-secondary-glow: rgba(16, 185, 129, 0.2);
 
-  --color-accent: hsl(199, 89%, 48%);
-  --color-accent-light: hsl(217, 91%, 60%);
-  --color-accent-glow: rgba(14, 165, 233, 0.2);
+  --color-accent: hsl(175, 77%, 30%);
+  --color-accent-light: hsl(175, 77%, 38%);
+  --color-accent-glow: rgba(15, 118, 110, 0.2);
 
   --color-success: hsl(142, 71%, 45%);
   --color-error: hsl(0, 84.2%, 60.2%);
@@ -172,7 +178,7 @@
   --bg-glass: rgba(255, 255, 255, 0.5);
   --bg-glass-hover: rgba(255, 255, 255, 0.7);
   --bg-input: hsl(214.3, 31.8%, 91.4%);
-  --bg-input-focus: rgba(37, 99, 235, 0.05);
+  --bg-input-focus: rgba(0, 143, 90, 0.05);
 
   /* Frosted Glass Theme Variables (Light Mode) */
   --glass-card-bg: radial-gradient(circle at top left, rgba(255, 255, 255, 0.5) 0%, rgba(255, 255, 255, 0.1) 70%), rgba(255, 255, 255, 0.5);
@@ -188,7 +194,7 @@
 
   --border-subtle: hsl(210, 40%, 96.1%);
   --border-default: hsl(214.3, 31.8%, 91.4%);
-  --border-hover: hsl(221, 83%, 53%);
+  --border-hover: var(--color-primary);
 
   --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.04);
   --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.06);
@@ -196,7 +202,7 @@
   --shadow-xl: 0 24px 64px rgba(0, 0, 0, 0.1);
 
   --gradient-hero: radial-gradient(circle at 50% 0%, hsl(210, 40%, 96.1%) 0%, hsl(0, 0%, 100%) 100%);
-  --gradient-border: linear-gradient(135deg, rgba(37, 99, 235, 0.4), rgba(16, 185, 129, 0.4));
+  --gradient-border: linear-gradient(135deg, rgba(0, 143, 90, 0.4), rgba(16, 185, 129, 0.4));
 }
 
 /* === Reset & Base === */
