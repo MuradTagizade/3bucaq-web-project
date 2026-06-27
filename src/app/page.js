@@ -105,7 +105,7 @@ export default function LandingPage() {
       {/* Footer */}
       <footer className={styles.footer}>
         <Logo size={28} />
-        <p className={styles.footerText}>© 2026 Level Up. {t('landing.all_rights_reserved', 'Bütün hüquqlar qorunur.')}</p>
+        <p className={styles.footerText}>© 2026 LEVEL UP. {t('landing.all_rights_reserved', 'Bütün hüquqlar qorunur.')}</p>
       </footer>
     </div>
   );

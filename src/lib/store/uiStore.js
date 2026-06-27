@@ -1,5 +1,5 @@
 /**
- * Level Up — UI Store (Zustand)
+ * LEVEL UP — UI Store (Zustand)
  */
 
 import { create } from 'zustand';

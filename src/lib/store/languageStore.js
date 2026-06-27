@@ -1,5 +1,5 @@
 /**
- * Level Up — Language Store (Zustand)
+ * LEVEL UP — Language Store (Zustand)
  */
 
 import { create } from 'zustand';

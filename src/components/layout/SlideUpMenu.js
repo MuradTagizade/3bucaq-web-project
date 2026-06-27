@@ -31,8 +31,8 @@ export default function SlideUpMenu({ referralLink = '', onLogout }) {
     if (navigator.share) {
       try {
         await navigator.share({
-          title: 'Level Up - ' + t('referral_link', 'Referal Link'),
-          text: t('join_platform', 'Level Up platformasına qoşulun!'),
+          title: 'LEVEL UP - ' + t('referral_link', 'Referal Link'),
+          text: t('join_platform', 'LEVEL UP platformasına qoşulun!'),
           url: referralLink,
         });
       } catch {

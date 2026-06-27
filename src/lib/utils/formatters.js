@@ -1,5 +1,5 @@
 /**
- * Level Up — Formatters
+ * LEVEL UP — Formatters
  */
 
 import { useLanguageStore } from '@/lib/store/languageStore';

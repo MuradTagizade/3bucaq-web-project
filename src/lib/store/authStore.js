@@ -1,5 +1,5 @@
 /**
- * Level Up — Auth Store (Zustand)
+ * LEVEL UP — Auth Store (Zustand)
  */
 
 import { create } from 'zustand';

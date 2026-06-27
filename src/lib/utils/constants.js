@@ -1,5 +1,5 @@
 /**
- * Level Up — Business Logic Constants
+ * LEVEL UP — Business Logic Constants
  * Paket məlumatları, level tələbləri, və sistem konfiqurasiyası
  */
 

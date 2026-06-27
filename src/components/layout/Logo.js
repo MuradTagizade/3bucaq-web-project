@@ -16,7 +16,7 @@ export default function Logo({ size = 40, showText = true, className = '' }) {
       />
       {showText && (
         <span className={styles.text}>
-          Level <span className={styles.highlight}>Up</span>
+          LEVEL <span className={styles.highlight}>UP</span>
         </span>
       )}
     </div>

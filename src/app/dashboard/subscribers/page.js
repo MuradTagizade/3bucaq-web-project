@@ -136,8 +136,8 @@ export default function SubscribersPage() {
     if (navigator.share) {
       try {
         await navigator.share({
-          title: 'Level Up - Referal Link',
-          text: t('join_platform', 'Level Up platformasına qoşulun!'),
+          title: 'LEVEL UP - Referal Link',
+          text: t('join_platform', 'LEVEL UP platformasına qoşulun!'),
           url: referralLink,
         });
       } catch { /* user cancelled */ }

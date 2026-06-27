@@ -1,5 +1,5 @@
 /**
- * Level Up — Translation Dictionary (AZ / EN)
+ * LEVEL UP — Translation Dictionary (AZ / EN)
  */
 
 export const translations = {
@@ -29,7 +29,7 @@ export const translations = {
     your_ref_link: "Referal Linkiniz",
     menu: "Menyu",
     share: "Paylaş",
-    join_platform: "Level Up platformasına qoşulun!",
+    join_platform: "LEVEL UP platformasına qoşulun!",
 
     // Common Buttons & Actions
     submit: "Göndər",
@@ -569,7 +569,7 @@ export const translations = {
     your_ref_link: "Your Referral Link",
     menu: "Menu",
     share: "Share",
-    join_platform: "Join Level Up platform!",
+    join_platform: "Join LEVEL UP platform!",
 
     // Common Buttons & Actions
     submit: "Submit",
