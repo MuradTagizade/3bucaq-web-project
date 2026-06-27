@@ -8,6 +8,7 @@ import Logo from '@/components/layout/Logo';
 import Input from '@/components/ui/Input';
 import Button from '@/components/ui/Button';
 import LanguageToggle from '@/components/ui/LanguageToggle';
+import ThemeToggle from '@/components/ui/ThemeToggle';
 import { useTranslation } from '@/lib/store/languageStore';
 import { Mail, Lock } from 'lucide-react';
 import { validateEmail } from '@/lib/utils/validators';
@@ -16,33 +17,34 @@ import { getUserByUid } from '@/lib/supabase/database';
 
 export default function LoginPage() {
   const router = useRouter();
-  const { t } = useTranslation();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
+  const { t } = useTranslation();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     const newErrors = {};
-
-    const emailError = validateEmail(email);
-    if (emailError) newErrors.email = emailError;
-    if (!password) newErrors.password = t('password_required', 'Parol tələb olunur');
+    if (!validateEmail(email)) {
+      newErrors.email = t('invalid_email', 'Düzgün email daxil edin');
+    }
+    if (!password) {
+      newErrors.password = t('required_field', 'Bu sahə doldurulmalıdır');
+    }
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
       return;
     }
 
-    setErrors({});
     setLoading(true);
+    setErrors({});
 
     try {
-      const authUser = await loginUser(email, password);
-      // Check role and redirect accordingly
-      const profile = await getUserByUid(authUser.id);
-      if (profile?.role === 'admin') {
+      const user = await loginUser(email, password);
+      const dbUser = await getUserByUid(user.id);
+      if (dbUser && dbUser.role === 'admin') {
         router.push('/admin');
       } else {
         router.push('/dashboard');
@@ -58,6 +60,7 @@ export default function LoginPage() {
     <div className={styles.page}>
       <div className={styles.topBar}>
         <LanguageToggle />
+        <ThemeToggle />
       </div>
       <div className={styles.bgGrid} />
       <div className={styles.bgGlow1} />

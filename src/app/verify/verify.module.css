@@ -4,6 +4,16 @@
   align-items: center;
   justify-content: center;
   background: var(--gradient-hero);
+  position: relative;
+}
+
+.topBar {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  z-index: 10;
+  display: flex;
+  gap: 12px;
 }
 
 .container {

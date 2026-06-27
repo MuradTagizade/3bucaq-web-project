@@ -9,6 +9,7 @@ import Input from '@/components/ui/Input';
 import Select from '@/components/ui/Select';
 import Button from '@/components/ui/Button';
 import LanguageToggle from '@/components/ui/LanguageToggle';
+import ThemeToggle from '@/components/ui/ThemeToggle';
 import { useTranslation } from '@/lib/store/languageStore';
 import { Mail, Lock, User, Globe, MapPin, Phone, Link2 } from 'lucide-react';
 import {
@@ -144,6 +145,7 @@ function RegisterForm() {
     <div className={styles.page}>
       <div className={styles.topBar}>
         <LanguageToggle />
+        <ThemeToggle />
       </div>
       <div className={styles.bgGrid} />
       <div className={styles.bgGlow1} />

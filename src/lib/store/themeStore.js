@@ -1,33 +1,34 @@
-/**
- * 3bucaq — Theme Store (Zustand)
- */
-
 import { create } from 'zustand';
 
-export const useThemeStore = create((set) => ({
+export const useThemeStore = create((set, get) => ({
   theme: 'dark',
   
   setTheme: (theme) => {
     if (typeof window !== 'undefined') {
-      localStorage.setItem('theme', 'dark');
-      document.documentElement.setAttribute('data-theme', 'dark');
+      localStorage.setItem('theme', theme);
+      document.documentElement.setAttribute('data-theme', theme);
     }
-    set({ theme: 'dark' });
+    set({ theme });
   },
   
   toggleTheme: () => {
+    const current = get().theme;
+    const next = current === 'dark' ? 'light' : 'dark';
     if (typeof window !== 'undefined') {
-      localStorage.setItem('theme', 'dark');
-      document.documentElement.setAttribute('data-theme', 'dark');
+      localStorage.setItem('theme', next);
+      document.documentElement.setAttribute('data-theme', next);
     }
-    set({ theme: 'dark' });
+    set({ theme: next });
   },
   
   initTheme: () => {
     if (typeof window !== 'undefined') {
-      localStorage.setItem('theme', 'dark');
-      document.documentElement.setAttribute('data-theme', 'dark');
-      set({ theme: 'dark' });
+      let saved = localStorage.getItem('theme');
+      if (!saved) {
+        saved = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      }
+      document.documentElement.setAttribute('data-theme', saved);
+      set({ theme: saved });
     }
   }
 }));

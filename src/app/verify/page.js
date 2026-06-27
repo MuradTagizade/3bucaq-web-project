@@ -7,6 +7,8 @@ import Logo from '@/components/layout/Logo';
 import Button from '@/components/ui/Button';
 import { supabase } from '@/lib/supabase/config';
 import { OTPInput } from '@/components/ui/be-ui-otp-input';
+import LanguageToggle from '@/components/ui/LanguageToggle';
+import ThemeToggle from '@/components/ui/ThemeToggle';
 
 function VerifyForm() {
   const router = useRouter();
@@ -97,6 +99,10 @@ function VerifyForm() {
 
   return (
     <div className={styles.page}>
+      <div className={styles.topBar}>
+        <LanguageToggle />
+        <ThemeToggle />
+      </div>
       <div className={styles.bgGlow1} />
       <div className={styles.bgGlow2} />
       <div className={styles.bgGlow3} />
