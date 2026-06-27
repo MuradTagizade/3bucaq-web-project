@@ -32,8 +32,9 @@ export default function LoginPage() {
     if (!inputVal) {
       newErrors.email = t('required_field', 'Bu sahə doldurulmalıdır');
     } else if (inputVal.includes('@')) {
-      if (!validateEmail(inputVal)) {
-        newErrors.email = t('invalid_email', 'Düzgün email daxil edin');
+      const emailErr = validateEmail(inputVal);
+      if (emailErr) {
+        newErrors.email = emailErr;
       }
     }
 
