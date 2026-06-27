@@ -473,6 +473,11 @@ as $$
 declare
   is_admin_user boolean;
 begin
+  -- Set identity_number automatically when KYC status transitions to approved
+  if NEW.kyc_status = 'approved' and OLD.kyc_status <> 'approved' then
+    NEW.identity_number := coalesce(NEW.kyc_document_number, OLD.kyc_document_number);
+  end if;
+
   -- Check if the action is run by service_role (system) or superuser
   if current_user in ('postgres', 'service_role', 'supabase_admin') then
     return NEW;
@@ -505,6 +510,12 @@ begin
     end if;
     if NEW.is_blocked <> OLD.is_blocked or NEW.blocked_until <> OLD.blocked_until then
       raise exception 'İcazə yoxdur: Blok statusunu dəyişə bilməzsiniz';
+    end if;
+    if NEW.identity_number <> OLD.identity_number then
+      raise exception 'İcazə yoxdur: Kimlik nömrəsini birbaşa dəyişə bilməzsiniz';
+    end if;
+    if OLD.kyc_status = 'approved' and NEW.kyc_document_number <> OLD.kyc_document_number then
+      raise exception 'İcazə yoxdur: Təsdiqlənmiş KYC sənəd nömrəsini dəyişə bilməzsiniz';
     end if;
     if NEW.kyc_status <> OLD.kyc_status then
       -- Allow user to submit KYC (change from none/rejected to pending)

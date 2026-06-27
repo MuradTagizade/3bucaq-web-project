@@ -100,6 +100,8 @@ export function AuthProvider({ children }) {
                 kycDocumentType: profile.kyc_document_type,
                 kycDocumentUrl: profile.kyc_document_url,
                 kycSelfieUrl: profile.kyc_selfie_url,
+                kycDocumentNumber: profile.kyc_document_number,
+                identityNumber: profile.identity_number,
                 createdAt: profile.created_at,
               });
             }

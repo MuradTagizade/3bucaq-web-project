@@ -268,6 +268,21 @@ export default function PersonalInfoPage() {
                   <Lock size={14} className={styles.lockIcon} />
                 </div>
               </div>
+
+              {isKycApproved && (
+                <div className={styles.inputWrapper}>
+                  <label className={styles.inputLabel}>{t('identity_number_label', 'KİMLİK NÖMRƏSİ')}</label>
+                  <div className={styles.disabledInputContainer}>
+                    <input
+                      type="text"
+                      value={authUser?.identityNumber || ''}
+                      disabled
+                      className={styles.disabledInput}
+                    />
+                    <Lock size={14} className={styles.lockIcon} />
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 

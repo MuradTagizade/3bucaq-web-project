@@ -266,6 +266,16 @@ export default function AdminKYCRequestsPage() {
                   </div>
                 </div>
 
+                {/* KYC Metadata */}
+                <div style={{ padding: '12px 24px 0', display: 'flex', gap: '20px', fontSize: '13px', color: 'var(--text-secondary)' }}>
+                  <span>
+                    <strong style={{ color: 'var(--text-primary)' }}>{t('doc_type_label', 'Sənəd Növü')}:</strong> {DOC_TYPE_LABELS[user.kyc_document_type] || user.kyc_document_type || '—'}
+                  </span>
+                  <span>
+                    <strong style={{ color: 'var(--text-primary)' }}>{t('identity_number_label', 'Kimlik Nömrəsi')}:</strong> <code style={{ background: 'rgba(255,255,255,0.05)', padding: '2px 6px', borderRadius: '4px', border: '1px solid rgba(255,255,255,0.1)', fontFamily: 'monospace' }}>{user.kyc_document_number || '—'}</code>
+                  </span>
+                </div>
+
                 {/* Document Previews */}
                 {isPending ? (
                   <div className={styles.documentsRow}>

@@ -8,6 +8,10 @@ export const metadata = {
   description: '3bucaq investisiya və MLM platforması. Paketlər alın, referal cəlb edin, qazanc əldə edin.',
   keywords: '3bucaq, investisiya, MLM, USDT, qazanc, referal',
   manifest: '/manifest.json',
+  icons: {
+    icon: '/3bucaq-logo.png',
+    apple: '/3bucaq-logo.png',
+  },
   openGraph: {
     title: '3bucaq — Make World Green Again',
     description: 'İnvestisiya və MLM platforması',
@@ -28,7 +32,8 @@ export default function RootLayout({ children }) {
   return (
     <html lang="az" data-scroll-behavior="smooth" suppressHydrationWarning>
       <head>
-        <link rel="icon" href="/favicon.ico" />
+        <link rel="icon" href="/3bucaq-logo.png" />
+        <link rel="apple-touch-icon" href="/3bucaq-logo.png" />
         <link rel="manifest" href="/manifest.json" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />

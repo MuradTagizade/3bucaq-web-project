@@ -34,7 +34,20 @@ export default function FooterNav({ transferBalance = 0 }) {
               className={`${styles.item} ${isActive ? styles.active : ''}`}
             >
               <div className={styles.iconWrap}>
-                <Icon size={20} />
+                {item.id === 'home' ? (
+                  <img
+                    src="/3bucaq-logo.png"
+                    alt="Logo"
+                    style={{
+                      width: '20px',
+                      height: '20px',
+                      borderRadius: '4px',
+                      objectFit: 'contain'
+                    }}
+                  />
+                ) : (
+                  <Icon size={20} />
+                )}
                 {isActive && <span className={styles.glow} />}
                 {showBalance && (
                   <span className={styles.badge}>

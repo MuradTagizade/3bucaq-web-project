@@ -626,7 +626,7 @@ export async function rejectWithdrawal(withdrawalId) {
 // KYC
 // ============================================
 
-export async function submitKYC(uid, documentType, documentUrl, selfieUrl, documentBackUrl = null) {
+export async function submitKYC(uid, documentType, documentUrl, selfieUrl, documentBackUrl = null, identityNumber = null) {
   const { error } = await supabase
     .from('profiles')
     .update({
@@ -635,6 +635,7 @@ export async function submitKYC(uid, documentType, documentUrl, selfieUrl, docum
       kyc_document_url: documentUrl,
       kyc_document_back_url: documentBackUrl,
       kyc_selfie_url: selfieUrl,
+      kyc_document_number: identityNumber,
     })
     .eq('id', uid);
 
@@ -648,6 +649,15 @@ export async function updateKYCStatus(uid, status) {
     updateData.kyc_document_url = null;
     updateData.kyc_document_back_url = null;
     updateData.kyc_selfie_url = null;
+  } else if (status === 'approved') {
+    const { data: profile, error: fetchErr } = await supabase
+      .from('profiles')
+      .select('kyc_document_number')
+      .eq('id', uid)
+      .single();
+    if (!fetchErr && profile) {
+      updateData.identity_number = profile.kyc_document_number;
+    }
   }
 
   const { error } = await supabase
@@ -657,6 +667,23 @@ export async function updateKYCStatus(uid, status) {
 
   if (error) throw new Error(error.message);
   return { success: true };
+}
+
+export async function checkIdentityNumberExists(uid, num) {
+  if (!num) return false;
+  const cleanNum = num.trim();
+  
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('id')
+    .neq('id', uid)
+    .or(`kyc_document_number.eq.${cleanNum},identity_number.eq.${cleanNum}`);
+
+  if (error) {
+    console.error('Error checking identity number:', error);
+    return false;
+  }
+  return data && data.length > 0;
 }
 
 // ============================================

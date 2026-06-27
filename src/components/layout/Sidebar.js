@@ -93,7 +93,20 @@ export default function Sidebar({ userName, transferBalance, referralLink, onLog
               href={item.href}
               className={`${styles.navItem} ${isActive ? styles.navActive : ''}`}
             >
-              <Icon size={18} />
+              {item.id === 'home' ? (
+                <img
+                  src="/3bucaq-logo.png"
+                  alt="Logo"
+                  style={{
+                    width: '18px',
+                    height: '18px',
+                    borderRadius: '4px',
+                    objectFit: 'contain'
+                  }}
+                />
+              ) : (
+                <Icon size={18} />
+              )}
               <span>{t(translationKey, item.label)}</span>
               {isActive && <span className={styles.activeIndicator} />}
             </Link>

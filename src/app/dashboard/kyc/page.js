@@ -9,13 +9,15 @@ import { KYC_DOC_TYPES } from '@/lib/utils/constants';
 import { getKYCStatusLabel, getKYCStatusVariant } from '@/lib/utils/formatters';
 import { useAuthStore } from '@/lib/store/authStore';
 import { useTranslation } from '@/lib/store/languageStore';
-import { submitKYC } from '@/lib/supabase/database';
+import { submitKYC, checkIdentityNumberExists } from '@/lib/supabase/database';
 import { supabase } from '@/lib/supabase/config';
 
 export default function KYCPage() {
   const { user: authUser, setUser } = useAuthStore();
   const { t } = useTranslation();
   const [docType, setDocType] = useState('id_card');
+  const [identityNumber, setIdentityNumber] = useState('');
+  const [duplicateWarning, setDuplicateWarning] = useState('');
   const [docFile, setDocFile] = useState(null);
   const [docBackFile, setDocBackFile] = useState(null);
   const [selfieFile, setSelfieFile] = useState(null);
@@ -33,7 +35,27 @@ export default function KYCPage() {
     return data.path;
   };
 
+  const handleIdentityNumberBlur = async () => {
+    if (!identityNumber.trim()) return;
+    try {
+      const isDuplicate = await checkIdentityNumberExists(authUser.uid, identityNumber);
+      if (isDuplicate) {
+        setDuplicateWarning(t('identity_already_exists', 'Bu kimlik nömrəsi ilə artıq bir hesab mövcuddur!'));
+      } else {
+        setDuplicateWarning('');
+      }
+    } catch (err) {
+      console.error('Error checking duplicate ID:', err);
+    }
+  };
+
   const handleSubmit = async () => {
+    if (!identityNumber.trim()) {
+      setToast(t('enter_identity_error', 'Zəhmət olmasa, kimlik nömrəsini daxil edin'));
+      setTimeout(() => setToast(null), 3000);
+      return;
+    }
+
     if (!docFile || !docBackFile || !selfieFile) {
       setToast(t('upload_all_docs', 'Sənədin ön, arxa və selfie şəkillərini yükləyin'));
       setTimeout(() => setToast(null), 3000);
@@ -43,17 +65,34 @@ export default function KYCPage() {
     setLoading(true);
     try {
       const uid = authUser.uid;
+
+      // Duplicate check
+      const isDuplicate = await checkIdentityNumberExists(uid, identityNumber);
+      if (isDuplicate) {
+        setDuplicateWarning(t('identity_already_exists', 'Bu kimlik nömrəsi ilə artıq bir hesab mövcuddur!'));
+        setToast(t('identity_already_exists', 'Bu kimlik nömrəsi ilə artıq bir hesab mövcuddur!'));
+        setLoading(false);
+        setTimeout(() => setToast(null), 3000);
+        return;
+      }
+
       const docPath = await uploadFile(docFile, `${uid}/document_front_${Date.now()}`);
       const docBackPath = await uploadFile(docBackFile, `${uid}/document_back_${Date.now()}`);
       const selfiePath = await uploadFile(selfieFile, `${uid}/selfie_${Date.now()}`);
 
-      await submitKYC(uid, docType, docPath, selfiePath, docBackPath);
+      await submitKYC(uid, docType, docPath, selfiePath, docBackPath, identityNumber.trim());
 
-      setUser({ ...authUser, kycStatus: 'pending' });
+      setUser({ 
+        ...authUser, 
+        kycStatus: 'pending',
+        kycDocumentNumber: identityNumber.trim()
+      });
       setToast(t('kyc_sent_success', 'KYC sənədləriniz göndərildi! Admin yoxlayacaq.'));
       setDocFile(null);
       setDocBackFile(null);
       setSelfieFile(null);
+      setIdentityNumber('');
+      setDuplicateWarning('');
     } catch (err) {
       setToast(t('error_prefix', 'Xəta: ') + err.message);
     } finally {
@@ -98,6 +137,26 @@ export default function KYCPage() {
               <span>{t('kyc_rejected_notice', 'Əvvəlki sənədləriniz rədd edilib. Yenidən yükləyin.')}</span>
             </div>
           )}
+
+          <div className={styles.field}>
+            <label className={styles.label}>{t('identity_number_label', 'Kimlik Nömrəsi')}</label>
+            <input
+              type="text"
+              value={identityNumber}
+              onChange={(e) => {
+                setIdentityNumber(e.target.value);
+                if (duplicateWarning) setDuplicateWarning('');
+              }}
+              onBlur={handleIdentityNumberBlur}
+              placeholder={t('enter_identity_placeholder', 'Kimlik nömrəsini daxil edin')}
+              className={`${styles.textInput} ${duplicateWarning ? styles.textInputError : ''}`}
+            />
+            {duplicateWarning && (
+              <span className={styles.errorText}>
+                {duplicateWarning}
+              </span>
+            )}
+          </div>
 
           <div className={styles.field}>
             <label className={styles.label}>{t('doc_type_label', 'Sənəd Növü')}</label>
@@ -169,7 +228,7 @@ export default function KYCPage() {
             size="lg"
             onClick={handleSubmit}
             loading={loading}
-            disabled={!docFile || !docBackFile || !selfieFile}
+            disabled={!docFile || !docBackFile || !selfieFile || !identityNumber.trim() || !!duplicateWarning}
           >
             {t('send_documents', 'Sənədləri Göndər')}
           </Button>

@@ -300,6 +300,10 @@ export const translations = {
     send_documents: "Sənədləri Göndər",
     upload_all_docs: "Sənədin ön, arxa və selfie şəkillərini yükləyin",
     kyc_sent_success: "KYC sənədləriniz göndərildi! Admin yoxlayacaq.",
+    identity_number_label: "KİMLİK NÖMRƏSİ",
+    enter_identity_placeholder: "Kimlik nömrəsini daxil edin",
+    identity_already_exists: "Bu kimlik nömrəsi ilə artıq bir hesab mövcuddur!",
+    enter_identity_error: "Zəhmət olmasa, kimlik nömrəsini daxil edin",
 
     // Auth & Layout
     password_required: "Parol tələb olunur",
@@ -827,6 +831,10 @@ export const translations = {
     send_documents: "Submit Documents",
     upload_all_docs: "Upload document front, back, and selfie images",
     kyc_sent_success: "Your KYC documents have been submitted! Admin will check.",
+    identity_number_label: "IDENTITY NUMBER",
+    enter_identity_placeholder: "Enter identity number",
+    identity_already_exists: "An account with this identity number already exists!",
+    enter_identity_error: "Please enter your identity number",
 
     // Auth & Layout
     password_required: "Password is required",

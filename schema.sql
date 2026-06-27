@@ -33,6 +33,8 @@ create table if not exists public.profiles (
   kyc_document_url text,
   kyc_document_back_url text,
   kyc_selfie_url text,
+  kyc_document_number text,
+  identity_number text,
   claimed_levels jsonb not null default '[]'::jsonb,
   admin_permissions jsonb not null default '{}'::jsonb,
   created_at timestamp with time zone not null default now()
@@ -64,6 +66,12 @@ begin
   end if;
   if not exists (select 1 from information_schema.columns where table_name='profiles' and column_name='kyc_selfie_url') then
     alter table public.profiles add column kyc_selfie_url text;
+  end if;
+  if not exists (select 1 from information_schema.columns where table_name='profiles' and column_name='kyc_document_number') then
+    alter table public.profiles add column kyc_document_number text;
+  end if;
+  if not exists (select 1 from information_schema.columns where table_name='profiles' and column_name='identity_number') then
+    alter table public.profiles add column identity_number text;
   end if;
   if not exists (select 1 from information_schema.columns where table_name='profiles' and column_name='blocked_until') then
     alter table public.profiles add column blocked_until timestamp with time zone;
