@@ -12,7 +12,7 @@ import LanguageToggle from '@/components/ui/LanguageToggle';
 import { useTranslation } from '@/lib/store/languageStore';
 import { Mail, Lock, User, Globe, MapPin, Phone, Link2 } from 'lucide-react';
 import {
-  validateEmail, validatePassword, validateFullName,
+  validateEmail, validatePassword, validateFirstName, validateLastName,
   validateLogin, validatePhone, validateCountry, validateCity,
 } from '@/lib/utils/validators';
 import { registerUser } from '@/lib/supabase/auth';
@@ -33,10 +33,12 @@ function RegisterForm() {
   const { t } = useTranslation();
 
   const [form, setForm] = useState({
-    fullName: '',
+    firstName: '',
+    lastName: '',
     login: '',
     email: '',
     password: '',
+    confirmPassword: '',
     country: 'Azərbaycan',
     city: 'Bakı',
     phone: '',
@@ -78,8 +80,11 @@ function RegisterForm() {
     e.preventDefault();
     const newErrors = {};
 
-    const nameErr = validateFullName(form.fullName);
-    if (nameErr) newErrors.fullName = nameErr;
+    const firstNameErr = validateFirstName(form.firstName);
+    if (firstNameErr) newErrors.firstName = firstNameErr;
+
+    const lastNameErr = validateLastName(form.lastName);
+    if (lastNameErr) newErrors.lastName = lastNameErr;
 
     const loginErr = validateLogin(form.login);
     if (loginErr) newErrors.login = loginErr;
@@ -90,6 +95,10 @@ function RegisterForm() {
 
     const passErr = validatePassword(form.password);
     if (passErr) newErrors.password = passErr;
+
+    if (form.password !== form.confirmPassword) {
+      newErrors.confirmPassword = t('passwords_mismatch', 'Şifrələr eyni deyil');
+    }
 
     const countryErr = validateCountry(form.country);
     if (countryErr) newErrors.country = countryErr;
@@ -114,8 +123,9 @@ function RegisterForm() {
     setLoading(true);
 
     try {
+      const combinedFullName = `${form.firstName.trim()} ${form.lastName.trim()}`;
       await registerUser(form.email, form.password, {
-        fullName: form.fullName,
+        fullName: combinedFullName,
         login: form.login,
         country: form.country,
         city: form.city,
@@ -146,14 +156,25 @@ function RegisterForm() {
           <p className={styles.subtitle}>{t('register_subtitle', 'Platformaya qoşulun və qazanmağa başlayın')}</p>
 
           <form onSubmit={handleSubmit} className={styles.form}>
-            <Input
-              label={t('fullname', 'Ad Soyad')}
-              placeholder={t('fullname', 'Ad Soyad')}
-              value={form.fullName}
-              onChange={(e) => updateField('fullName', e.target.value)}
-              error={errors.fullName}
-              icon={<User size={18} />}
-            />
+            <div className={styles.formRow}>
+              <Input
+                label={t('first_name', 'Ad')}
+                placeholder={t('first_name', 'Ad')}
+                value={form.firstName}
+                onChange={(e) => updateField('firstName', e.target.value)}
+                error={errors.firstName}
+                icon={<User size={18} />}
+              />
+
+              <Input
+                label={t('last_name', 'Soyad')}
+                placeholder={t('last_name', 'Soyad')}
+                value={form.lastName}
+                onChange={(e) => updateField('lastName', e.target.value)}
+                error={errors.lastName}
+                icon={<User size={18} />}
+              />
+            </div>
 
             <Input
               label={t('username', 'İstifadəçi adı')}
@@ -188,6 +209,16 @@ function RegisterForm() {
               icon={<Lock size={18} />}
             />
 
+            <Input
+              label={t('confirm_password', 'Şifrənin Təsdiqi')}
+              type="password"
+              placeholder={t('confirm_password_placeholder', 'Şifrəni yenidən yazın')}
+              value={form.confirmPassword}
+              onChange={(e) => updateField('confirmPassword', e.target.value)}
+              error={errors.confirmPassword}
+              icon={<Lock size={18} />}
+            />
+
             <Select
               label={t('country', 'Ölkə')}
               value={form.country}
@@ -206,7 +237,7 @@ function RegisterForm() {
               <option value="">{t('select_country', 'Ölkə seçin')}</option>
               {COUNTRIES.map((c) => (
                 <option key={c.name} value={c.name}>
-                  {c.name} ({c.phoneCode})
+                  {c.name}
                 </option>
               ))}
             </Select>

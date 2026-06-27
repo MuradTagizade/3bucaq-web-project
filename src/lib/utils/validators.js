@@ -80,3 +80,15 @@ export function validateCity(city) {
   if (city.trim().length < 2) return 'Düzgün şəhər adı daxil edin';
   return null;
 }
+
+export function validateFirstName(name) {
+  if (!name || !name.trim()) return 'Ad tələb olunur';
+  if (name.trim().length < 2) return 'Ad minimum 2 simvol olmalıdır';
+  return null;
+}
+
+export function validateLastName(name) {
+  if (!name || !name.trim()) return 'Soyad tələb olunur';
+  if (name.trim().length < 2) return 'Soyad minimum 2 simvol olmalıdır';
+  return null;
+}

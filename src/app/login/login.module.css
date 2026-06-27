@@ -260,3 +260,16 @@
     font-size: var(--text-lg);
   }
 }
+
+.formRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-md);
+}
+
+@media (max-width: 480px) {
+  .formRow {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+}
