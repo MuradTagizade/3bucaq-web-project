@@ -10,9 +10,11 @@ import { PACKAGES } from '@/lib/utils/constants';
 import { formatCurrency } from '@/lib/utils/formatters';
 import { Info, Flame, Zap } from 'lucide-react';
 import { useAuthStore } from '@/lib/store/authStore';
+import { useTranslation } from '@/lib/store/languageStore';
 import { buyPackage, getUserByUid } from '@/lib/supabase/database';
 
 export default function HotBedPage() {
+  const { t } = useTranslation();
   const { user: authUser, setUser } = useAuthStore();
   const [confirmModal, setConfirmModal] = useState({ open: false, pkg: null });
   const [infoModal, setInfoModal] = useState(false);
@@ -54,7 +56,7 @@ export default function HotBedPage() {
         });
       }
     } catch (err) {
-      alert('Xəta baş verdi: ' + err.message);
+      alert(t('error_occurred', 'Xəta baş verdi') + ': ' + err.message);
     } finally {
       setConfirmModal({ open: false, pkg: null });
     }
@@ -65,7 +67,7 @@ export default function HotBedPage() {
       <div className={styles.headerRow}>
         <h2 className={styles.title}>
           <Flame size={22} color="var(--color-warning)" />
-          Hot Bed Paketləri
+          {t('hotbed_packages', 'Hot Bed Paketləri')}
         </h2>
         <button className={styles.infoBtn} onClick={() => setInfoModal(true)}>
           <Info size={20} />
@@ -90,14 +92,14 @@ export default function HotBedPage() {
             </div>
             <div className={styles.pkgInfo}>
               <Badge variant={pkg.type === 'earning' ? 'gold' : 'info'} size="sm">
-                {pkg.type === 'earning' ? 'Qazanc' : 'Yatırım'}
+                {pkg.type === 'earning' ? t('earning', 'Qazanc') : t('investment', 'Yatırım')}
               </Badge>
-              <span className={styles.pkgDesc}>{pkg.description}</span>
+              <span className={styles.pkgDesc}>{t(pkg.id + '_desc', pkg.description)}</span>
             </div>
             {pkg.dailyEarning > 0 && (
               <div className={styles.dailyTag}>
                 <Zap size={14} />
-                Gündəlik {formatCurrency(pkg.dailyEarning)}
+                {t('daily_gain', 'Gündəlik')} {formatCurrency(pkg.dailyEarning)}
               </div>
             )}
           </div>
@@ -108,27 +110,25 @@ export default function HotBedPage() {
       <Modal
         isOpen={confirmModal.open}
         onClose={() => setConfirmModal({ open: false, pkg: null })}
-        title="Paketi Aktiv Edin?"
+        title={t('confirm_purchase_title', 'Paketi Aktiv Edin?')}
         size="sm"
       >
         {confirmModal.pkg && (
           <div className={styles.confirmContent}>
             <p>
-              <strong>{confirmModal.pkg.displayName}</strong> paketini{' '}
-              <span style={{ color: confirmModal.pkg.color }}>
-                {formatCurrency(confirmModal.pkg.price)}
-              </span>{' '}
-              məbləğinə aktiv etmək istəyirsiniz?
+              {t('confirm_purchase_desc', '{{package}} paketini {{price}} məbləğinə aktiv etmək istəyirsiniz?')
+                .replace('{{package}}', confirmModal.pkg.displayName)
+                .replace('{{price}}', formatCurrency(confirmModal.pkg.price))}
             </p>
             <p className={styles.confirmNote}>
-              Məbləğ əsas balansınızdan çıxılacaq.
+              {t('price_deducted_from_balance', 'Məbləğ əsas balansınızdan çıxılacaq.')}
             </p>
             <div className={styles.confirmActions}>
               <Button variant="ghost" onClick={() => setConfirmModal({ open: false, pkg: null })}>
-                Xeyr
+                {t('no', 'Xeyr')}
               </Button>
               <Button onClick={confirmPurchase}>
-                Bəli
+                {t('yes', 'Bəli')}
               </Button>
             </div>
           </div>
@@ -139,21 +139,21 @@ export default function HotBedPage() {
       <Modal
         isOpen={infoModal}
         onClose={() => setInfoModal(false)}
-        title="Paket Məlumatları"
+        title={t('package_info_title', 'Paket Məlumatları')}
         size="md"
       >
         <div className={styles.infoContent}>
-          <h4>Yatırım Paketləri</h4>
-          <p>Bu paketlər gündəlik qazanc vermir, lakin xal (point) qazandırır. Xallar level yüksəlmək və bonus qazanmaq üçün lazımdır.</p>
+          <h4>{t('investment_packages', 'Yatırım Paketləri')}</h4>
+          <p>{t('pkg_desc_invest', 'Bu paketlər gündəlik qazanc vermir, lakin xal (point) qazandırır. Xallar level yüksəlmək və bonus qazanmaq üçün lazımdır.')}</p>
 
-          <h4>Qazanc Paketləri</h4>
-          <p>Bu paketlər həm xal, həm gündəlik dollar qazandırır. Qazanc Transfer balansına yığılır.</p>
+          <h4>{t('earning_packages', 'Qazanc Paketləri')}</h4>
+          <p>{t('pkg_desc_earn', 'Bu paketlər həm xal, həm gündəlik dollar qazandırır. Qazanc Transfer balansına yığılır.')}</p>
 
           <div className={styles.infoTable}>
             <div className={styles.infoRow}>
-              <span>Paket</span>
-              <span>Point</span>
-              <span>Gündəlik</span>
+              <span>{t('package', 'Paket')}</span>
+              <span>{t('points', 'Point')}</span>
+              <span>{t('daily', 'Gündəlik')}</span>
             </div>
             {PACKAGES.map((pkg) => (
               <div key={pkg.id} className={styles.infoRow}>

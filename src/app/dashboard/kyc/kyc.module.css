@@ -1,125 +1,162 @@
-.page { padding: 8px 0 24px; }
+.page {
+  padding: 8px 0 24px;
+}
 
 .header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 20px;
+  margin-bottom: 24px;
 }
 
 .title {
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 18px;
-  font-weight: 700;
+  font-size: var(--text-2xl);
+  font-weight: 800;
+  color: var(--text-primary);
 }
 
-.successCard, .pendingCard {
-  text-align: center;
-  padding: 40px 20px;
-  background: var(--bg-card);
-  border: 1px solid var(--border-color);
-  border-radius: 16px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 12px;
-}
-
-.successCard h3, .pendingCard h3 {
-  font-size: 18px;
-  font-weight: 700;
-}
-
-.successCard p, .pendingCard p {
-  font-size: 14px;
-  color: var(--text-muted);
-}
-
+.successCard,
+.pendingCard,
 .formCard {
   background: var(--bg-card);
-  border: 1px solid var(--border-color);
-  border-radius: 16px;
-  padding: 24px 20px;
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 32px;
   display: flex;
   flex-direction: column;
   gap: 20px;
+  position: relative;
+  overflow: hidden;
 }
+
+.successCard::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; height: 2px;
+  background: var(--color-success);
+  box-shadow: 0 0 15px rgba(0, 255, 163, 0.4);
+}
+
+.pendingCard::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; height: 2px;
+  background: var(--color-warning);
+  box-shadow: 0 0 15px rgba(255, 210, 0, 0.4);
+}
+
+.successCard { align-items: center; text-align: center; }
+.successCard h3 { color: var(--color-success); font-size: 18px; margin-bottom: 8px; text-shadow: 0 0 10px rgba(0, 255, 163, 0.2); }
+.successCard p { color: var(--text-secondary); font-size: 14px; }
+
+.pendingCard { align-items: center; text-align: center; }
+.pendingCard h3 { color: var(--color-warning); font-size: 18px; margin-bottom: 8px; text-shadow: 0 0 10px rgba(255, 210, 0, 0.2); }
+.pendingCard p { color: var(--text-secondary); font-size: 14px; }
 
 .rejectedNotice {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 10px 14px;
-  background: rgba(244, 67, 54, 0.08);
-  border: 1px solid rgba(244, 67, 54, 0.2);
-  border-radius: 10px;
-  font-size: 13px;
+  padding: 12px 16px;
+  background: rgba(255, 42, 95, 0.1);
+  border: 1px solid rgba(255, 42, 95, 0.3);
+  border-radius: var(--radius-sm);
   color: var(--color-error);
+  font-size: 14px;
+  font-weight: 600;
+  box-shadow: 0 0 15px rgba(255, 42, 95, 0.1);
 }
 
-.field { display: flex; flex-direction: column; gap: 6px; }
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
 
 .label {
-  font-size: 13px;
+  font-size: 11px;
   color: var(--text-muted);
-  font-weight: 500;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 .select {
   width: 100%;
-  padding: 10px 12px;
-  border-radius: 8px;
-  background: var(--bg-secondary);
+  padding: 14px 16px;
+  background: var(--bg-input);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
   color: var(--text-primary);
-  border: 1px solid var(--border-color);
   font-size: 14px;
+  font-family: inherit;
+  appearance: none;
+  outline: none;
+  transition: all var(--transition-fast);
+}
+
+.select:focus {
+  border-color: var(--color-secondary);
+  box-shadow: 0 0 15px rgba(0, 240, 255, 0.15);
+  background: var(--bg-input-focus);
 }
 
 .uploadGroup {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-top: 8px;
 }
 
 .uploadBox {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
-  padding: 20px 12px;
-  border: 2px dashed var(--border-color);
-  border-radius: 14px;
+  justify-content: center;
+  gap: 12px;
+  padding: 24px;
+  background: var(--bg-glass);
+  border: 1px dashed var(--border-default);
+  border-radius: var(--radius-md);
   text-align: center;
+  transition: all var(--transition-base);
+}
+
+.uploadBox:hover {
+  background: rgba(0, 240, 255, 0.05);
+  border-color: rgba(0, 240, 255, 0.4);
+  box-shadow: inset 0 0 20px rgba(0, 240, 255, 0.05);
 }
 
 .uploadBox span {
-  font-size: 12px;
-  color: var(--text-muted);
-  font-weight: 500;
+  font-size: 14px;
+  color: var(--text-primary);
 }
 
 .uploadBtn {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  padding: 6px 12px;
-  border-radius: 8px;
-  background: var(--bg-secondary);
-  border: 1px solid var(--border-color);
-  font-size: 11px;
-  color: var(--text-secondary);
+  gap: 8px;
+  padding: 10px 16px;
+  background: rgba(0, 255, 163, 0.05);
+  border: 1px solid rgba(0, 255, 163, 0.2);
+  border-radius: var(--radius-sm);
+  color: var(--color-primary);
+  font-size: 13px;
+  font-weight: 600;
   cursor: pointer;
-  transition: background 0.2s;
-  max-width: 100%;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  transition: all var(--transition-fast);
 }
 
 .uploadBtn:hover {
-  background: rgba(124, 77, 255, 0.1);
+  background: rgba(0, 255, 163, 0.15);
+  border-color: var(--color-primary);
+  box-shadow: 0 0 15px rgba(0, 255, 163, 0.2);
 }
 
 .toast {
@@ -127,14 +164,27 @@
   bottom: 100px;
   left: 50%;
   transform: translateX(-50%);
-  background: var(--bg-card);
-  border: 1px solid var(--border-color);
+  background: var(--bg-secondary);
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  border: 1px solid var(--border-default);
   color: var(--text-primary);
   padding: 12px 24px;
-  border-radius: 12px;
+  border-radius: var(--radius-full);
   font-size: 14px;
+  font-weight: 600;
   z-index: 9999;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-  max-width: 90%;
+  box-shadow: 0 0 30px rgba(0, 255, 163, 0.1);
   text-align: center;
+}
+
+@media (max-width: 768px) {
+  .uploadGroup {
+    grid-template-columns: 1fr;
+  }
+  .formCard, .successCard, .pendingCard {
+    padding: 24px 16px;
+  }
+  .uploadBox {
+    padding: 16px;
+  }
 }

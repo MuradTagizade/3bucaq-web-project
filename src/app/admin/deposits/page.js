@@ -6,6 +6,7 @@ import Button from '@/components/ui/Button';
 import Badge from '@/components/ui/Badge';
 import Modal from '@/components/ui/Modal';
 import Input from '@/components/ui/Input';
+import { useTranslation } from '@/lib/store/languageStore';
 import { CheckCircle2, XCircle, Wallet, CreditCard, Save, Eye, FileText, Image as ImageIcon } from 'lucide-react';
 import { getDeposits, approveDeposit, rejectDeposit, addAdminLog, getSystemSetting, updateSystemSetting } from '@/lib/supabase/database';
 import { formatCurrency, formatDateTime } from '@/lib/utils/formatters';
@@ -14,6 +15,7 @@ import { supabase } from '@/lib/supabase/config';
 
 export default function AdminDepositsPage() {
   const { user: adminUser } = useAuthStore();
+  const { t } = useTranslation();
   const [deposits, setDeposits] = useState([]);
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState('pending');
@@ -53,16 +55,16 @@ export default function AdminDepositsPage() {
   const handleUpdateCard = async () => {
     const cleanCard = depositCard.replace(/\s+/g, '');
     if (cleanCard.length !== 16 || isNaN(Number(cleanCard))) {
-      alert('Kart nömrəsi 16 rəqəmli olmalıdır.');
+      alert(t('card_number_16_digit_err', 'Kart nömrəsi 16 rəqəmli olmalıdır.'));
       return;
     }
     setUpdatingCard(true);
     try {
       await updateSystemSetting('admin_deposit_card', cleanCard);
       await addAdminLog(adminUser?.uid, 'update_admin_deposit_card', null, `Admin deposit card updated to: ${cleanCard}`);
-      alert('Mədaxil kart hesabı uğurla yeniləndi!');
+      alert(t('admin_deposit_card_updated', 'Mədaxil kart hesabı uğurla yeniləndi!'));
     } catch (err) {
-      alert('Xəta: ' + err.message);
+      alert(t('error_prefix', 'Xəta: ') + err.message);
     } finally {
       setUpdatingCard(false);
     }
@@ -80,9 +82,10 @@ export default function AdminDepositsPage() {
         `Admin ${newStatus ? 'enabled' : 'disabled'} card payments system-wide`
       );
       setIsCardActive(newStatus);
-      alert(`Kart ilə ödəniş sistemi ${newStatus ? 'aktiv edildi' : 'deaktiv edildi'}!`);
+      const statusText = newStatus ? t('activate', 'aktiv edildi') : t('deactivate', 'deaktiv edildi');
+      alert(t('card_payment_active_msg', 'Kart ilə ödəniş sistemi {{status}}!').replace('{{status}}', statusText));
     } catch (err) {
-      alert('Xəta: ' + err.message);
+      alert(t('error_prefix', 'Xəta: ') + err.message);
     } finally {
       setUpdatingToggle(false);
     }
@@ -95,7 +98,7 @@ export default function AdminDepositsPage() {
         `Approved deposit $${deposit.amount} from ${deposit.login}`);
       await load();
     } catch (err) {
-      alert('Xəta: ' + err.message);
+      alert(t('error_prefix', 'Xəta: ') + err.message);
     }
   };
 
@@ -106,7 +109,7 @@ export default function AdminDepositsPage() {
         `Rejected deposit $${deposit.amount} from ${deposit.login}`);
       await load();
     } catch (err) {
-      alert('Xəta: ' + err.message);
+      alert(t('error_prefix', 'Xəta: ') + err.message);
     }
   };
 
@@ -116,14 +119,14 @@ export default function AdminDepositsPage() {
   };
 
   if (loading) {
-    return <div style={{ textAlign: 'center', padding: '40px 0' }}>Yüklənir...</div>;
+    return <div style={{ textAlign: 'center', padding: '40px 0' }}>{t('loading', 'Yüklənir...')}</div>;
   }
 
   return (
     <div>
       <h1 className={styles.pageTitle}>
         <Wallet size={24} style={{ display: 'inline', verticalAlign: 'middle', marginRight: 8 }} />
-        Depozitlər
+        {t('deposits', 'Depozitlər')}
       </h1>
 
       {/* Admin Deposit Card Configuration Card */}
@@ -135,8 +138,8 @@ export default function AdminDepositsPage() {
           {/* Card payment active toggle */}
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: 16, borderBottom: '1px solid var(--border-color)' }}>
             <div>
-              <strong style={{ fontSize: 14, color: 'var(--text-primary)' }}>Kart ilə Ödəniş Sistemi</strong>
-              <p style={{ fontSize: 12, color: 'var(--text-muted)', margin: '4px 0 0 0' }}>Bütün istifadəçi profillərində kart ilə mədaxil və məxarici aktiv/deaktiv edin.</p>
+              <strong style={{ fontSize: 14, color: 'var(--text-primary)' }}>{t('card_active_system', 'Kart ilə Ödəniş Sistemi')}</strong>
+              <p style={{ fontSize: 12, color: 'var(--text-muted)', margin: '4px 0 0 0' }}>{t('card_active_desc', 'Bütün istifadəçi profillərində kart ilə mədaxil və məxarici aktiv/deaktiv edin.')}</p>
             </div>
             <button
               onClick={handleToggleCardPayment}
@@ -153,17 +156,17 @@ export default function AdminDepositsPage() {
                 transition: 'all 0.2s ease',
               }}
             >
-              {isCardActive ? 'Deaktiv Et' : 'Aktiv Et'}
+              {isCardActive ? t('deactivate', 'Deaktiv Et') : t('activate', 'Aktiv Et')}
             </button>
           </div>
 
           <div>
             <h3 style={{ fontSize: 14, fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-secondary)', marginBottom: 12 }}>
-              Mədaxil üçün Kart Hesabı Tənzimləməsi
+              {t('deposit_card_setting', 'Mədaxil üçün Kart Hesabı Tənzimləməsi')}
             </h3>
             <div style={{ display: 'flex', gap: 12, alignItems: 'flex-end', flexWrap: 'wrap' }}>
               <div style={{ flex: '1 1 250px' }}>
-                <label style={{ fontSize: 12, color: 'var(--text-muted)', display: 'block', marginBottom: 6 }}>16 Rəqəmli Bank Kart Nömrəsi</label>
+                <label style={{ fontSize: 12, color: 'var(--text-muted)', display: 'block', marginBottom: 6 }}>{t('card_number_16_digit', '16 Rəqəmli Bank Kart Nömrəsi')}</label>
                 <input
                   type="text"
                   value={depositCard}
@@ -181,7 +184,7 @@ export default function AdminDepositsPage() {
                 />
               </div>
               <Button onClick={handleUpdateCard} loading={updatingCard}>
-                <Save size={16} style={{ marginRight: 6 }} /> Yadda Saxla
+                <Save size={16} style={{ marginRight: 6 }} /> {t('save_btn', 'Yadda Saxla')}
               </Button>
             </div>
           </div>
@@ -189,16 +192,16 @@ export default function AdminDepositsPage() {
       </div>
 
       <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
-        {['pending', 'approved', 'rejected'].map((t) => (
-          <button key={t} onClick={() => setTab(t)}
+        {['pending', 'approved', 'rejected'].map((tVal) => (
+          <button key={tVal} onClick={() => setTab(tVal)}
             style={{
-              padding: '8px 16px', borderRadius: 10, fontSize: 13, fontWeight: tab === t ? 600 : 400,
-              background: tab === t ? 'rgba(124,77,255,0.1)' : 'var(--bg-secondary)',
-              border: `1px solid ${tab === t ? 'var(--color-primary)' : 'var(--border-color)'}`,
-              color: tab === t ? 'var(--color-primary)' : 'var(--text-secondary)', cursor: 'pointer',
+              padding: '8px 16px', borderRadius: 10, fontSize: 13, fontWeight: tab === tVal ? 600 : 400,
+              background: tab === tVal ? 'rgba(124,77,255,0.1)' : 'var(--bg-secondary)',
+              border: `1px solid ${tab === tVal ? 'var(--color-primary)' : 'var(--border-color)'}`,
+              color: tab === tVal ? 'var(--color-primary)' : 'var(--text-secondary)', cursor: 'pointer',
             }}>
-            {t === 'pending' ? `Gözləyən (${deposits.filter((d) => d.status === 'pending').length})` :
-              t === 'approved' ? 'Təsdiqlənən' : 'Rədd'}
+            {tVal === 'pending' ? `${t('claims_tabs.pending', 'Gözləyən')} (${deposits.filter((d) => d.status === 'pending').length})` :
+              tVal === 'approved' ? t('approved', 'Təsdiqlənən') : t('reject', 'Rədd')}
           </button>
         ))}
       </div>
@@ -207,10 +210,15 @@ export default function AdminDepositsPage() {
         <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr 1fr 1.8fr 1fr 0.8fr', padding: '12px 16px',
           background: 'var(--bg-secondary)', fontWeight: 700, fontSize: 11, color: 'var(--text-muted)',
           textTransform: 'uppercase', letterSpacing: '0.06em', borderRadius: '8px 8px 0 0' }}>
-          <span>İstifadəçi</span><span>Məbləğ</span><span>Metod</span><span>Ödəniş Detalı</span><span>Tarix</span><span></span>
+          <span>{t('deposits_table_header.user', 'İstifadəçi')}</span>
+          <span>{t('deposits_table_header.amount', 'Məbləğ')}</span>
+          <span>{t('deposits_table_header.method', 'Metod')}</span>
+          <span>{t('deposits_table_header.detail', 'Ödəniş Detalı')}</span>
+          <span>{t('deposits_table_header.date', 'Tarix')}</span>
+          <span></span>
         </div>
         {filtered.length === 0 && (
-          <div style={{ padding: 20, textAlign: 'center', color: 'var(--text-muted)' }}>Tapılmadı</div>
+          <div style={{ padding: 20, textAlign: 'center', color: 'var(--text-muted)' }}>{t('empty_table', 'Tapılmadı')}</div>
         )}
         {filtered.map((d) => (
           <div key={d.id} style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr 1fr 1.8fr 1fr 0.8fr',
@@ -219,7 +227,7 @@ export default function AdminDepositsPage() {
             <span style={{ fontWeight: 700, color: 'var(--text-primary)' }}>{formatCurrency(d.amount)}</span>
             <span>
               <Badge variant={d.payment_method === 'card' ? 'gold' : 'info'} size="sm">
-                {d.payment_method === 'card' ? 'Bank Kartı' : 'USDT'}
+                {d.payment_method === 'card' ? t('bank_card_manual', 'Bank Kartı') : 'USDT'}
               </Badge>
             </span>
             <span>
@@ -236,7 +244,7 @@ export default function AdminDepositsPage() {
                         cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4
                       }}
                     >
-                      <Eye size={12} /> Qəbzə bax
+                      <Eye size={12} /> {t('view_receipt', 'Qəbzə bax')}
                     </button>
                   )}
                 </div>
@@ -255,19 +263,19 @@ export default function AdminDepositsPage() {
                 <>
                   <button onClick={() => handleApprove(d)}
                     style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-success)' }}
-                    title="Təsdiqlə">
+                    title={t('approve_btn_title', 'Təsdiqlə')}>
                     <CheckCircle2 size={20} />
                   </button>
                   <button onClick={() => handleReject(d)}
                     style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-error)' }}
-                    title="Rədd et">
+                    title={t('reject_btn_title', 'Rədd et')}>
                     <XCircle size={20} />
                   </button>
                 </>
               )}
               {d.status !== 'pending' && (
                 <Badge variant={d.status === 'approved' ? 'success' : 'error'} size="sm">
-                  {d.status === 'approved' ? 'Təsdiqləndi' : 'Rədd edilib'}
+                  {d.status === 'approved' ? t('approved', 'Təsdiqləndi') : t('rejected', 'Rədd edilib')}
                 </Badge>
               )}
             </div>
@@ -279,7 +287,7 @@ export default function AdminDepositsPage() {
       <Modal
         isOpen={!!viewerReceiptUrl}
         onClose={() => setViewerReceiptUrl(null)}
-        title="Mədaxil Ödəniş Qəbzi"
+        title={t('deposit_receipt_title', 'Mədaxil Ödəniş Qəbzi')}
         size="md"
       >
         {viewerReceiptUrl && (
@@ -290,7 +298,7 @@ export default function AdminDepositsPage() {
               style={{ maxWidth: '100%', maxHeight: '420px', borderRadius: 8, objectFit: 'contain', border: '1px solid var(--border-color)' }}
             />
             <Button onClick={() => window.open(viewerReceiptUrl, '_blank')}>
-              Tam Ekran Bax
+              {t('view_full_screen', 'Tam Ekran Bax')}
             </Button>
           </div>
         )}

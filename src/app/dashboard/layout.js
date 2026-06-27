@@ -8,11 +8,13 @@ import Sidebar from '@/components/layout/Sidebar';
 import { useAuthStore } from '@/lib/store/authStore';
 import { useRouter } from 'next/navigation';
 import { logoutUser } from '@/lib/supabase/auth';
+import { useTranslation } from '@/lib/store/languageStore';
 import { Ban, Clock } from 'lucide-react';
 
 export default function DashboardLayout({ children }) {
   const { user, loading: authLoading, setUser, setLoading } = useAuthStore();
   const router = useRouter();
+  const { t } = useTranslation();
 
   useEffect(() => {
     if (!authLoading) {
@@ -30,7 +32,7 @@ export default function DashboardLayout({ children }) {
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         minHeight: '100vh', background: 'var(--bg-primary)', color: 'var(--text-secondary)'
       }}>
-        <span>Yüklənir...</span>
+        <span>{t('loading', 'Yüklənir...')}</span>
       </div>
     );
   }
@@ -52,12 +54,12 @@ export default function DashboardLayout({ children }) {
 
   // Block check
   if (user?.isBlocked) {
-    let blockMessage = user?.blockReason || 'Hesabınız bloklanıb.';
+    let blockMessage = user?.blockReason || t('kyc_rejected_desc', 'Hesabınız bloklanıb.');
     if (user?.blockedUntil) {
       const endDate = new Date(user.blockedUntil);
       const daysLeft = Math.ceil((endDate - new Date()) / (1000 * 60 * 60 * 24));
       if (daysLeft > 0) {
-        blockMessage += ` (${daysLeft} gün qalıb)`;
+        blockMessage += ` (${daysLeft} ${t('days_left', 'gün qalıb')})`;
       }
     }
 
@@ -68,7 +70,7 @@ export default function DashboardLayout({ children }) {
       }}>
         <Ban size={64} color="var(--color-error)" style={{ marginBottom: 20 }} />
         <h2 style={{ fontSize: 22, fontWeight: 700, marginBottom: 12, color: 'var(--text-primary)' }}>
-          Hesab Bloklanıb
+          {t('account_blocked', 'Hesab Bloklanıb')}
         </h2>
         <p style={{ fontSize: 14, color: 'var(--text-muted)', maxWidth: 400, marginBottom: 24 }}>
           {blockMessage}
@@ -78,7 +80,7 @@ export default function DashboardLayout({ children }) {
           border: '1px solid var(--border-color)', color: 'var(--text-primary)',
           fontSize: 14, cursor: 'pointer',
         }}>
-          Çıxış
+          {t('logout', 'Çıxış')}
         </button>
       </div>
     );

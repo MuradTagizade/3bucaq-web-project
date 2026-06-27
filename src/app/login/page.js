@@ -7,6 +7,8 @@ import styles from './login.module.css';
 import Logo from '@/components/layout/Logo';
 import Input from '@/components/ui/Input';
 import Button from '@/components/ui/Button';
+import LanguageToggle from '@/components/ui/LanguageToggle';
+import { useTranslation } from '@/lib/store/languageStore';
 import { Mail, Lock } from 'lucide-react';
 import { validateEmail } from '@/lib/utils/validators';
 import { loginUser } from '@/lib/supabase/auth';
@@ -14,6 +16,7 @@ import { getUserByUid } from '@/lib/supabase/database';
 
 export default function LoginPage() {
   const router = useRouter();
+  const { t } = useTranslation();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [errors, setErrors] = useState({});
@@ -25,7 +28,7 @@ export default function LoginPage() {
 
     const emailError = validateEmail(email);
     if (emailError) newErrors.email = emailError;
-    if (!password) newErrors.password = 'Parol tələb olunur';
+    if (!password) newErrors.password = t('password_required', 'Parol tələb olunur');
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
@@ -53,6 +56,9 @@ export default function LoginPage() {
 
   return (
     <div className={styles.page}>
+      <div className={styles.topBar}>
+        <LanguageToggle />
+      </div>
       <div className={styles.bgGrid} />
       <div className={styles.container}>
         <div className={styles.card}>
@@ -60,12 +66,12 @@ export default function LoginPage() {
             <Logo size={48} />
           </Link>
 
-          <h1 className={styles.title}>Xoş gəldiniz</h1>
-          <p className={styles.subtitle}>Hesabınıza daxil olun</p>
+          <h1 className={styles.title}>{t('welcome_back', 'Xoş gəldiniz')}</h1>
+          <p className={styles.subtitle}>{t('login_subtitle', 'Hesabınıza daxil olun')}</p>
 
           <form onSubmit={handleSubmit} className={styles.form}>
             <Input
-              label="Email"
+              label={t('email', 'Email')}
               type="email"
               placeholder="email@example.com"
               value={email}
@@ -75,9 +81,9 @@ export default function LoginPage() {
             />
 
             <Input
-              label="Parol"
+              label={t('password', 'Şifrə')}
               type="password"
-              placeholder="Parolunuzu daxil edin"
+              placeholder={t('password', 'Şifrə')}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               error={errors.password}
@@ -91,17 +97,17 @@ export default function LoginPage() {
             )}
 
             <Button type="submit" fullWidth size="lg" loading={loading}>
-              Giriş
+              {t('login', 'Giriş')}
             </Button>
           </form>
 
           <div className={styles.links}>
             <Link href="/forgot-password" className={styles.link}>
-              Parolu unutmuşam
+              {t('forgot_password_btn', 'Parolu unutmuşam')}
             </Link>
             <span className={styles.divider}>•</span>
             <Link href="/register" className={styles.link}>
-              Hesab yarat
+              {t('create_account', 'Hesab yarat')}
             </Link>
           </div>
         </div>

@@ -4,57 +4,14 @@ import { useState, useEffect, useRef } from 'react';
 import styles from './personal-info.module.css';
 import { User, Lock, MapPin, ShieldCheck, Star, Headphones, Check } from 'lucide-react';
 import { useAuthStore } from '@/lib/store/authStore';
+import { useTranslation } from '@/lib/store/languageStore';
 import { formatDate } from '@/lib/utils/formatters';
 import { updateUserProfile } from '@/lib/supabase/database';
 import { supabase } from '@/lib/supabase/config';
 
-const DOC_TYPE_LABELS = {
-  passport: 'Pasport',
-  id_card: 'Şəxsiyyət Vəsiqəsi',
-  driving_license: 'Sürücülük Vəsiqəsi',
-};
-
-const KYC_STATUS_LABELS = {
-  approved: 'TƏSDİQLƏNİB',
-  pending: 'GÖZLƏYİR',
-  rejected: 'RƏDD EDİLİB',
-  none: 'GÖNDƏRİLMƏYİB',
-};
-
-function maskEmail(email) {
-  if (!email) return '';
-  const [name, domain] = email.split('@');
-  if (name.length <= 3) return `${name}***@${domain}`;
-  return `${name.slice(0, 3)}*****@${domain}`;
-}
-
-function maskPhone(phone) {
-  if (!phone || phone === '—') return 'Təyin edilməyib';
-  const clean = phone.replace(/\s+/g, '');
-  if (clean.startsWith('+994')) {
-    const code = clean.slice(4, 6);
-    const last = clean.slice(-2);
-    return `+994 ${code} *** ** ${last}`;
-  }
-  if (clean.length > 6) {
-    return `${clean.slice(0, 4)} *** ** ${clean.slice(-2)}`;
-  }
-  return clean;
-}
-
-const getHighestActivePackage = (pkgs) => {
-  if (!pkgs) return 'Paket yoxdur';
-  if (pkgs.pkg799) return 'VIP Səviyyə';
-  if (pkgs.pkg399) return 'Whale Səviyyə';
-  if (pkgs.pkg199) return 'Elite Səviyyə';
-  if (pkgs.pkg99) return 'Pro Səviyyə';
-  if (pkgs.pkg49) return 'Basic Səviyyə';
-  if (pkgs.pkg19) return 'Starter Səviyyə';
-  return 'Paket yoxdur';
-};
-
 export default function PersonalInfoPage() {
   const { user: authUser, setUser, setLoading } = useAuthStore();
+  const { t } = useTranslation();
 
   const [fullName, setFullName] = useState('');
   const [country, setCountry] = useState('');
@@ -69,6 +26,54 @@ export default function PersonalInfoPage() {
   const [otpError, setOtpError] = useState('');
   const [verifying, setVerifying] = useState(false);
   const otpRefs = useRef([]);
+
+  const DOC_TYPE_LABELS = t('doc_types', {
+    passport: 'Pasport',
+    id_card: 'Şəxsiyyət Vəsiqəsi',
+    driving_license: 'Sürücülük Vəsiqəsi',
+  });
+
+  const KYC_STATUS_LABELS = {
+    approved: t('approved', 'TƏSDİQLƏNİB'),
+    pending: t('pending', 'GÖZLƏYİR'),
+    rejected: t('rejected', 'RƏDD EDİLİB'),
+    none: t('not_submitted', 'GÖNDƏRİLMƏYİB'),
+  };
+
+  function maskPhone(phone) {
+    if (!phone || phone === '—') return t('not_set', 'Təyin edilməyib');
+    const clean = phone.replace(/\s+/g, '');
+    if (clean.startsWith('+994')) {
+      const code = clean.slice(4, 6);
+      const last = clean.slice(-2);
+      return `+994 ${code} *** ** ${last}`;
+    }
+    if (clean.length > 6) {
+      return `${clean.slice(0, 4)} *** ** ${clean.slice(-2)}`;
+    }
+    return clean;
+  }
+
+  const getHighestActivePackage = (pkgs) => {
+    const labels = t('highest_package_labels', {
+      no_pkg: 'Paket yoxdur',
+      pkg799: 'VIP Səviyyə',
+      pkg399: 'Whale Səviyyə',
+      pkg199: 'Elite Səviyyə',
+      pkg99: 'Pro Səviyyə',
+      pkg49: 'Basic Səviyyə',
+      pkg19: 'Starter Səviyyə',
+    });
+    
+    if (!pkgs) return labels.no_pkg;
+    if (pkgs.pkg799) return labels.pkg799;
+    if (pkgs.pkg399) return labels.pkg399;
+    if (pkgs.pkg199) return labels.pkg199;
+    if (pkgs.pkg99) return labels.pkg99;
+    if (pkgs.pkg49) return labels.pkg49;
+    if (pkgs.pkg19) return labels.pkg19;
+    return labels.no_pkg;
+  };
 
   useEffect(() => {
     if (authUser) {
@@ -105,7 +110,7 @@ export default function PersonalInfoPage() {
         email,
       });
       if (resendErr) throw new Error(resendErr.message);
-      alert('Təsdiq kodu yenidən göndərildi!');
+      alert(t('otp_resent', 'Təsdiq kodu yenidən göndərildi!'));
     } catch (err) {
       setOtpError(err.message);
     }
@@ -120,7 +125,7 @@ export default function PersonalInfoPage() {
       // If email has changed, trigger verification email / OTP change
       if (email !== authUser.email) {
         const { error: authErr } = await supabase.auth.updateUser({ email });
-        if (authErr) throw new Error('E-poçt yenilənərkən xəta: ' + authErr.message);
+        if (authErr) throw new Error(t('email_update_err', 'E-poçt yenilənərkən xəta: ') + authErr.message);
         
         setShowOtpModal(true);
         setSaving(false);
@@ -144,10 +149,10 @@ export default function PersonalInfoPage() {
         city: city,
       });
 
-      setStatusMsg({ type: 'success', text: 'Məlumatlar uğurla yeniləndi!' });
+      setStatusMsg({ type: 'success', text: t('update_success', 'Məlumatlar uğurla yeniləndi!') });
       setTimeout(() => setStatusMsg({ type: '', text: '' }), 4000);
     } catch (err) {
-      setStatusMsg({ type: 'error', text: 'Xəta baş verdi: ' + err.message });
+      setStatusMsg({ type: 'error', text: t('error_occurred', 'Xəta baş verdi') + ': ' + err.message });
     } finally {
       if (email === authUser.email) {
         setSaving(false);
@@ -158,7 +163,7 @@ export default function PersonalInfoPage() {
   const handleVerifyOtp = async () => {
     const fullCode = otpDigits.join('');
     if (fullCode.length !== 6) {
-      setOtpError('6 rəqəmli təsdiq kodunu daxil edin');
+      setOtpError(t('enter_6_digits', '6 rəqəmli təsdiq kodunu daxil edin'));
       return;
     }
 
@@ -191,7 +196,7 @@ export default function PersonalInfoPage() {
 
       setShowOtpModal(false);
       setOtpDigits(['', '', '', '', '', '']);
-      setStatusMsg({ type: 'success', text: 'E-poçt və digər məlumatlar uğurla yeniləndi!' });
+      setStatusMsg({ type: 'success', text: t('profile_update_success', 'E-poçt və digər məlumatlar uğurla yeniləndi!') });
       setTimeout(() => setStatusMsg({ type: '', text: '' }), 4000);
     } catch (err) {
       setOtpError(err.message);
@@ -200,7 +205,7 @@ export default function PersonalInfoPage() {
     }
   };
 
-  const currentPkgLabel = authUser ? getHighestActivePackage(authUser.activePackages) : 'Paket yoxdur';
+  const currentPkgLabel = authUser ? getHighestActivePackage(authUser.activePackages) : t('no_packages', 'Paket yoxdur');
   const isKycApproved = authUser?.kycStatus === 'approved';
 
   return (
@@ -212,23 +217,23 @@ export default function PersonalInfoPage() {
           <div className={styles.card}>
             <div className={styles.cardHeader}>
               <User size={18} className={styles.cardIcon} />
-              <h3 className={styles.cardTitle}>Hesab Məlumatları</h3>
+              <h3 className={styles.cardTitle}>{t('account_info', 'Hesab Məlumatları')}</h3>
             </div>
 
             <div className={styles.inputsGrid}>
               <div className={styles.inputWrapper}>
-                <label className={styles.inputLabel}>AD VƏ SOYAD</label>
+                <label className={styles.inputLabel}>{t('fullname_label', 'AD VƏ SOYAD')}</label>
                 <input
                   type="text"
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
                   className={styles.textInput}
-                  placeholder="Məlumat daxil edin"
+                  placeholder={t('enter_info_placeholder', 'Məlumat daxil edin')}
                 />
               </div>
 
               <div className={styles.inputWrapper}>
-                <label className={styles.inputLabel}>İSTİFADƏÇİ ADI (LOGİN)</label>
+                <label className={styles.inputLabel}>{t('login_label', 'İSTİFADƏÇİ ADI (LOGİN)')}</label>
                 <div className={styles.disabledInputContainer}>
                   <input
                     type="text"
@@ -241,18 +246,18 @@ export default function PersonalInfoPage() {
               </div>
 
               <div className={styles.inputWrapper}>
-                <label className={styles.inputLabel}>E-POÇT</label>
+                <label className={styles.inputLabel}>{t('email_label', 'E-POÇT')}</label>
                 <input
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className={styles.textInput}
-                  placeholder="E-poçt daxil edin"
+                  placeholder={t('enter_email_placeholder', 'E-poçt daxil edin')}
                 />
               </div>
 
               <div className={styles.inputWrapper}>
-                <label className={styles.inputLabel}>TELEFON NÖMRƏSİ</label>
+                <label className={styles.inputLabel}>{t('phone_label', 'TELEFON NÖMRƏSİ')}</label>
                 <div className={styles.disabledInputContainer}>
                   <input
                     type="text"
@@ -279,29 +284,29 @@ export default function PersonalInfoPage() {
 
             <div className={styles.cardHeader}>
               <MapPin size={18} className={styles.cardIcon} />
-              <h3 className={styles.cardTitle}>Məkan</h3>
+              <h3 className={styles.cardTitle}>{t('location', 'Məkan')}</h3>
             </div>
 
             <div className={styles.inputsGrid}>
               <div className={styles.inputWrapper}>
-                <label className={styles.inputLabel}>ÖLKƏ</label>
+                <label className={styles.inputLabel}>{t('country_label', 'ÖLKƏ')}</label>
                 <input
                   type="text"
                   value={country}
                   onChange={(e) => setCountry(e.target.value)}
                   className={styles.textInput}
-                  placeholder="Ölkə daxil edin"
+                  placeholder={t('enter_country_placeholder', 'Ölkə daxil edin')}
                 />
               </div>
 
               <div className={styles.inputWrapper}>
-                <label className={styles.inputLabel}>ŞƏHƏR</label>
+                <label className={styles.inputLabel}>{t('city_label', 'ŞƏHƏR')}</label>
                 <input
                   type="text"
                   value={city}
                   onChange={(e) => setCity(e.target.value)}
                   className={styles.textInput}
-                  placeholder="Şəhər daxil edin"
+                  placeholder={t('enter_city_placeholder', 'Şəhər daxil edin')}
                 />
               </div>
             </div>
@@ -321,7 +326,7 @@ export default function PersonalInfoPage() {
                 disabled={saving}
                 className={styles.saveBtn}
               >
-                {saving ? 'Gözləyin...' : 'Yenilə'}
+                {saving ? t('please_wait', 'Gözləyin...') : t('update_btn', 'Yenilə')}
               </button>
             </div>
           </div>
@@ -338,7 +343,7 @@ export default function PersonalInfoPage() {
                   <ShieldCheck size={28} className={styles.shieldIcon} />
                 </div>
               </div>
-              <h3 className={styles.kycTitle}>KYC Statusu</h3>
+              <h3 className={styles.kycTitle}>{t('kyc_status_label', 'KYC Statusu')}</h3>
               <span className={`${styles.kycPill} ${
                 authUser?.kycStatus === 'approved' 
                   ? styles.kycApproved 
@@ -355,17 +360,17 @@ export default function PersonalInfoPage() {
 
             <div className={styles.kycDetailsList}>
               <div className={styles.kycDetailRow}>
-                <span>Sənəd Növü</span>
+                <span>{t('doc_type_label', 'Sənəd Növü')}</span>
                 <span>{DOC_TYPE_LABELS[authUser?.kycDocumentType] || '—'}</span>
               </div>
               <div className={styles.kycDetailRow}>
-                <span>Təsdiq Tarixi</span>
+                <span>{t('approval_date', 'Təsdiq Tarixi')}</span>
                 <span>{isKycApproved && authUser?.createdAt ? formatDate(authUser?.createdAt) : '—'}</span>
               </div>
               <div className={styles.kycDetailRow}>
-                <span>Risk Səviyyəsi</span>
+                <span>{t('risk_level', 'Risk Səviyyəsi')}</span>
                 <span className={isKycApproved ? styles.riskLow : styles.riskDefault}>
-                  {isKycApproved ? 'Aşağı' : '—'}
+                  {isKycApproved ? t('low', 'Aşağı') : '—'}
                 </span>
               </div>
             </div>
@@ -376,7 +381,7 @@ export default function PersonalInfoPage() {
               className={styles.supportBtn}
             >
               <Headphones size={16} />
-              Dəstək ilə Əlaqə
+              {t('contact_support', 'Dəstək ilə Əlaqə')}
             </button>
           </div>
 
@@ -386,7 +391,7 @@ export default function PersonalInfoPage() {
               <Star size={20} className={styles.starIcon} />
             </div>
             <div className={styles.packageInfo}>
-              <span className={styles.packageLabel}>Cari Paket</span>
+              <span className={styles.packageLabel}>{t('current_package', 'Cari Paket')}</span>
               <span className={styles.packageValue}>{currentPkgLabel}</span>
             </div>
           </div>
@@ -396,9 +401,10 @@ export default function PersonalInfoPage() {
       {showOtpModal && (
         <div className={styles.modalOverlay}>
           <div className={styles.modalContent}>
-            <h3 className={styles.modalTitle}>E-poçt Təsdiqi</h3>
+            <h3 className={styles.modalTitle}>{t('email_verification', 'E-poçt Təsdiqi')}</h3>
             <p className={styles.modalSubtitle}>
-              Yeni e-poçt <strong>{email}</strong> ünvanına göndərilən 6 rəqəmli təsdiq kodunu daxil edin.
+              {t('otp_desc', 'Yeni e-poçt {{email}} ünvanına göndərilən 6 rəqəmli təsdiq kodunu daxil edin.')
+                .replace('{{email}}', email)}
             </p>
 
             <div className={styles.otpInputs}>
@@ -426,7 +432,7 @@ export default function PersonalInfoPage() {
                 disabled={verifying}
                 className={styles.confirmBtn}
               >
-                {verifying ? 'Təsdiqlənir...' : 'Təsdiqlə'}
+                {verifying ? t('please_wait', 'Gözləyin...') : t('confirm', 'Təsdiqlə')}
               </button>
               <button
                 type="button"
@@ -437,7 +443,7 @@ export default function PersonalInfoPage() {
                 }}
                 className={styles.cancelBtn}
               >
-                Ləğv et
+                {t('cancel', 'Ləğv et')}
               </button>
             </div>
             <button
@@ -445,7 +451,7 @@ export default function PersonalInfoPage() {
               className={styles.resendBtn}
               onClick={handleResendOtp}
             >
-              Kodu yenidən göndər
+              {t('resend_code', 'Kodu yenidən göndər')}
             </button>
           </div>
         </div>

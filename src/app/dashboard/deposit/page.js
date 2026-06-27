@@ -10,11 +10,13 @@ import { Wallet, ArrowDown, Clock, CheckCircle2, XCircle, Copy, Upload, CreditCa
 import { formatCurrency, formatDateTime } from '@/lib/utils/formatters';
 import { validateAmount } from '@/lib/utils/validators';
 import { useAuthStore } from '@/lib/store/authStore';
+import { useTranslation } from '@/lib/store/languageStore';
 import { createDeposit, getDeposits, getSystemSetting } from '@/lib/supabase/database';
 import { supabase } from '@/lib/supabase/config';
 
 export default function DepositPage() {
   const { user: authUser } = useAuthStore();
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState('usdt'); // 'usdt' or 'card'
   const [isCardActive, setIsCardActive] = useState(false); // Enable/Disable card payment setting
   
@@ -50,7 +52,7 @@ export default function DepositPage() {
         if (activeCard) {
           setAdminCardNumber(activeCard);
         } else {
-          setAdminCardNumber('Təyin edilməyib');
+          setAdminCardNumber(t('not_set', 'Təyin edilməyib'));
         }
         setIsCardActive(cardActiveSetting === 'true');
         // Force USDT if card system is disabled
@@ -74,9 +76,9 @@ export default function DepositPage() {
   const handleCopyCard = async () => {
     try {
       await navigator.clipboard.writeText(adminCardNumber);
-      showToast('Kart nömrəsi kopyalandı!');
+      showToast(t('receipt_copied', 'Kart nömrəsi kopyalandı!'));
     } catch (err) {
-      showToast('Kopyalamaq alınmadı');
+      showToast(t('receipt_copy_fail', 'Kopyalamaq alınmadı'));
     }
   };
 
@@ -105,27 +107,27 @@ export default function DepositPage() {
       }
 
       if (!txHash.trim()) {
-        showToast('Transaction Hash daxil edin');
+        showToast(t('enter_tx_hash', 'Transaction Hash daxil edin'));
         return;
       }
 
       setLoading(true);
       try {
         await createDeposit(authUser.uid, amount, txHash, network, 'usdt');
-        showToast('Depozit sorğusu göndərildi! Admin təsdiq edəcək.');
+        showToast(t('deposit_success', 'Depozit sorğusu göndərildi! Admin təsdiq edəcək.'));
         setAmount('');
         setTxHash('');
         const data = await getDeposits(authUser.uid);
         setDeposits(data);
       } catch (err) {
-        showToast('Xəta: ' + err.message);
+        showToast(t('error_prefix', 'Xəta: ') + err.message);
       } finally {
         setLoading(false);
       }
     } else {
       // Security check if card payments were deactivated in background
       if (!isCardActive) {
-        showToast('Kart ilə ödəniş hazırda aktiv deyil.');
+        showToast(t('card_payment_inactive', 'Kart ilə ödəniş hazırda aktiv deyil.'));
         return;
       }
 
@@ -138,12 +140,12 @@ export default function DepositPage() {
 
       const formattedCard = userCardNumber.replace(/\s+/g, '');
       if (formattedCard.length !== 16 || isNaN(Number(formattedCard))) {
-        showToast('Kart nömrəsi 16 rəqəmdən ibarət olmalıdır');
+        showToast(t('card_number_16_digits', 'Kart nömrəsi 16 rəqəmdən ibarət olmalıdır'));
         return;
       }
 
       if (!receiptFile) {
-        showToast('Ödəniş qəbzi şəklini yükləyin');
+        showToast(t('upload_receipt', 'Ödəniş qəbzi şəklini yükləyin'));
         return;
       }
 
@@ -151,14 +153,14 @@ export default function DepositPage() {
       try {
         const receiptPath = await uploadReceiptFile(receiptFile);
         await createDeposit(authUser.uid, cardAmount, null, null, 'card', formattedCard, receiptPath);
-        showToast('Kart ilə depozit sorğusu göndərildi! Admin təsdiq edəcək.');
+        showToast(t('card_deposit_success', 'Kart ilə depozit sorğusu göndərildi! Admin təsdiq edəcək.'));
         setCardAmount('');
         setUserCardNumber('');
         setReceiptFile(null);
         const data = await getDeposits(authUser.uid);
         setDeposits(data);
       } catch (err) {
-        showToast('Xəta: ' + err.message);
+        showToast(t('error_prefix', 'Xəta: ') + err.message);
       } finally {
         setLoading(false);
       }
@@ -167,9 +169,9 @@ export default function DepositPage() {
 
   const getStatusBadge = (status) => {
     const map = {
-      pending: { variant: 'warning', label: 'Gözləyir' },
-      approved: { variant: 'success', label: 'Təsdiqlənib' },
-      rejected: { variant: 'error', label: 'Rədd' },
+      pending: { variant: 'warning', label: t('pending', 'Gözləyir') },
+      approved: { variant: 'success', label: t('approved', 'Təsdiqlənib') },
+      rejected: { variant: 'error', label: t('rejected', 'Rədd') },
     };
     const s = map[status] || { variant: 'info', label: status };
     return <Badge variant={s.variant} size="sm">{s.label}</Badge>;
@@ -185,7 +187,7 @@ export default function DepositPage() {
     <div className={styles.page}>
       <h2 className={styles.title}>
         <Wallet size={22} color="var(--color-primary)" />
-        Depozit
+        {t('deposit', 'Depozit')}
       </h2>
 
       {/* Payment Method Tabs (Only show if card payments are active in system_settings) */}
@@ -205,7 +207,7 @@ export default function DepositPage() {
             onClick={() => setActiveTab('card')}
           >
             <CreditCard size={16} />
-            <span>Bank Kartı (Manuel)</span>
+            <span>{t('bank_card_manual', 'Bank Kartı (Manuel)')}</span>
           </button>
         </div>
       )}
@@ -217,7 +219,7 @@ export default function DepositPage() {
           </div>
           <div>
             <strong>USDT TRC20</strong>
-            <p>Kripto vasitəsilə balansınızı artırın. Transaction hash-i daxil edin, admin təsdiq edəcək.</p>
+            <p>{t('usdt_deposit_desc', 'Kripto vasitəsilə balansınızı artırın. Transaction hash-i daxil edin, admin təsdiq edəcək.')}</p>
           </div>
         </div>
       ) : (
@@ -226,8 +228,8 @@ export default function DepositPage() {
             <CreditCard size={20} color="var(--color-primary)" />
           </div>
           <div>
-            <strong>Bank Kartı ilə Mədaxil</strong>
-            <p>Aşağıda qeyd olunan bank kartına pulu göndərib, ödəniş qəbzi şəklini və kart nömrənizi daxil edin.</p>
+            <strong>{t('bank_card_manual', 'Bank Kartı (Manuel)')}</strong>
+            <p>{t('card_deposit_desc', 'Aşağıda qeyd olunan bank kartına pulu göndərib, ödəniş qəbzi şəklini və kart nömrənizi daxil edin.')}</p>
           </div>
         </div>
       )}
@@ -236,7 +238,7 @@ export default function DepositPage() {
         {activeTab === 'usdt' ? (
           <>
             <Input
-              label="Məbləğ (USD)"
+              label={t('amount_usd', 'Məbləğ (USD)')}
               type="number"
               placeholder="100.00"
               value={amount}
@@ -246,13 +248,13 @@ export default function DepositPage() {
 
             <Input
               label="Transaction Hash"
-              placeholder="Ödəniş hash-i daxil edin"
+              placeholder={t('enter_tx_hash', 'Transaction Hash daxil edin')}
               value={txHash}
               onChange={(e) => setTxHash(e.target.value)}
             />
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-              <label style={{ fontSize: 13, color: 'var(--text-muted)', fontWeight: 500 }}>Şəbəkə</label>
+              <label style={{ fontSize: 13, color: 'var(--text-muted)', fontWeight: 500 }}>{t('network', 'Şəbəkə')}</label>
               <select
                 value={network}
                 onChange={(e) => setNetwork(e.target.value)}
@@ -267,18 +269,18 @@ export default function DepositPage() {
         ) : (
           <>
             <div className={styles.cardDisplay}>
-              <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Göndəriləcək Kart Hesabı</span>
+              <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>{t('card_display_label', 'Göndəriləcək Kart Hesabı')}</span>
               <div className={styles.cardNumRow}>
                 <span className={styles.cardNum}>{adminCardNumber}</span>
                 <button type="button" className={styles.copyBtn} onClick={handleCopyCard}>
                   <Copy size={12} />
-                  <span>Kopyala</span>
+                  <span>{t('copy', 'Kopyala')}</span>
                 </button>
               </div>
             </div>
 
             <Input
-              label="Məbləğ (USD)"
+              label={t('amount_usd', 'Məbləğ (USD)')}
               type="number"
               placeholder="100.00"
               value={cardAmount}
@@ -287,7 +289,7 @@ export default function DepositPage() {
             />
 
             <Input
-              label="Göndərən Kart Nömrəniz (16 rəqəmli)"
+              label={t('bank_card_label', 'Göndərən Kart Nömrəniz (16 rəqəmli)')}
               placeholder="1234 5678 1234 5678"
               value={userCardNumber}
               maxLength={19}
@@ -300,10 +302,10 @@ export default function DepositPage() {
             />
 
             <div className={styles.fileUploadGroup}>
-              <span className={styles.fileUploadLabel}>Ödəniş Qəbzi (Foto)</span>
+              <span className={styles.fileUploadLabel}>{t('payment_receipt_photo', 'Ödəniş Qəbzi (Foto)')}</span>
               <label className={styles.fileUploader}>
                 <Upload size={18} color="var(--color-primary)" />
-                <span>{receiptFile ? receiptFile.name : 'Qəbzin şəklini seçin...'}</span>
+                <span>{receiptFile ? receiptFile.name : t('select_receipt_file', 'Qəbzin şəklini seçin...')}</span>
                 <input
                   type="file"
                   accept="image/*"
@@ -316,16 +318,16 @@ export default function DepositPage() {
         )}
 
         <Button type="submit" fullWidth size="lg" loading={loading}>
-          Depozit Sorğusu Göndər
+          {t('send_deposit_request', 'Depozit Sorğusu Göndər')}
         </Button>
       </form>
 
       {/* Deposit History */}
-      <h3 className={styles.historyTitle}>Depozit Tarixçəsi</h3>
+      <h3 className={styles.historyTitle}>{t('deposit_history', 'Depozit Tarixçəsi')}</h3>
       {loadingHistory ? (
-        <div style={{ textAlign: 'center', padding: 20 }}>Yüklənir...</div>
+        <div style={{ textAlign: 'center', padding: 20 }}>{t('loading', 'Yüklənir...')}</div>
       ) : deposits.length === 0 ? (
-        <div className={styles.empty}>Hələ depozit yoxdur</div>
+        <div className={styles.empty}>{t('no_deposits_yet', 'Hələ depozit yoxdur')}</div>
       ) : (
         <div className={styles.historyList}>
           {deposits.map((d) => (
@@ -335,7 +337,7 @@ export default function DepositPage() {
                 <span className={styles.historyDate}>{formatDateTime(d.created_at)}</span>
                 {d.payment_method === 'card' ? (
                   <div className={styles.historyMethod}>
-                    <span>Kart: **** {d.card_number?.slice(-4)}</span>
+                    <span>{t('card_prefix', 'Kart: ****')} {d.card_number?.slice(-4)}</span>
                     {d.receipt_url && (
                       <div>
                         <button
@@ -343,7 +345,7 @@ export default function DepositPage() {
                           className={styles.viewReceiptLink}
                           onClick={() => handleViewReceipt(d.receipt_url)}
                         >
-                          Qəbzə Bax
+                          {t('view_receipt', 'Qəbzə Bax')}
                         </button>
                       </div>
                     )}
@@ -362,7 +364,7 @@ export default function DepositPage() {
       <Modal
         isOpen={!!viewerReceiptUrl}
         onClose={() => setViewerReceiptUrl(null)}
-        title="Depozit Ödəniş Qəbzi"
+        title={t('deposit_receipt_title', 'Depozit Ödəniş Qəbzi')}
         size="md"
       >
         {viewerReceiptUrl && (
@@ -373,7 +375,7 @@ export default function DepositPage() {
               style={{ maxWidth: '100%', maxHeight: '400px', borderRadius: 8, objectFit: 'contain', border: '1px solid var(--border-color)' }}
             />
             <Button onClick={() => window.open(viewerReceiptUrl, '_blank')}>
-              Tam Ekran Bax
+              {t('view_full_screen', 'Tam Ekran Bax')}
             </Button>
           </div>
         )}

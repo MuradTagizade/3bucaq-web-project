@@ -5,31 +5,29 @@
 import { create } from 'zustand';
 
 export const useThemeStore = create((set) => ({
-  theme: 'dark', // default to dark
+  theme: 'dark',
   
   setTheme: (theme) => {
     if (typeof window !== 'undefined') {
-      localStorage.setItem('theme', theme);
-      document.documentElement.setAttribute('data-theme', theme);
+      localStorage.setItem('theme', 'dark');
+      document.documentElement.setAttribute('data-theme', 'dark');
     }
-    set({ theme });
+    set({ theme: 'dark' });
   },
   
   toggleTheme: () => {
-    const current = useThemeStore.getState().theme;
-    const next = current === 'dark' ? 'light' : 'dark';
     if (typeof window !== 'undefined') {
-      localStorage.setItem('theme', next);
-      document.documentElement.setAttribute('data-theme', next);
+      localStorage.setItem('theme', 'dark');
+      document.documentElement.setAttribute('data-theme', 'dark');
     }
-    set({ theme: next });
+    set({ theme: 'dark' });
   },
   
   initTheme: () => {
     if (typeof window !== 'undefined') {
-      const savedTheme = localStorage.getItem('theme') || 'dark';
-      document.documentElement.setAttribute('data-theme', savedTheme);
-      set({ theme: savedTheme });
+      localStorage.setItem('theme', 'dark');
+      document.documentElement.setAttribute('data-theme', 'dark');
+      set({ theme: 'dark' });
     }
   }
 }));

@@ -3,19 +3,51 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--gradient-hero);
+  background: var(--bg-primary);
   position: relative;
   overflow: hidden;
 }
 
+.topBar {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  z-index: 10;
+  display: flex;
+  gap: 12px;
+}
+
+/* Neon space grid */
 .bgGrid {
   position: fixed;
   inset: 0;
   background-image:
-    linear-gradient(rgba(0, 230, 118, 0.02) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0, 230, 118, 0.02) 1px, transparent 1px);
-  background-size: 40px 40px;
+    linear-gradient(rgba(0, 240, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 240, 255, 0.03) 1px, transparent 1px);
+  background-size: 50px 50px;
   pointer-events: none;
+  z-index: 0;
+  perspective: 1000px;
+  transform: rotateX(60deg) translateY(-100px) scale(2.5);
+  transform-origin: top;
+  animation: gridMove 20s linear infinite;
+}
+
+@keyframes gridMove {
+  0% { background-position: 0 0; }
+  100% { background-position: 0 50px; }
+}
+
+.bgGlow {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(circle, rgba(176, 38, 255, 0.15) 0%, transparent 60%);
+  pointer-events: none;
+  z-index: 0;
 }
 
 .container {
@@ -28,31 +60,44 @@
 
 .card {
   background: var(--bg-card);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid var(--border-subtle);
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  border: 1px solid var(--border-default);
   border-radius: var(--radius-xl);
   padding: var(--space-2xl) var(--space-xl);
-  box-shadow: var(--shadow-xl);
-  animation: fadeInUp 500ms ease-out;
+  box-shadow: 0 0 50px rgba(0, 255, 163, 0.05), var(--shadow-xl);
+  animation: scaleIn 500ms cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+  overflow: hidden;
 }
 
-@keyframes fadeInUp {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
+.card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; height: 2px;
+  background: var(--gradient-primary);
+  box-shadow: 0 0 15px var(--color-primary-glow);
+}
+
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.95) translateY(20px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
 }
 
 .logoLink {
   display: flex;
   justify-content: center;
   margin-bottom: var(--space-lg);
+  filter: drop-shadow(0 0 10px rgba(0,255,163,0.3));
 }
 
 .title {
   text-align: center;
   font-size: var(--text-2xl);
-  font-weight: 800;
+  font-weight: 900;
   margin-bottom: var(--space-xs);
+  color: var(--text-primary);
+  letter-spacing: -0.02em;
 }
 
 .subtitle {
@@ -70,17 +115,18 @@
 
 .errorBox {
   padding: var(--space-sm) var(--space-md);
-  background: rgba(255, 82, 82, 0.08);
-  border: 1px solid rgba(255, 82, 82, 0.2);
+  background: rgba(255, 42, 95, 0.1);
+  border: 1px solid rgba(255, 42, 95, 0.3);
   border-radius: var(--radius-sm);
   color: var(--color-error);
   font-size: var(--text-sm);
   text-align: center;
+  box-shadow: 0 0 15px rgba(255, 42, 95, 0.15);
 }
 
 .errorBox span {
-  font-weight: 800;
-  letter-spacing: 0.1em;
+  font-weight: 700;
+  letter-spacing: 0.02em;
 }
 
 .links {
@@ -93,16 +139,18 @@
 
 .link {
   font-size: var(--text-sm);
-  color: var(--text-muted);
-  transition: color var(--transition-fast);
+  color: var(--color-secondary);
+  font-weight: 600;
+  transition: all var(--transition-fast);
 }
 
 .link:hover {
-  color: var(--color-primary);
+  color: #fff;
+  text-shadow: 0 0 10px var(--color-secondary-glow);
 }
 
 .divider {
-  color: var(--text-muted);
+  color: var(--border-default);
   font-size: var(--text-xs);
 }
 
@@ -120,4 +168,95 @@
 
 .phoneInput {
   flex: 1;
+}
+
+/* Common form styles for register/forgot-password/verify */
+.formText {
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  text-align: center;
+  margin-bottom: var(--space-md);
+  line-height: 1.5;
+}
+
+.pinContainer {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-md);
+}
+
+.pinInput {
+  width: 48px;
+  height: 56px;
+  border-radius: var(--radius-sm);
+  background: var(--bg-glass);
+  border: 1px solid var(--border-default);
+  font-size: var(--text-xl);
+  font-weight: 800;
+  text-align: center;
+  color: var(--text-primary);
+  transition: all var(--transition-fast);
+}
+
+.pinInput:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 15px rgba(0, 255, 163, 0.2);
+  background: var(--bg-input-focus);
+}
+
+.resendBtn {
+  margin-top: var(--space-sm);
+  font-size: var(--text-sm);
+  color: var(--color-primary);
+  font-weight: 600;
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  margin-left: auto;
+  margin-right: auto;
+  transition: all var(--transition-fast);
+}
+
+.resendBtn:hover:not(:disabled) {
+  text-shadow: 0 0 10px var(--color-primary-glow);
+}
+
+.resendBtn:disabled {
+  color: var(--text-muted);
+  cursor: not-allowed;
+}
+
+.backLink {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-xs);
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+  margin-top: var(--space-xl);
+  transition: all var(--transition-fast);
+}
+
+.backLink:hover {
+  color: var(--color-secondary);
+  text-shadow: 0 0 10px var(--color-secondary-glow);
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 480px) {
+  .card {
+    padding: var(--space-lg) var(--space-md);
+  }
+  
+  .title {
+    font-size: var(--text-xl);
+  }
+  
+  .pinInput {
+    width: 40px;
+    height: 48px;
+    font-size: var(--text-lg);
+  }
 }

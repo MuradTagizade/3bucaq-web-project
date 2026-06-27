@@ -10,6 +10,7 @@ import Pagination from '@/components/ui/Pagination';
 import { ScrollText, Search, Calendar, User, Eye, X, Filter } from 'lucide-react';
 import { getAdminLogs } from '@/lib/supabase/database';
 import { formatDateTime } from '@/lib/utils/formatters';
+import { useTranslation } from '@/lib/store/languageStore';
 
 const ACTION_LABELS = {
   approve_withdrawal: { label: 'Çıxarış Təsdiq', variant: 'success' },
@@ -35,6 +36,7 @@ const ACTION_LABELS = {
 const PER_PAGE = 15;
 
 export default function AdminLogsPage() {
+  const { t } = useTranslation();
   const [logs, setLogs] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -62,6 +64,11 @@ export default function AdminLogsPage() {
     }
     loadLogs();
   }, []);
+
+  const getActionLabel = (actionKey) => {
+    const trans = t('action_labels', {});
+    return trans[actionKey] || ACTION_LABELS[actionKey]?.label || actionKey;
+  };
 
   // Compute unique admins and actions from data for filtering
   const uniqueAdmins = Array.from(
@@ -93,7 +100,7 @@ export default function AdminLogsPage() {
       const adminEmailMatch = log.admin?.email?.toLowerCase().includes(query);
       const targetLoginMatch = log.target?.display_login?.toLowerCase().includes(query);
       const targetEmailMatch = log.target?.email?.toLowerCase().includes(query);
-      const actionLabelMatch = (ACTION_LABELS[log.action]?.label || log.action)
+      const actionLabelMatch = getActionLabel(log.action)
         ?.toLowerCase()
         .includes(query);
 
@@ -159,20 +166,22 @@ export default function AdminLogsPage() {
   if (loading) {
     return (
       <div style={{ textAlign: 'center', padding: '60px 0' }}>
-        <span className={lStyles.loadingText}>Yüklənir...</span>
+        <span className={lStyles.loadingText}>{t('loading', 'Yüklənir...')}</span>
       </div>
     );
   }
+
+  const logsTableHeader = t('logs_table_header', {});
 
   return (
     <div>
       <div className={lStyles.titleRow}>
         <h1 className={styles.pageTitle}>
           <ScrollText size={24} style={{ display: 'inline', verticalAlign: 'middle', marginRight: 10 }} />
-          Admin Logları
+          {t('admin_logs_title', 'Admin Logları')}
         </h1>
         <Badge variant="info" size="md">
-          {filteredLogs.length} Log tapıldı
+          {t('logs_found_count', '{{count}} Log tapıldı').replace('{{count}}', filteredLogs.length)}
         </Badge>
       </div>
 
@@ -181,12 +190,12 @@ export default function AdminLogsPage() {
         <div className={lStyles.filterHeader}>
           <div className={lStyles.filterTitle}>
             <Filter size={16} />
-            <span>Filtrləmə və Axtarış</span>
+            <span>{t('filter_search_title', 'Filtrləmə və Axtarış')}</span>
           </div>
           {isFilterActive && (
             <button className={lStyles.resetBtn} onClick={handleResetFilters}>
               <X size={14} />
-              <span>Sıfırla</span>
+              <span>{t('reset', 'Sıfırla')}</span>
             </button>
           )}
         </div>
@@ -194,12 +203,12 @@ export default function AdminLogsPage() {
         <div className={lStyles.filterGrid}>
           {/* Text Search */}
           <div className={lStyles.filterGroup}>
-            <label className={lStyles.filterLabel}>Axtarış</label>
+            <label className={lStyles.filterLabel}>{t('search', 'Axtarış')}</label>
             <div className={lStyles.inputWrapper}>
               <Search size={16} className={lStyles.inputIcon} />
               <input
                 type="text"
-                placeholder="Admin, hədəf və ya detal..."
+                placeholder={t('search_placeholder_logs', 'Admin, hədəf və ya detal...')}
                 value={search}
                 onChange={(e) => {
                   setSearch(e.target.value);
@@ -212,7 +221,7 @@ export default function AdminLogsPage() {
 
           {/* Action Filter */}
           <div className={lStyles.filterGroup}>
-            <label className={lStyles.filterLabel}>Əməliyyat Növü</label>
+            <label className={lStyles.filterLabel}>{t('tx_type', 'Əməliyyat Növü')}</label>
             <select
               value={selectedAction}
               onChange={(e) => {
@@ -221,10 +230,10 @@ export default function AdminLogsPage() {
               }}
               className={lStyles.filterSelect}
             >
-              <option value="">Hamısı</option>
+              <option value="">{t('all', 'Hamısı')}</option>
               {uniqueActions.map((act) => (
                 <option key={act} value={act}>
-                  {ACTION_LABELS[act]?.label || act}
+                  {getActionLabel(act)}
                 </option>
               ))}
             </select>
@@ -232,7 +241,7 @@ export default function AdminLogsPage() {
 
           {/* Admin Filter */}
           <div className={lStyles.filterGroup}>
-            <label className={lStyles.filterLabel}>Həyata Keçirən Admin</label>
+            <label className={lStyles.filterLabel}>{t('admin_filter_label', 'Həyata Keçirən Admin')}</label>
             <select
               value={selectedAdmin}
               onChange={(e) => {
@@ -241,7 +250,7 @@ export default function AdminLogsPage() {
               }}
               className={lStyles.filterSelect}
             >
-              <option value="">Hamısı</option>
+              <option value="">{t('all', 'Hamısı')}</option>
               {uniqueAdmins.map((adm) => (
                 <option key={adm} value={adm}>
                   {adm}
@@ -252,7 +261,7 @@ export default function AdminLogsPage() {
 
           {/* Date Range - From */}
           <div className={lStyles.filterGroup}>
-            <label className={lStyles.filterLabel}>Başlanğıc Tarixi</label>
+            <label className={lStyles.filterLabel}>{t('date_from_label', 'Başlanğıc Tarixi')}</label>
             <div className={lStyles.inputWrapper}>
               <Calendar size={16} className={lStyles.inputIcon} />
               <input
@@ -269,7 +278,7 @@ export default function AdminLogsPage() {
 
           {/* Date Range - To */}
           <div className={lStyles.filterGroup}>
-            <label className={lStyles.filterLabel}>Bitiş Tarixi</label>
+            <label className={lStyles.filterLabel}>{t('date_to_label', 'Bitiş Tarixi')}</label>
             <div className={lStyles.inputWrapper}>
               <Calendar size={16} className={lStyles.inputIcon} />
               <input
@@ -292,27 +301,25 @@ export default function AdminLogsPage() {
           <table className={lStyles.logsTable}>
             <thead>
               <tr>
-                <th>Tarix</th>
-                <th>Admin</th>
-                <th>Əməliyyat</th>
-                <th>Hədəf İstifadəçi</th>
-                <th>Detallar</th>
-                <th className={lStyles.centerAlign}>Bax</th>
+                <th>{logsTableHeader.date || 'Tarix'}</th>
+                <th>{logsTableHeader.admin || 'Admin'}</th>
+                <th>{logsTableHeader.action || 'Əməliyyat'}</th>
+                <th>{logsTableHeader.target || 'Hədəf İstifadəçi'}</th>
+                <th>{logsTableHeader.details || 'Detallar'}</th>
+                <th className={lStyles.centerAlign}>{logsTableHeader.view || 'Bax'}</th>
               </tr>
             </thead>
             <tbody>
               {paginatedLogs.length === 0 ? (
                 <tr>
                   <td colSpan="6" className={lStyles.noLogs}>
-                    Uyğun log tapılmadı
+                    {t('no_logs_found', 'Uyğun log tapılmadı')}
                   </td>
                 </tr>
               ) : (
                 paginatedLogs.map((log) => {
-                  const action = ACTION_LABELS[log.action] || {
-                    label: log.action,
-                    variant: 'default',
-                  };
+                  const actionLabel = getActionLabel(log.action);
+                  const actionVariant = ACTION_LABELS[log.action]?.variant || 'default';
                   return (
                     <tr key={log.id} className={lStyles.tableRow}>
                       <td className={lStyles.dateCell}>
@@ -325,7 +332,7 @@ export default function AdminLogsPage() {
                           </div>
                           <div className={lStyles.userInfo}>
                             <span className={lStyles.userLogin}>
-                              {log.admin?.display_login || 'Sistem'}
+                              {log.admin?.display_login || t('system', 'Sistem')}
                             </span>
                             {log.admin?.email && (
                               <span className={lStyles.userEmail}>
@@ -336,8 +343,8 @@ export default function AdminLogsPage() {
                         </div>
                       </td>
                       <td>
-                        <Badge variant={action.variant} size="sm">
-                          {action.label}
+                        <Badge variant={actionVariant} size="sm">
+                          {actionLabel}
                         </Badge>
                       </td>
                       <td className={lStyles.userCell}>
@@ -372,7 +379,7 @@ export default function AdminLogsPage() {
                         <button
                           className={lStyles.viewButton}
                           onClick={() => setSelectedLog(log)}
-                          title="Ətraflı Bax"
+                          title={t('view', 'Bax')}
                         >
                           <Eye size={16} />
                         </button>
@@ -391,7 +398,7 @@ export default function AdminLogsPage() {
         <Pagination
           currentPage={currentPage}
           totalPages={totalPages}
-          onPageChange={setSelectedLog ? setCurrentPage : undefined}
+          onPageChange={setCurrentPage}
         />
       )}
 
@@ -399,27 +406,27 @@ export default function AdminLogsPage() {
       <Modal
         isOpen={!!selectedLog}
         onClose={() => setSelectedLog(null)}
-        title="Log Əməliyyat Detalları"
+        title={t('log_details_title', 'Log Əməliyyat Detalları')}
         size="md"
       >
         {selectedLog && (
           <div className={lStyles.modalContent}>
             <div className={lStyles.modalGrid}>
               <div className={lStyles.modalItem}>
-                <span className={lStyles.modalLabel}>Tarix:</span>
+                <span className={lStyles.modalLabel}>{t('date', 'Tarix')}:</span>
                 <span className={lStyles.modalValue}>
                   {formatDateTime(selectedLog.created_at)}
                 </span>
               </div>
               <div className={lStyles.modalItem}>
-                <span className={lStyles.modalLabel}>Həyata keçirən:</span>
+                <span className={lStyles.modalLabel}>{t('performed_by', 'Həyata keçirən:')}</span>
                 <span className={lStyles.modalValue}>
-                  {selectedLog.admin?.display_login || 'Sistem'}{' '}
+                  {selectedLog.admin?.display_login || t('system', 'Sistem')}{' '}
                   {selectedLog.admin?.email ? `(${selectedLog.admin.email})` : ''}
                 </span>
               </div>
               <div className={lStyles.modalItem}>
-                <span className={lStyles.modalLabel}>Əməliyyat:</span>
+                <span className={lStyles.modalLabel}>{t('action', 'Əməliyyat')}:</span>
                 <span>
                   <Badge
                     variant={
@@ -427,12 +434,12 @@ export default function AdminLogsPage() {
                     }
                     size="sm"
                   >
-                    {ACTION_LABELS[selectedLog.action]?.label || selectedLog.action}
+                    {getActionLabel(selectedLog.action)}
                   </Badge>
                 </span>
               </div>
               <div className={lStyles.modalItem}>
-                <span className={lStyles.modalLabel}>Hədəf istifadəçi:</span>
+                <span className={lStyles.modalLabel}>{(logsTableHeader.target || 'Hədəf istifadəçi')}:</span>
                 <span className={lStyles.modalValue}>
                   {selectedLog.target
                     ? `${selectedLog.target.display_login} (${selectedLog.target.email})`
@@ -444,14 +451,14 @@ export default function AdminLogsPage() {
             </div>
 
             <div className={lStyles.modalDetailsWrapper}>
-              <span className={lStyles.modalLabel}>Açıqlama / Detallar:</span>
+              <span className={lStyles.modalLabel}>{t('description_details', 'Açıqlama / Detallar:')}</span>
               <div className={lStyles.detailsContent}>
                 {renderLogDetails(selectedLog.details)}
               </div>
             </div>
 
             <div className={lStyles.modalActions}>
-              <Button onClick={() => setSelectedLog(null)}>Bağla</Button>
+              <Button onClick={() => setSelectedLog(null)}>{t('close', 'Bağla')}</Button>
             </div>
           </div>
         )}

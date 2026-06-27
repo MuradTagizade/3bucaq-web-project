@@ -1,17 +1,70 @@
 .spinner {
+  width: 24px;
+  height: 24px;
   border: 3px solid var(--border-subtle);
   border-top-color: var(--color-primary);
   border-radius: 50%;
-  animation: spin 0.7s linear infinite;
+  animation: spin 0.8s linear infinite;
+  display: inline-block;
+}
+
+.spinner--sm {
+  width: 16px;
+  height: 16px;
+  border-width: 2px;
+}
+
+.spinner--md {
+  width: 24px;
+  height: 24px;
+  border-width: 3px;
+}
+
+.spinner--lg {
+  width: 36px;
+  height: 36px;
+  border-width: 3px;
 }
 
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
 
+/* iOS Activity Indicator style option */
+.spinner--ios {
+  border: none;
+  border-radius: 0;
+  width: 20px;
+  height: 20px;
+  position: relative;
+  animation: iosSpin 1s steps(8, end) infinite;
+}
+
+.spinner--ios::before,
+.spinner--ios::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: calc(50% - 1px);
+  width: 2px;
+  height: 100%;
+  border-radius: 2px;
+  background: transparent;
+  box-shadow: 0 4px 0 var(--text-muted), 0 -4px 0 var(--text-muted);
+}
+
+.spinner--ios::after {
+  transform: rotate(45deg);
+}
+
+@keyframes iosSpin {
+  100% { transform: rotate(360deg); }
+}
+
 .pageSpinner {
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 60vh;
+  min-height: 200px;
+  width: 100%;
 }

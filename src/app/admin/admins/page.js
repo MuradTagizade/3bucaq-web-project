@@ -10,6 +10,7 @@ import Modal from '@/components/ui/Modal';
 import Toggle from '@/components/ui/Toggle';
 import Spinner from '@/components/ui/Spinner';
 import { useAuthStore } from '@/lib/store/authStore';
+import { useTranslation } from '@/lib/store/languageStore';
 import { 
   getAdmins, 
   getUsers, 
@@ -40,6 +41,7 @@ const PERMISSION_LABELS = {
 
 export default function AdminsPage() {
   const { user: superAdminUser } = useAuthStore();
+  const { t } = useTranslation();
   const [admins, setAdmins] = useState([]);
   const [allUsers, setAllUsers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -99,7 +101,7 @@ export default function AdminsPage() {
       setAdmins(adminList);
       setAllUsers(userList);
     } catch (err) {
-      showToast('Yükləmə xətası: ' + err.message);
+      showToast(t('loading_error', 'Yükləmə xətası: ') + err.message);
     } finally {
       setLoading(false);
     }
@@ -182,10 +184,10 @@ export default function AdminsPage() {
 
         const resData = await res.json();
         if (!res.ok) {
-          throw new Error(resData.error || 'Sub-admin yaradılarkən xəta baş verdi');
+          throw new Error(resData.error || t('subadmin_create_err', 'Sub-admin yaradılarkən xəta baş verdi'));
         }
 
-        showToast('Yeni sub-admin uğurla yaradıldı');
+        showToast(t('subadmin_created_success', 'Yeni sub-admin uğurla yaradıldı'));
         setNewAdminForm({
           fullName: '',
           login: '',
@@ -197,7 +199,7 @@ export default function AdminsPage() {
         });
       } else {
         if (!selectedUser) {
-          showToast('Zəhmət olmasa istifadəçi seçin');
+          showToast(t('select_user_please', 'Zəhmət olmasa istifadəçi seçin'));
           setActionLoading(false);
           return;
         }
@@ -216,7 +218,7 @@ export default function AdminsPage() {
           `Promoted user to admin. Permissions: ${JSON.stringify(newUserPerms)}`
         );
         
-        showToast('Admin uğurla əlavə edildi');
+        showToast(t('promoted_to_admin_msg', 'Admin uğurla əlavə edildi'));
         setSelectedUser(null);
         setUserSearch('');
       }
@@ -232,7 +234,7 @@ export default function AdminsPage() {
       });
       await loadData();
     } catch (err) {
-      showToast('Xəta: ' + err.message);
+      showToast(t('error_prefix', 'Xəta: ') + err.message);
     } finally {
       setActionLoading(false);
     }
@@ -254,12 +256,12 @@ export default function AdminsPage() {
         `Updated admin permissions to: ${JSON.stringify(adminPerms)}`
       );
 
-      showToast('Admin icazələri yeniləndi');
+      showToast(t('admin_perms_updated', 'Admin icazələri yeniləndi'));
       setEditModal(false);
       setSelectedAdmin(null);
       await loadData();
     } catch (err) {
-      showToast('Xəta: ' + err.message);
+      showToast(t('error_prefix', 'Xəta: ') + err.message);
     } finally {
       setActionLoading(false);
     }
@@ -268,10 +270,10 @@ export default function AdminsPage() {
   const handleRemoveAdmin = async () => {
     if (!selectedAdmin) return;
     if (selectedAdmin.email === 'admin@3bucaq.com') {
-      showToast('Əsas adminin səlahiyyətlərini almaq olmaz!');
+      showToast(t('cannot_demote_main_admin', 'Əsas adminin səlahiyyətlərini almaq olmaz!'));
       return;
     }
-    if (confirm(`Bu admini (${selectedAdmin.display_login}) normal istifadəçi statusuna qaytarmaq istədiyinizdən əminsiniz?`)) {
+    if (confirm(t('demote_confirm_msg', 'Bu admini ({{user}}) normal istifadəçi statusuna qaytarmaq istədiyinizdən əminsiniz?').replace('{{user}}', selectedAdmin.display_login))) {
       setActionLoading(true);
       try {
         // Demote role to user
@@ -288,12 +290,12 @@ export default function AdminsPage() {
           `Demoted admin ${selectedAdmin.display_login} back to regular user.`
         );
 
-        showToast('Admin silindi');
+        showToast(t('demoted_success_msg', 'Admin silindi'));
         setEditModal(false);
         setSelectedAdmin(null);
         await loadData();
       } catch (err) {
-        showToast('Xəta: ' + err.message);
+        showToast(t('error_prefix', 'Xəta: ') + err.message);
       } finally {
         setActionLoading(false);
       }
@@ -327,29 +329,36 @@ export default function AdminsPage() {
         (u.email || '').toLowerCase().includes(userSearch.toLowerCase()))
   );
 
+  const getPermissionLabel = (key) => {
+    const trans = t('permission_labels', {});
+    return trans[key] || PERMISSION_LABELS[key] || key;
+  };
+
   if (loading) {
     return (
       <div className={styles.loadingWrapper}>
         <Spinner size="lg" />
-        <span>Yüklənir...</span>
+        <span>{t('loading', 'Yüklənir...')}</span>
       </div>
     );
   }
+
+  const tableHeader = t('admins_table_header', {});
 
   return (
     <div className={styles.adminsPage}>
       {toast && <div className={styles.toast}>{toast}</div>}
 
       <div className={uStyles.topRow}>
-        <h1 className={styles.pageTitle}>Admin Heyəti</h1>
+        <h1 className={styles.pageTitle}>{t('admin_staff_title', 'Admin Heyəti')}</h1>
         <Button onClick={() => setAddModal(true)} size="sm">
-          <Plus size={16} /> Admin Əlavə Et
+          <Plus size={16} /> {t('add_admin_btn', 'Admin Əlavə Et')}
         </Button>
       </div>
 
       <div className={uStyles.searchBar}>
         <Input
-          placeholder="Admin axtar (Login və ya Email)..."
+          placeholder={t('search_admins_placeholder', 'Admin axtar (Login və ya Email)...')}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           icon={<Search size={18} />}
@@ -359,14 +368,14 @@ export default function AdminsPage() {
       {/* Admin List */}
       <div className={styles.table}>
         <div className={styles.tableHeader}>
-          <span>Login / Ad</span>
-          <span>Səlahiyyətlər</span>
-          <span>Status</span>
-          <span style={{ textAlign: 'right' }}>Düzəliş</span>
+          <span>{tableHeader.name || 'Login / Ad'}</span>
+          <span>{tableHeader.perms || 'Səlahiyyətlər'}</span>
+          <span>{tableHeader.status || 'Status'}</span>
+          <span style={{ textAlign: 'right' }}>{tableHeader.edit || 'Düzəliş'}</span>
         </div>
         {filteredAdmins.length === 0 ? (
           <div style={{ padding: 20, textAlign: 'center', color: 'var(--text-muted)' }}>
-            Admin tapılmadı
+            {t('no_admins_found', 'Admin tapılmadı')}
           </div>
         ) : (
           filteredAdmins.map((admin) => {
@@ -380,30 +389,30 @@ export default function AdminsPage() {
                 </div>
                 <div className={styles.permsList}>
                   {isSuper ? (
-                    <Badge variant="gold" size="sm">Full SuperAdmin</Badge>
+                    <Badge variant="gold" size="sm">{t('superadmin_role', 'Full SuperAdmin')}</Badge>
                   ) : (
                     <>
-                      {perms.users && <Badge variant="info" size="sm">İstifadəçilər</Badge>}
-                      {perms.kyc && <Badge variant="success" size="sm">KYC</Badge>}
-                      {perms.claims && <Badge variant="warning" size="sm">Claims</Badge>}
-                      {perms.finance && <Badge variant="primary" size="sm">Maliyyə</Badge>}
-                      {perms.logs && <Badge variant="neutral" size="sm">Loglar</Badge>}
+                      {perms.users && <Badge variant="info" size="sm">{t('users', 'İstifadəçilər')}</Badge>}
+                      {perms.kyc && <Badge variant="success" size="sm">{t('kyc', 'KYC')}</Badge>}
+                      {perms.claims && <Badge variant="warning" size="sm">{t('claims', 'Claims')}</Badge>}
+                      {perms.finance && <Badge variant="primary" size="sm">{t('finance', 'Maliyyə')}</Badge>}
+                      {perms.logs && <Badge variant="neutral" size="sm">{t('logs', 'Loglar')}</Badge>}
                     </>
                   )}
                   {Object.keys(perms).filter(k => perms[k] === true).length === 0 && (
-                    <Badge variant="error" size="sm">Səlahiyyətsiz</Badge>
+                    <Badge variant="error" size="sm">{t('no_permissions', 'Səlahiyyətsiz')}</Badge>
                   )}
                 </div>
                 <div>
                   <Badge variant={admin.is_blocked ? 'error' : 'success'} size="sm">
-                    {admin.is_blocked ? 'Blok' : 'Aktiv'}
+                    {admin.is_blocked ? t('blocked', 'Blok') : t('active', 'Aktiv')}
                   </Badge>
                 </div>
                 <div style={{ textAlign: 'right' }}>
                   <button 
                     onClick={() => openEditModal(admin)} 
                     className={styles.actionBtn}
-                    title="İcazələri redaktə et"
+                    title={t('edit_permissions', 'İcazələri redaktə et')}
                   >
                     <Edit2 size={16} />
                   </button>
@@ -415,7 +424,7 @@ export default function AdminsPage() {
       </div>
 
       {/* MODAL: ADD ADMIN */}
-      <Modal isOpen={addModal} onClose={() => setAddModal(false)} title="Yeni Admin Təyin Et" size="xl">
+      <Modal isOpen={addModal} onClose={() => setAddModal(false)} title={t('add_admin_title', 'Yeni Admin Təyin Et')} size="xl">
         <form onSubmit={handleAddAdminSubmit} className={styles.modalForm}>
           <div className={styles.tabs}>
             <button
@@ -423,14 +432,14 @@ export default function AdminsPage() {
               className={`${styles.tabBtn} ${activeTab === 'create' ? styles.tabActive : ''}`}
               onClick={() => setActiveTab('create')}
             >
-              Yeni Hesab Yarat
+              {t('new_account_tab', 'Yeni Hesab Yarat')}
             </button>
             <button
               type="button"
               className={`${styles.tabBtn} ${activeTab === 'select' ? styles.tabActive : ''}`}
               onClick={() => setActiveTab('select')}
             >
-              Mövcud İstifadəçini Seç
+              {t('select_existing_tab', 'Mövcud İstifadəçini Seç')}
             </button>
           </div>
 
@@ -438,52 +447,52 @@ export default function AdminsPage() {
             <div className={styles.createFormContainer}>
               <div className={styles.formGrid}>
                 <Input
-                  label="Ad Soyad"
-                  placeholder="Ad Soyad daxil edin..."
+                  label={t('fullname', 'Ad Soyad')}
+                  placeholder={t('fullname_placeholder', 'Ad Soyad daxil edin...')}
                   value={newAdminForm.fullName}
                   onChange={(e) => setNewAdminForm(prev => ({ ...prev, fullName: e.target.value }))}
                   error={formErrors.fullName}
                 />
                 <Input
-                  label="Login (İstifadəçi adı)"
-                  placeholder="Login..."
+                  label={t('login_label', 'Login (İstifadəçi adı)')}
+                  placeholder={t('login_placeholder', 'Login...')}
                   value={newAdminForm.login}
                   onChange={(e) => setNewAdminForm(prev => ({ ...prev, login: e.target.value }))}
                   error={formErrors.login}
                 />
                 <Input
-                  label="Email"
-                  placeholder="Email..."
+                  label={t('email', 'Email')}
+                  placeholder={t('email_placeholder', 'Email...')}
                   type="email"
                   value={newAdminForm.email}
                   onChange={(e) => setNewAdminForm(prev => ({ ...prev, email: e.target.value }))}
                   error={formErrors.email}
                 />
                 <Input
-                  label="Şifrə"
-                  placeholder="Şifrə..."
+                  label={t('password', 'Şifrə')}
+                  placeholder={t('password_placeholder', 'Şifrə...')}
                   type="password"
                   value={newAdminForm.password}
                   onChange={(e) => setNewAdminForm(prev => ({ ...prev, password: e.target.value }))}
                   error={formErrors.password}
                 />
                 <Input
-                  label="Telefon"
-                  placeholder="+994..."
+                  label={t('phone', 'Telefon')}
+                  placeholder={t('phone_placeholder', '+994...')}
                   value={newAdminForm.phone}
                   onChange={(e) => setNewAdminForm(prev => ({ ...prev, phone: e.target.value }))}
                   error={formErrors.phone}
                 />
                 <Input
-                  label="Ölkə"
-                  placeholder="Azərbaycan"
+                  label={t('country', 'Ölkə')}
+                  placeholder={t('country_placeholder', 'Azərbaycan')}
                   value={newAdminForm.country}
                   onChange={(e) => setNewAdminForm(prev => ({ ...prev, country: e.target.value }))}
                   error={formErrors.country}
                 />
                 <Input
-                  label="Şəhər"
-                  placeholder="Bakı"
+                  label={t('city', 'Şəhər')}
+                  placeholder={t('city_placeholder', 'Bakı')}
                   value={newAdminForm.city}
                   onChange={(e) => setNewAdminForm(prev => ({ ...prev, city: e.target.value }))}
                   error={formErrors.city}
@@ -491,10 +500,10 @@ export default function AdminsPage() {
               </div>
 
               <div className={styles.permissionsGrid} style={{ marginTop: 'var(--space-md)' }}>
-                <h3 className={styles.modalSubtitle}>Səlahiyyətlər</h3>
+                <h3 className={styles.modalSubtitle}>{tableHeader.perms || 'Səlahiyyətlər'}</h3>
                 {Object.keys(PERMISSION_LABELS).map((key) => (
                   <div key={key} className={styles.permRow}>
-                    <span className={styles.permLabel}>{PERMISSION_LABELS[key]}</span>
+                    <span className={styles.permLabel}>{getPermissionLabel(key)}</span>
                     <Toggle
                       checked={newUserPerms[key]}
                       onChange={(e) => handleTogglePerm(key, e.target.checked, true)}
@@ -508,8 +517,8 @@ export default function AdminsPage() {
               {!selectedUser ? (
                 <div className={styles.searchSection}>
                   <Input
-                    label="İstifadəçi Axtar"
-                    placeholder="Login və ya email ilə axtar..."
+                    label={t('search_users_btn', 'İstifadəçi Axtar')}
+                    placeholder={t('search_users_placeholder', 'Login və ya email ilə axtar...')}
                     value={userSearch}
                     onChange={(e) => setUserSearch(e.target.value)}
                     icon={<Search size={18} />}
@@ -517,7 +526,7 @@ export default function AdminsPage() {
                   <div className={styles.userListDropdown}>
                     {userSearch.length >= 2 ? (
                       searchableUsers.length === 0 ? (
-                        <div className={styles.dropdownInfo}>Uyğun istifadəçi tapılmadı</div>
+                        <div className={styles.dropdownInfo}>{t('no_users_found', 'Uyğun istifadəçi tapılmadı')}</div>
                       ) : (
                         searchableUsers.slice(0, 5).map((u) => (
                           <button
@@ -532,7 +541,7 @@ export default function AdminsPage() {
                         ))
                       )
                     ) : (
-                      <div className={styles.dropdownInfo}>Axtarmaq üçün ən azı 2 hərf yazın</div>
+                      <div className={styles.dropdownInfo}>{t('user_search_min_chars', 'Axtarmaq üçün ən azı 2 hərf yazın')}</div>
                     )}
                   </div>
                 </div>
@@ -557,10 +566,10 @@ export default function AdminsPage() {
 
               {selectedUser && (
                 <div className={styles.permissionsGrid}>
-                  <h3 className={styles.modalSubtitle}>Səlahiyyətlər</h3>
+                  <h3 className={styles.modalSubtitle}>{tableHeader.perms || 'Səlahiyyətlər'}</h3>
                   {Object.keys(PERMISSION_LABELS).map((key) => (
                     <div key={key} className={styles.permRow}>
-                      <span className={styles.permLabel}>{PERMISSION_LABELS[key]}</span>
+                      <span className={styles.permLabel}>{getPermissionLabel(key)}</span>
                       <Toggle
                         checked={newUserPerms[key]}
                         onChange={(e) => handleTogglePerm(key, e.target.checked, true)}
@@ -574,17 +583,17 @@ export default function AdminsPage() {
 
           <div className={styles.modalActions}>
             <Button type="button" variant="secondary" onClick={() => setAddModal(false)}>
-              İmtina
+              {t('cancel', 'İmtina')}
             </Button>
             <Button type="submit" loading={actionLoading} disabled={activeTab === 'select' && !selectedUser}>
-              {activeTab === 'create' ? 'Yeni Hesab Yarat və Admin Et' : 'Admin Et'}
+              {activeTab === 'create' ? t('create_and_make_admin', 'Yeni Hesab Yarat və Admin Et') : t('make_admin', 'Admin Et')}
             </Button>
           </div>
         </form>
       </Modal>
 
       {/* MODAL: EDIT ADMIN PERMISSIONS */}
-      <Modal isOpen={editModal} onClose={() => setEditModal(false)} title="Admin Səlahiyyətləri Redaktə" size="md">
+      <Modal isOpen={editModal} onClose={() => setEditModal(false)} title={t('edit_perms_title', 'Admin Səlahiyyətləri Redaktə')} size="md">
         {selectedAdmin && (
           <form onSubmit={handleEditAdminSubmit} className={styles.modalForm}>
             <div className={styles.selectedUserCard}>
@@ -596,15 +605,15 @@ export default function AdminsPage() {
                 </div>
               </div>
               {selectedAdmin.email === 'admin@3bucaq.com' && (
-                <Badge variant="gold">Əsas Super Admin</Badge>
+                <Badge variant="gold">{t('main_super_admin', 'Əsas Super Admin')}</Badge>
               )}
             </div>
 
             <div className={styles.permissionsGrid}>
-              <h3 className={styles.modalSubtitle}>Səlahiyyətlər</h3>
+              <h3 className={styles.modalSubtitle}>{tableHeader.perms || 'Səlahiyyətlər'}</h3>
               {Object.keys(PERMISSION_LABELS).map((key) => (
                 <div key={key} className={styles.permRow}>
-                  <span className={styles.permLabel}>{PERMISSION_LABELS[key]}</span>
+                  <span className={styles.permLabel}>{getPermissionLabel(key)}</span>
                   <Toggle
                     checked={adminPerms[key]}
                     onChange={(e) => handleTogglePerm(key, e.target.checked, false)}
@@ -617,17 +626,17 @@ export default function AdminsPage() {
             <div className={styles.modalActionsBetween}>
               {selectedAdmin.email !== 'admin@3bucaq.com' ? (
                 <Button type="button" variant="danger" onClick={handleRemoveAdmin} loading={actionLoading}>
-                  Adminlikdən Çıxar
+                  {t('demote_admin_btn', 'Adminlikdən Çıxar')}
                 </Button>
               ) : (
                 <div />
               )}
               <div className={styles.rightButtons}>
                 <Button type="button" variant="secondary" onClick={() => setEditModal(false)}>
-                  İmtina
+                  {t('cancel', 'İmtina')}
                 </Button>
                 <Button type="submit" loading={actionLoading} disabled={selectedAdmin.email === 'admin@3bucaq.com'}>
-                  Yadda Saxla
+                  {t('save_btn', 'Yadda Saxla')}
                 </Button>
               </div>
             </div>

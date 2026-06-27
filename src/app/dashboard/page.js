@@ -253,7 +253,7 @@ export default function DashboardPage() {
                     onClick={() => handleReceiveClick(level)}
                     disabled={!status.isReady}
                   >
-                    {status.isReady ? 'Receive' : t('locked', 'Kilidli')}
+                    {status.isReady ? t('receive', 'Bonus Al') : t('locked', 'Kilidli')}
                   </Button>
                 )}
               </div>

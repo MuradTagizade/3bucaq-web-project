@@ -2,6 +2,37 @@
  * 3bucaq — Formatters
  */
 
+import { useLanguageStore } from '@/lib/store/languageStore';
+import { translations } from './translations';
+
+function getTranslation(key, fallback) {
+  try {
+    const lang = useLanguageStore.getState().language || 'az';
+    const dict = translations[lang] || translations.az;
+    if (dict) {
+      if (key.includes('.')) {
+        const parts = key.split('.');
+        let current = dict;
+        for (const part of parts) {
+          if (current === undefined || current === null) {
+            current = undefined;
+            break;
+          }
+          current = current[part];
+        }
+        if (current !== undefined) {
+          return current;
+        }
+      } else if (dict[key] !== undefined) {
+        return dict[key];
+      }
+    }
+  } catch (e) {
+    // Fallback if store is not initialized or inside SSR
+  }
+  return fallback;
+}
+
 export function formatCurrency(amount, currency = '$') {
   if (amount == null) return `${currency}0.00`;
   
@@ -26,7 +57,11 @@ export function formatPoints(current, required) {
 export function formatDate(timestamp) {
   if (!timestamp) return '';
   const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
-  return date.toLocaleDateString('az-AZ', {
+  let lang = 'az';
+  try {
+    lang = useLanguageStore.getState().language || 'az';
+  } catch (e) {}
+  return date.toLocaleDateString(lang === 'az' ? 'az-AZ' : 'en-US', {
     year: 'numeric',
     month: 'short',
     day: 'numeric',
@@ -36,7 +71,11 @@ export function formatDate(timestamp) {
 export function formatDateTime(timestamp) {
   if (!timestamp) return '';
   const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
-  return date.toLocaleString('az-AZ', {
+  let lang = 'az';
+  try {
+    lang = useLanguageStore.getState().language || 'az';
+  } catch (e) {}
+  return date.toLocaleString(lang === 'az' ? 'az-AZ' : 'en-US', {
     year: 'numeric',
     month: 'short',
     day: 'numeric',
@@ -52,7 +91,7 @@ export function formatCompactNumber(num) {
 }
 
 export function getTransactionTypeLabel(type) {
-  const labels = {
+  const defaultLabels = {
     transfer: 'Hesabdan transfer',
     referral_bonus: '10% bonus',
     depth_bonus: '1% referal bonusu',
@@ -63,17 +102,23 @@ export function getTransactionTypeLabel(type) {
     withdrawal: 'Çıxarış',
     admin_adjust: 'Admin düzəlişi',
   };
-  return labels[type] || type;
+  
+  const txLabels = getTranslation('tx_type_labels', defaultLabels);
+  return txLabels[type] || defaultLabels[type] || type;
 }
 
 export function getKYCStatusLabel(status) {
-  const labels = {
+  const defaultLabels = {
     none: 'Təqdim edilməyib',
     pending: 'Gözləyir',
     approved: 'Təsdiqlənib',
     rejected: 'Rədd edilib',
   };
-  return labels[status] || status;
+  
+  const kycLabels = getTranslation('kyc_status_labels', defaultLabels);
+  // check direct mapping or under doc_types
+  if (status === 'none') return getTranslation('not_submitted', defaultLabels.none);
+  return kycLabels[status] || getTranslation(status, defaultLabels[status]) || status;
 }
 
 export function getKYCStatusVariant(status) {

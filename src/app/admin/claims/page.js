@@ -8,11 +8,13 @@ import Modal from '@/components/ui/Modal';
 import Input from '@/components/ui/Input';
 import Badge from '@/components/ui/Badge';
 import { CheckCircle2, XCircle } from 'lucide-react';
+import { useTranslation } from '@/lib/store/languageStore';
 import { getLevelClaims, approveClaim, rejectClaim, addAdminLog } from '@/lib/supabase/database';
 import { useAuthStore } from '@/lib/store/authStore';
 
 export default function AdminClaimsPage() {
   const { user: adminUser } = useAuthStore();
+  const { t } = useTranslation();
   const [claims, setClaims] = useState([]);
   const [loading, setLoading] = useState(true);
   const [approveModal, setApproveModal] = useState({ open: false, claim: null });
@@ -50,7 +52,7 @@ export default function AdminClaimsPage() {
       setApproveModal({ open: false, claim: null });
       setTxHash('');
     } catch (err) {
-      alert('Xəta baş verdi: ' + err.message);
+      alert(t('error_prefix', 'Xəta: ') + err.message);
     }
   };
 
@@ -65,14 +67,14 @@ export default function AdminClaimsPage() {
       );
       await loadClaims();
     } catch (err) {
-      alert('Xəta baş verdi: ' + err.message);
+      alert(t('error_prefix', 'Xəta: ') + err.message);
     }
   };
 
   if (loading) {
     return (
       <div style={{ textAlign: 'center', padding: '40px 0' }}>
-        <span>Yüklənir...</span>
+        <span>{t('loading', 'Yüklənir...')}</span>
       </div>
     );
   }
@@ -83,24 +85,24 @@ export default function AdminClaimsPage() {
 
       <div className={cStyles.tabs}>
         <button className={`${cStyles.tab} ${tab === 'pending' ? cStyles.tabActive : ''}`} onClick={() => setTab('pending')}>
-          Gözləyən ({claims.filter((c) => c.status === 'pending').length})
+          {t('claims_tabs.pending', 'Gözləyən')} ({claims.filter((c) => c.status === 'pending').length})
         </button>
         <button className={`${cStyles.tab} ${tab === 'done' ? cStyles.tabActive : ''}`} onClick={() => setTab('done')}>
-          Tamamlanan
+          {t('claims_tabs.done', 'Tamamlanan')}
         </button>
       </div>
 
       <div className={styles.table}>
         <div className={cStyles.claimHeader}>
-          <span>İstifadəçi</span>
-          <span>Level</span>
-          <span>Bonus</span>
-          <span>Növ</span>
-          <span>Status</span>
+          <span>{t('claims_table_header.user', 'İstifadəçi')}</span>
+          <span>{t('claims_table_header.level', 'Level')}</span>
+          <span>{t('claims_table_header.bonus', 'Bonus')}</span>
+          <span>{t('claims_table_header.type', 'Növ')}</span>
+          <span>{t('claims_table_header.status', 'Status')}</span>
           <span></span>
         </div>
         {filtered.length === 0 && (
-          <div className={cStyles.empty}>Heç bir iddia tapılmadı</div>
+          <div className={cStyles.empty}>{t('no_claims_found', 'Heç bir iddia tapılmadı')}</div>
         )}
         {filtered.map((c) => (
           <div key={c.id} className={cStyles.claimRow}>
@@ -109,12 +111,12 @@ export default function AdminClaimsPage() {
             <span>${Number(c.bonus_amount).toLocaleString()}</span>
             <span>
               <Badge variant={c.claim_type === 'balance' ? 'info' : 'gold'} size="sm">
-                {c.claim_type === 'balance' ? 'Balans' : 'Kripto'}
+                {c.claim_type === 'balance' ? t('balance', 'Balans') : t('crypto', 'Kripto')}
               </Badge>
             </span>
             <span>
               <Badge variant={c.status === 'pending' ? 'warning' : 'success'} size="sm">
-                {c.status === 'pending' ? 'Gözləyir' : 'Done'}
+                {c.status === 'pending' ? t('pending', 'Gözləyir') : 'Done'}
               </Badge>
             </span>
             <div className={cStyles.actions}>
@@ -137,14 +139,14 @@ export default function AdminClaimsPage() {
       </div>
 
       {/* Approve Modal */}
-      <Modal isOpen={approveModal.open} onClose={() => setApproveModal({ open: false, claim: null })} title="Claim Təsdiqlə" size="sm">
+      <Modal isOpen={approveModal.open} onClose={() => setApproveModal({ open: false, claim: null })} title={t('claim_approve_title', 'Claim Təsdiqlə')} size="sm">
         {approveModal.claim && (
           <div className={cStyles.approveContent}>
             <p><strong>{approveModal.claim.login}</strong> — LVL {approveModal.claim.level} — ${approveModal.claim.bonus_amount}</p>
             <p className={cStyles.approveAddress}>USDT: {approveModal.claim.usdt_address}</p>
             <Input label="Transaction Hash" placeholder="0x..." value={txHash} onChange={(e) => setTxHash(e.target.value)} />
             <Button fullWidth size="lg" onClick={handleApprove} disabled={!txHash.trim()} style={{ marginTop: 16 }}>
-              Təsdiqlə
+              {t('confirm', 'Təsdiqlə')}
             </Button>
           </div>
         )}

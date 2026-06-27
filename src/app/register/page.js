@@ -8,6 +8,8 @@ import Logo from '@/components/layout/Logo';
 import Input from '@/components/ui/Input';
 import Select from '@/components/ui/Select';
 import Button from '@/components/ui/Button';
+import LanguageToggle from '@/components/ui/LanguageToggle';
+import { useTranslation } from '@/lib/store/languageStore';
 import { Mail, Lock, User, Globe, MapPin, Phone, Link2 } from 'lucide-react';
 import {
   validateEmail, validatePassword, validateFullName,
@@ -28,6 +30,7 @@ function RegisterForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const refCode = searchParams.get('ref') || '';
+  const { t } = useTranslation();
 
   const [form, setForm] = useState({
     fullName: '',
@@ -80,7 +83,7 @@ function RegisterForm() {
 
     const loginErr = validateLogin(form.login);
     if (loginErr) newErrors.login = loginErr;
-    else if (loginAvailable === false) newErrors.login = 'Bu login artıq istifadə olunur';
+    else if (loginAvailable === false) newErrors.login = t('login_available', 'Bu login artıq istifadə olunur');
 
     const emailErr = validateEmail(form.email);
     if (emailErr) newErrors.email = emailErr;
@@ -99,7 +102,7 @@ function RegisterForm() {
     if (phoneErr) newErrors.phone = phoneErr;
 
     if (form.referralCode && refValid === false) {
-      newErrors.referralCode = 'Referal kodu tapılmadı';
+      newErrors.referralCode = t('ref_not_found', 'Referal kodu tapılmadı');
     }
 
     if (Object.keys(newErrors).length > 0) {
@@ -129,6 +132,9 @@ function RegisterForm() {
 
   return (
     <div className={styles.page}>
+      <div className={styles.topBar}>
+        <LanguageToggle />
+      </div>
       <div className={styles.bgGrid} />
       <div className={styles.container}>
         <div className={styles.card}>
@@ -136,13 +142,13 @@ function RegisterForm() {
             <Logo size={48} />
           </Link>
 
-          <h1 className={styles.title}>Hesab Yaradın</h1>
-          <p className={styles.subtitle}>Platformaya qoşulun və qazanmağa başlayın</p>
+          <h1 className={styles.title}>{t('register_title', 'Hesab Yaradın')}</h1>
+          <p className={styles.subtitle}>{t('register_subtitle', 'Platformaya qoşulun və qazanmağa başlayın')}</p>
 
           <form onSubmit={handleSubmit} className={styles.form}>
             <Input
-              label="Ad Soyad"
-              placeholder="Ad Soyad"
+              label={t('fullname', 'Ad Soyad')}
+              placeholder={t('fullname', 'Ad Soyad')}
               value={form.fullName}
               onChange={(e) => updateField('fullName', e.target.value)}
               error={errors.fullName}
@@ -150,7 +156,7 @@ function RegisterForm() {
             />
 
             <Input
-              label="Login"
+              label={t('username', 'İstifadəçi adı')}
               placeholder="istifadeci_adi"
               value={form.login}
               onChange={(e) => {
@@ -163,7 +169,7 @@ function RegisterForm() {
             />
 
             <Input
-              label="Email"
+              label={t('email', 'Email')}
               type="email"
               placeholder="email@example.com"
               value={form.email}
@@ -173,7 +179,7 @@ function RegisterForm() {
             />
 
             <Input
-              label="Parol"
+              label={t('password', 'Şifrə')}
               type="password"
               placeholder="Min 10 simvol, 1 böyük hərf, 1 rəqəm"
               value={form.password}
@@ -183,7 +189,7 @@ function RegisterForm() {
             />
 
             <Select
-              label="Ölkə"
+              label={t('country', 'Ölkə')}
               value={form.country}
               onChange={(e) => {
                 const countryName = e.target.value;
@@ -197,7 +203,7 @@ function RegisterForm() {
               error={errors.country}
               icon={<Globe size={18} />}
             >
-              <option value="">Ölkə seçin</option>
+              <option value="">{t('select_country', 'Ölkə seçin')}</option>
               {COUNTRIES.map((c) => (
                 <option key={c.name} value={c.name}>
                   {c.name} ({c.phoneCode})
@@ -207,13 +213,13 @@ function RegisterForm() {
 
             {['Azərbaycan', 'Türkiyə', 'Rusiya'].includes(form.country) ? (
               <Select
-                label="Şəhər"
+                label={t('city', 'Şəhər')}
                 value={form.city}
                 onChange={(e) => updateField('city', e.target.value)}
                 error={errors.city}
                 icon={<MapPin size={18} />}
               >
-                <option value="">Şəhər seçin</option>
+                <option value="">{t('select_city', 'Şəhər seçin')}</option>
                 {(CITIES[form.country] || []).map((city) => (
                   <option key={city} value={city}>
                     {city}
@@ -222,8 +228,8 @@ function RegisterForm() {
               </Select>
             ) : (
               <Input
-                label="Şəhər"
-                placeholder="Şəhər daxil edin (elle)"
+                label={t('city', 'Şəhər')}
+                placeholder="Şəhər daxil edin"
                 value={form.city}
                 onChange={(e) => updateField('city', e.target.value)}
                 error={errors.city}
@@ -233,7 +239,7 @@ function RegisterForm() {
 
             <div className={styles.phoneGroup}>
               <Select
-                label="Kod"
+                label={t('code', 'Kod')}
                 value={phonePrefix}
                 onChange={(e) => setPhonePrefix(e.target.value)}
                 className={styles.phonePrefixSelect}
@@ -246,7 +252,7 @@ function RegisterForm() {
               </Select>
 
               <Input
-                label="Telefon"
+                label={t('phone', 'Telefon')}
                 placeholder="50 123 45 67"
                 value={phoneBody}
                 onChange={(e) => setPhoneBody(e.target.value)}
@@ -257,7 +263,7 @@ function RegisterForm() {
             </div>
 
             <Input
-              label="Referal Kodu (ixtiyari)"
+              label={t('referral_code_optional', 'Referal Kodu (ixtiyari)')}
               placeholder="REF12345"
               value={form.referralCode}
               onChange={(e) => {
@@ -274,16 +280,16 @@ function RegisterForm() {
             )}
 
             <Button type="submit" fullWidth size="lg" loading={loading}>
-              Qeydiyyatdan Keç
+              {t('register', 'Qeydiyyat')}
             </Button>
           </form>
 
           <div className={styles.links}>
             <span style={{ color: 'var(--text-muted)', fontSize: 'var(--text-sm)' }}>
-              Artıq hesabınız var?
+              {t('already_have_account', 'Artıq hesabınız var?')}
             </span>
             <Link href="/login" className={styles.link}>
-              Giriş
+              {t('login', 'Giriş')}
             </Link>
           </div>
         </div>
@@ -293,8 +299,9 @@ function RegisterForm() {
 }
 
 export default function RegisterPage() {
+  const { t } = useTranslation();
   return (
-    <Suspense fallback={<div style={{ textAlign: 'center', padding: '40px' }}>Yüklənir...</div>}>
+    <Suspense fallback={<div style={{ textAlign: 'center', padding: '40px' }}>{t('loading', 'Yüklənir...')}</div>}>
       <RegisterForm />
     </Suspense>
   );

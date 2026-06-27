@@ -6,6 +6,7 @@ import Button from '@/components/ui/Button';
 import Badge from '@/components/ui/Badge';
 import Modal from '@/components/ui/Modal';
 import Input from '@/components/ui/Input';
+import { useTranslation } from '@/lib/store/languageStore';
 import { CheckCircle2, XCircle, ArrowDownToLine, CreditCard, Wallet, Upload, Eye, FileText } from 'lucide-react';
 import { getWithdrawals, approveWithdrawal, rejectWithdrawal, addAdminLog } from '@/lib/supabase/database';
 import { formatCurrency, formatDateTime } from '@/lib/utils/formatters';
@@ -14,6 +15,7 @@ import { supabase } from '@/lib/supabase/config';
 
 export default function AdminWithdrawalsPage() {
   const { user: adminUser } = useAuthStore();
+  const { t } = useTranslation();
   const [withdrawals, setWithdrawals] = useState([]);
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState('pending');
@@ -61,12 +63,12 @@ export default function AdminWithdrawalsPage() {
     if (!w) return;
 
     if (w.payment_method === 'usdt' && !txHash.trim()) {
-      alert('Transaction Hash daxil edilməlidir.');
+      alert(t('tx_hash_required', 'Transaction Hash daxil edilməlidir.'));
       return;
     }
 
     if (w.payment_method === 'card' && !receiptFile) {
-      alert('Bank çıxarışı (ekstrası) şəkli yüklənməlidir.');
+      alert(t('bank_receipt_desc', 'Bank çıxarışı (ekstrası) şəkli yüklənməlidir.'));
       return;
     }
 
@@ -87,14 +89,14 @@ export default function AdminWithdrawalsPage() {
       console.log(`[Notification Engine] Bildiriş göndərildi: @${w.login} adlı istifadəçinin ${formatCurrency(w.amount)} çıxarışı tamamlandı.`);
       console.log(`[Email Engine] E-poçt göndərildi: ${w.login}@3bucaq.com ünvanına qəbz (${receiptPath || txHash}) göndərildi.`);
       
-      alert('Çıxarış sorğusu uğurla təsdiqləndi! Müştəriyə bildiriş və e-poçt (mock) göndərildi.');
+      alert(t('approved_sent_msg', 'Çıxarış sorğusu uğurla təsdiqləndi! Müştəriyə bildiriş və e-poçt (mock) göndərildi.'));
       
       await load();
       setApproveModal({ open: false, withdrawal: null });
       setTxHash('');
       setReceiptFile(null);
     } catch (err) {
-      alert('Xəta: ' + err.message);
+      alert(t('error_prefix', 'Xəta: ') + err.message);
     } finally {
       setSubmitting(false);
     }
@@ -107,7 +109,7 @@ export default function AdminWithdrawalsPage() {
         `Rejected withdrawal $${withdrawal.amount}. Refunded.`);
       await load();
     } catch (err) {
-      alert('Xəta: ' + err.message);
+      alert(t('error_prefix', 'Xəta: ') + err.message);
     }
   };
 
@@ -117,27 +119,27 @@ export default function AdminWithdrawalsPage() {
   };
 
   if (loading) {
-    return <div style={{ textAlign: 'center', padding: '40px 0' }}>Yüklənir...</div>;
+    return <div style={{ textAlign: 'center', padding: '40px 0' }}>{t('loading', 'Yüklənir...')}</div>;
   }
 
   return (
     <div>
       <h1 className={styles.pageTitle}>
         <ArrowDownToLine size={24} style={{ display: 'inline', verticalAlign: 'middle', marginRight: 8 }} />
-        Çıxarışlar
+        {t('withdrawals', 'Çıxarışlar')}
       </h1>
 
       <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
-        {['pending', 'done', 'rejected'].map((t) => (
-          <button key={t} onClick={() => setTab(t)}
+        {['pending', 'done', 'rejected'].map((tVal) => (
+          <button key={tVal} onClick={() => setTab(tVal)}
             style={{
-              padding: '8px 16px', borderRadius: 10, fontSize: 13, fontWeight: tab === t ? 600 : 400,
-              background: tab === t ? 'rgba(124,77,255,0.1)' : 'var(--bg-secondary)',
-              border: `1px solid ${tab === t ? 'var(--color-primary)' : 'var(--border-color)'}`,
-              color: tab === t ? 'var(--color-primary)' : 'var(--text-secondary)', cursor: 'pointer',
+              padding: '8px 16px', borderRadius: 10, fontSize: 13, fontWeight: tab === tVal ? 600 : 400,
+              background: tab === tVal ? 'rgba(124,77,255,0.1)' : 'var(--bg-secondary)',
+              border: `1px solid ${tab === tVal ? 'var(--color-primary)' : 'var(--border-color)'}`,
+              color: tab === tVal ? 'var(--color-primary)' : 'var(--text-secondary)', cursor: 'pointer',
             }}>
-            {t === 'pending' ? `Gözləyən (${withdrawals.filter((w) => w.status === 'pending').length})` :
-              t === 'done' ? 'Tamamlanan' : 'Rədd'}
+            {tVal === 'pending' ? `${t('claims_tabs.pending', 'Gözləyən')} (${withdrawals.filter((w) => w.status === 'pending').length})` :
+              tVal === 'done' ? t('claims_tabs.done', 'Tamamlanan') : t('reject', 'Rədd')}
           </button>
         ))}
       </div>
@@ -146,10 +148,15 @@ export default function AdminWithdrawalsPage() {
         <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr 1fr 2fr 1fr 0.8fr', padding: '12px 16px',
           background: 'var(--bg-secondary)', fontWeight: 700, fontSize: 11, color: 'var(--text-muted)',
           textTransform: 'uppercase', letterSpacing: '0.06em', borderRadius: '8px 8px 0 0' }}>
-          <span>İstifadəçi</span><span>Məbləğ</span><span>Metod</span><span>Çıxarış Detalı</span><span>Tarix</span><span></span>
+          <span>{t('withdrawals_table_header.user', 'İstifadəçi')}</span>
+          <span>{t('withdrawals_table_header.amount', 'Məbləğ')}</span>
+          <span>{t('withdrawals_table_header.method', 'Metod')}</span>
+          <span>{t('withdrawals_table_header.detail', 'Çıxarış Detalı')}</span>
+          <span>{t('withdrawals_table_header.date', 'Tarix')}</span>
+          <span></span>
         </div>
         {filtered.length === 0 && (
-          <div style={{ padding: 20, textAlign: 'center', color: 'var(--text-muted)' }}>Tapılmadı</div>
+          <div style={{ padding: 20, textAlign: 'center', color: 'var(--text-muted)' }}>{t('empty_table', 'Tapılmadı')}</div>
         )}
         {filtered.map((w) => (
           <div key={w.id} style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr 1fr 2fr 1fr 0.8fr',
@@ -158,7 +165,7 @@ export default function AdminWithdrawalsPage() {
             <span style={{ fontWeight: 700, color: 'var(--text-primary)' }}>{formatCurrency(w.amount)}</span>
             <span>
               <Badge variant={w.payment_method === 'card' ? 'gold' : 'info'} size="sm">
-                {w.payment_method === 'card' ? 'Bank Kartı' : 'USDT'}
+                {w.payment_method === 'card' ? t('bank_card_manual', 'Bank Kartı') : 'USDT'}
               </Badge>
             </span>
             <span>
@@ -175,7 +182,7 @@ export default function AdminWithdrawalsPage() {
                         cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4
                       }}
                     >
-                      <Eye size={12} /> Bank Qəbzi
+                      <Eye size={12} /> {t('view_receipt', 'Bank Qəbzi')}
                     </button>
                   )}
                 </div>
@@ -196,19 +203,19 @@ export default function AdminWithdrawalsPage() {
                 <>
                   <button onClick={() => { setApproveModal({ open: true, withdrawal: w }); setTxHash(''); setReceiptFile(null); }}
                     style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-success)' }}
-                    title="Təsdiqlə">
+                    title={t('approve_btn_title', 'Təsdiqlə')}>
                     <CheckCircle2 size={20} />
                   </button>
                   <button onClick={() => handleReject(w)}
                     style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-error)' }}
-                    title="Rədd et">
+                    title={t('reject_btn_title', 'Rədd et')}>
                     <XCircle size={20} />
                   </button>
                 </>
               )}
               {w.status !== 'pending' && (
                 <Badge variant={w.status === 'done' ? 'success' : 'error'} size="sm">
-                  {w.status === 'done' ? 'Tamamlandı' : 'Rədd edilib'}
+                  {w.status === 'done' ? t('completed', 'Tamamlandı') : t('rejected', 'Rədd edilib')}
                 </Badge>
               )}
             </div>
@@ -218,18 +225,18 @@ export default function AdminWithdrawalsPage() {
 
       {/* Approve Modal */}
       <Modal isOpen={approveModal.open} onClose={() => setApproveModal({ open: false, withdrawal: null })}
-        title="Çıxarışı Təsdiqlə" size="sm">
+        title={t('claim_approve_title', 'Çıxarışı Təsdiqlə')} size="sm">
         {approveModal.withdrawal && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
             <div>
-              <p style={{ margin: '0 0 4px 0' }}>İstifadəçi: <strong>{approveModal.withdrawal.login}</strong></p>
-              <p style={{ margin: 0 }}>Məbləğ: <strong style={{ color: 'var(--color-success)' }}>{formatCurrency(approveModal.withdrawal.amount)}</strong></p>
+              <p style={{ margin: '0 0 4px 0' }}>{t('user', 'İstifadəçi')}: <strong>{approveModal.withdrawal.login}</strong></p>
+              <p style={{ margin: 0 }}>{t('amount', 'Məbləğ')}: <strong style={{ color: 'var(--color-success)' }}>{formatCurrency(approveModal.withdrawal.amount)}</strong></p>
             </div>
 
             {approveModal.withdrawal.payment_method === 'usdt' ? (
               <>
                 <p style={{ fontSize: 12, color: 'var(--text-muted)', wordBreak: 'break-all', margin: 0 }}>
-                  Ünvan: <strong>{approveModal.withdrawal.crypto_address} ({approveModal.withdrawal.network || 'TRC20'})</strong>
+                  {t('usdt_address', 'Ünvan')}: <strong>{approveModal.withdrawal.crypto_address} ({approveModal.withdrawal.network || 'TRC20'})</strong>
                 </p>
                 <Input
                   label="Transaction Hash"
@@ -241,18 +248,18 @@ export default function AdminWithdrawalsPage() {
             ) : (
               <>
                 <p style={{ fontSize: 12, color: 'var(--text-muted)', margin: 0 }}>
-                  Bank Kartı: <strong style={{ fontFamily: 'monospace' }}>{approveModal.withdrawal.card_number}</strong>
+                  {t('bank_card_manual', 'Bank Kartı')}: <strong style={{ fontFamily: 'monospace' }}>{approveModal.withdrawal.card_number}</strong>
                 </p>
                 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                  <span style={{ fontSize: 13, color: 'var(--text-muted)', fontWeight: 500 }}>Bank Qəbzi / Çıxarışı (Ekstrası)</span>
+                  <span style={{ fontSize: 13, color: 'var(--text-muted)', fontWeight: 500 }}>{t('bank_receipt_statement', 'Bank Qəbzi / Çıxarışı (Ekstrası)')}</span>
                   <label style={{
                     display: 'flex', alignItems: 'center', gap: 10, padding: 12, background: 'var(--bg-secondary)',
                     border: '1px dashed var(--border-color)', borderRadius: 8, cursor: 'pointer'
                   }}>
                     <Upload size={16} color="var(--color-primary)" />
                     <span style={{ fontSize: 13, color: 'var(--text-secondary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                      {receiptFile ? receiptFile.name : 'Ekstra şəklini seçin...'}
+                      {receiptFile ? receiptFile.name : t('select_statement_image', 'Ekstra şəklini seçin...')}
                     </span>
                     <input
                       type="file"
@@ -274,7 +281,7 @@ export default function AdminWithdrawalsPage() {
                 approveModal.withdrawal.payment_method === 'usdt' ? !txHash.trim() : !receiptFile
               }
             >
-              Təsdiqlə (Ödənildi)
+              {t('approve_paid_btn', 'Təsdiqlə (Ödənildi)')}
             </Button>
           </div>
         )}
@@ -284,7 +291,7 @@ export default function AdminWithdrawalsPage() {
       <Modal
         isOpen={!!viewerReceiptUrl}
         onClose={() => setViewerReceiptUrl(null)}
-        title="Admin Ödəniş Qəbzi"
+        title={t('admin_payment_receipt', 'Admin Ödəniş Qəbzi')}
         size="md"
       >
         {viewerReceiptUrl && (
@@ -295,7 +302,7 @@ export default function AdminWithdrawalsPage() {
               style={{ maxWidth: '100%', maxHeight: '420px', borderRadius: 8, objectFit: 'contain', border: '1px solid var(--border-color)' }}
             />
             <Button onClick={() => window.open(viewerReceiptUrl, '_blank')}>
-              Tam Ekran Bax
+              {t('view_full_screen', 'Tam Ekran Bax')}
             </Button>
           </div>
         )}

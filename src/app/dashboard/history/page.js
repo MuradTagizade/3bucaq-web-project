@@ -9,43 +9,10 @@ import {
 } from 'lucide-react';
 import { formatCurrency, formatDateTime } from '@/lib/utils/formatters';
 import { useAuthStore } from '@/lib/store/authStore';
+import { useTranslation } from '@/lib/store/languageStore';
 import { getTransactions, getDeposits, getWithdrawals } from '@/lib/supabase/database';
 
 const PER_PAGE = 10;
-
-const TX_TYPE_LABELS = {
-  deposit: 'Depozit',
-  withdrawal: 'Çıxarış',
-  transfer: 'Daxili Köçürmə',
-  referral_bonus: 'Referal Bonusu',
-  depth_bonus: 'Dərinlik Bonusu',
-  daily_earning: 'Gündəlik Qazanc',
-  package_purchase: 'Paket Alışı',
-  level_bonus: 'Səviyyə Bonusu',
-  admin_adjust: 'Admin Düzəlişi',
-};
-
-const STATUS_LABELS = {
-  completed: 'Tamamlanıb',
-  pending: 'Gözləyir',
-  rejected: 'Rədd edilib',
-};
-
-function formatRowDate(dateString) {
-  if (!dateString) return '';
-  const d = new Date(dateString);
-  const months = ['Yan', 'Fev', 'Mar', 'Apr', 'May', 'İyun', 'İyul', 'Avq', 'Sen', 'Okt', 'Noy', 'Dek'];
-  return `${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`;
-}
-
-function formatRowTime(dateString) {
-  if (!dateString) return '';
-  const d = new Date(dateString);
-  const h = String(d.getHours()).padStart(2, '0');
-  const m = String(d.getMinutes()).padStart(2, '0');
-  const s = String(d.getSeconds()).padStart(2, '0');
-  return `${h}:${m}:${s}`;
-}
 
 const getTxTypeStyle = (type, amount) => {
   const stylesMap = {
@@ -73,6 +40,7 @@ const getAmountColorClass = (type, amt) => {
 
 export default function HistoryPage() {
   const { user: authUser } = useAuthStore();
+  const { t } = useTranslation();
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
@@ -81,6 +49,41 @@ export default function HistoryPage() {
   const [filterDate, setFilterDate] = useState('');
   const [typeDropdownOpen, setTypeDropdownOpen] = useState(false);
   const [stats, setStats] = useState({ incoming: 0, outgoing: 0, pending: 0 });
+
+  const TX_TYPE_LABELS = t('tx_type_labels', {
+    deposit: 'Depozit',
+    withdrawal: 'Çıxarış',
+    transfer: 'Daxili Köçürmə',
+    referral_bonus: 'Referal Bonusu',
+    depth_bonus: 'Dərinlik Bonusu',
+    daily_earning: 'Gündəlik Qazanc',
+    package_purchase: 'Paket Alışı',
+    level_bonus: 'Səviyyə Bonusu',
+    admin_adjust: 'Admin Düzəlişi',
+  });
+
+  const STATUS_LABELS = t('status_labels', {
+    completed: 'Tamamlanıb',
+    pending: 'Gözləyir',
+    rejected: 'Rədd edilib',
+  });
+
+  const MONTHS = t('months', ['Yan', 'Fev', 'Mar', 'Apr', 'May', 'İyun', 'İyul', 'Avq', 'Sen', 'Okt', 'Noy', 'Dek']);
+
+  function formatRowDate(dateString) {
+    if (!dateString) return '';
+    const d = new Date(dateString);
+    return `${d.getDate()} ${MONTHS[d.getMonth()]} ${d.getFullYear()}`;
+  }
+
+  function formatRowTime(dateString) {
+    if (!dateString) return '';
+    const d = new Date(dateString);
+    const h = String(d.getHours()).padStart(2, '0');
+    const m = String(d.getMinutes()).padStart(2, '0');
+    const s = String(d.getSeconds()).padStart(2, '0');
+    return `${h}:${m}:${s}`;
+  }
 
   useEffect(() => {
     async function loadData() {
@@ -120,15 +123,17 @@ export default function HistoryPage() {
           // Detail formatting
           let detail = 'Sistem';
           if (tx.type === 'transfer') {
-            detail = tx.from_uid === authUser.uid ? `İstifadəçi: @${tx.to_login}` : `İstifadəçi: @${tx.from_login}`;
+            detail = tx.from_uid === authUser.uid 
+              ? `${t('user', 'İstifadəçi')}: @${tx.to_login}` 
+              : `${t('user', 'İstifadəçi')}: @${tx.from_login}`;
           } else if (tx.type === 'referral_bonus' || tx.type === 'depth_bonus') {
             detail = `Referral: @${tx.from_login}`;
           } else if (tx.type === 'level_bonus') {
-            detail = 'Level Bonusu';
+            detail = t('level_bonus', 'Level Bonusu');
           } else if (tx.type === 'daily_earning') {
-            detail = 'Gündəlik Qazanc';
+            detail = t('daily_revenue', 'Gündəlik Qazanc');
           } else if (tx.type === 'admin_adjust') {
-            detail = 'Admin Düzəlişi';
+            detail = t('admin_adjust', 'Admin Düzəlişi');
           }
 
           unifiedList.push({
@@ -151,7 +156,7 @@ export default function HistoryPage() {
             amount: Number(d.amount),
             status: d.status === 'approved' ? 'completed' : d.status,
             created_at: d.created_at,
-            detail: d.tx_hash ? `Xarici Pulqabı (${d.tx_hash.slice(0, 6)}...${d.tx_hash.slice(-4)})` : 'Xarici Pulqabı (TRC20)',
+            detail: d.tx_hash ? `${t('external_wallet', 'Xarici Pulqabı')} (${d.tx_hash.slice(0, 6)}...${d.tx_hash.slice(-4)})` : `${t('external_wallet', 'Xarici Pulqabı')} (TRC20)`,
             network: d.network,
           });
         });
@@ -164,7 +169,7 @@ export default function HistoryPage() {
             amount: -Number(w.amount),
             status: (w.status === 'done' || w.status === 'approved') ? 'completed' : w.status,
             created_at: w.created_at,
-            detail: w.crypto_address ? `Xarici Pulqabı (${w.crypto_address.slice(0, 6)}...${w.crypto_address.slice(-4)})` : 'Xarici Pulqabı',
+            detail: w.crypto_address ? `${t('external_wallet', 'Xarici Pulqabı')} (${w.crypto_address.slice(0, 6)}...${w.crypto_address.slice(-4)})` : t('external_wallet', 'Xarici Pulqabı'),
             network: w.network,
           });
         });
@@ -245,7 +250,7 @@ export default function HistoryPage() {
     return (
       <div className={styles.loadingState}>
         <div className={styles.spinner} />
-        <span>Yüklənir...</span>
+        <span>{t('loading', 'Yüklənir...')}</span>
       </div>
     );
   }
@@ -285,13 +290,13 @@ export default function HistoryPage() {
   };
 
   const getFilterTypeLabel = (val) => {
-    const labels = {
+    const labels = t('filter_types', {
       all: 'Bütün Növlər',
       deposit: 'Depozit',
       withdrawal: 'Çıxarış',
       transfer: 'Daxili Köçürmə',
       bonus: 'Referal Bonusu',
-    };
+    });
     return labels[val] || val;
   };
 
@@ -303,8 +308,8 @@ export default function HistoryPage() {
       <div className={styles.pageHeader}>
         <div className={styles.headerTitleRow}>
           <div>
-            <h1 className={styles.pageTitle}>USDT Tarixçəsi</h1>
-            <p className={styles.pageSubtitle}>Bütün maliyyə əməliyyatlarının detallı siyahısı.</p>
+            <h1 className={styles.pageTitle}>{t('tx_history_title', 'USDT Tarixçəsi')}</h1>
+            <p className={styles.pageSubtitle}>{t('tx_history_subtitle', 'Bütün maliyyə əməliyyatlarının detallı siyahısı.')}</p>
           </div>
           
           {/* Top Filters */}
@@ -349,28 +354,28 @@ export default function HistoryPage() {
       {/* Stats Cards */}
       <div className={styles.statsGrid}>
         <div className={styles.statCard}>
-          <span className={styles.statLabel}>Ümumi Mədaxil</span>
+          <span className={styles.statLabel}>{t('incoming_sum', 'Ümumi Mədaxil')}</span>
           <div className={`${styles.statValue} ${styles.valIncoming}`}>
             +{stats.incoming.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} <span className={styles.currency}>USDT</span>
           </div>
         </div>
 
         <div className={styles.statCard}>
-          <span className={styles.statLabel}>Ümumi Məxaric</span>
+          <span className={styles.statLabel}>{t('outgoing_sum', 'Ümumi Məxaric')}</span>
           <div className={`${styles.statValue} ${styles.valOutgoing}`}>
             -{stats.outgoing.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} <span className={styles.currency}>USDT</span>
           </div>
         </div>
 
         <div className={styles.statCard}>
-          <span className={styles.statLabel}>Gözləmədə</span>
+          <span className={styles.statLabel}>{t('pending', 'Gözləmədə')}</span>
           <div className={`${styles.statValue} ${styles.valPending}`}>
             {stats.pending.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} <span className={styles.currency}>USDT</span>
           </div>
         </div>
 
         <div className={styles.statCard}>
-          <span className={styles.statLabel}>Net Balans</span>
+          <span className={styles.statLabel}>{t('net_balance', 'Net Balans')}</span>
           <div className={styles.statValue}>
             {netBalance >= 0 ? '+' : ''}
             {netBalance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} <span className={styles.currency}>USDT</span>
@@ -384,18 +389,18 @@ export default function HistoryPage() {
           <table className={styles.table}>
             <thead>
               <tr>
-                <th>TARİX</th>
-                <th>ƏMƏLİYYAT NÖVÜ</th>
-                <th>MƏBLƏĞ</th>
-                <th>STATUS</th>
-                <th>DETAL (GÖNDƏRƏN/ALAN)</th>
+                <th>{t('tx_date', 'TARİX')}</th>
+                <th>{t('tx_type', 'ƏMƏLİYYAT NÖVÜ')}</th>
+                <th>{t('tx_amount', 'MƏBLƏĞ')}</th>
+                <th>{t('tx_status', 'STATUS')}</th>
+                <th>{t('tx_detail', 'DETAL (GÖNDƏRƏN/ALAN)')}</th>
               </tr>
             </thead>
             <tbody>
               {pageData.length === 0 ? (
                 <tr>
                   <td colSpan={5} className={styles.emptyCell}>
-                    Məlumat tapılmadı
+                    {t('no_data_found', 'Məlumat tapılmadı')}
                   </td>
                 </tr>
               ) : (
@@ -454,8 +459,10 @@ export default function HistoryPage() {
         {/* Custom Pagination Footer */}
         <div className={styles.tableFooter}>
           <div className={styles.tableFooterInfo}>
-            Göstərilir {filteredTxs.length > 0 ? start + 1 : 0}-
-            {Math.min(start + PER_PAGE, filteredTxs.length)} / {filteredTxs.length}
+            {t('showing_rows', 'Göstərilir {{start}}-{{end}} / {{total}}')
+              .replace('{{start}}', filteredTxs.length > 0 ? start + 1 : 0)
+              .replace('{{end}}', Math.min(start + PER_PAGE, filteredTxs.length))
+              .replace('{{total}}', filteredTxs.length)}
           </div>
           <div className={styles.paginationButtons}>
             <button
@@ -478,35 +485,35 @@ export default function HistoryPage() {
       </div>
 
       {/* Transaction Details Modal */}
-      <Modal isOpen={!!selectedTx} onClose={() => setSelectedTx(null)} title="Əməliyyat Detalları" size="sm">
+      <Modal isOpen={!!selectedTx} onClose={() => setSelectedTx(null)} title={t('tx_details', 'Əməliyyat Detalları')} size="sm">
         {selectedTx && (
           <div className={styles.detailModal}>
             <div className={styles.detailRow}>
-              <span>Əməliyyat ID</span>
+              <span>{t('tx_id', 'Əməliyyat ID')}</span>
               <span className={styles.monoText}>{selectedTx.id}</span>
             </div>
             <div className={styles.detailRow}>
-              <span>Növ</span>
+              <span>{t('type', 'Növ')}</span>
               <span>{TX_TYPE_LABELS[selectedTx.type] || selectedTx.type}</span>
             </div>
             <div className={styles.detailRow}>
-              <span>Məbləğ</span>
+              <span>{t('amount', 'Məbləğ')}</span>
               <span className={selectedTx.amount > 0 ? styles.amountGreen : styles.amountRed}>
                 {selectedTx.amount > 0 ? '+' : ''}{formatCurrency(selectedTx.amount)}
               </span>
             </div>
             <div className={styles.detailRow}>
-              <span>Status</span>
+              <span>{t('status', 'Status')}</span>
               <span style={{ fontWeight: 600, color: selectedTx.status === 'completed' ? '#00E676' : selectedTx.status === 'pending' ? '#FFD600' : '#FF5252' }}>
                 {STATUS_LABELS[selectedTx.status] || selectedTx.status}
               </span>
             </div>
             <div className={styles.detailRow}>
-              <span>Tarix</span>
+              <span>{t('date', 'Tarix')}</span>
               <span>{formatDateTime(selectedTx.created_at)}</span>
             </div>
             <div className={styles.detailRow}>
-              <span>Detal</span>
+              <span>{t('details', 'Detal')}</span>
               <span>{selectedTx.detail}</span>
             </div>
           </div>
@@ -515,4 +522,3 @@ export default function HistoryPage() {
     </div>
   );
 }
-

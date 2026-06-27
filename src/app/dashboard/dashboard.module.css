@@ -1,336 +1,349 @@
-/* Dashboard Page Styles */
 .dashboard {
   padding: 8px 0 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
 }
 
 /* User Info Card */
 .userInfoCard {
-  background: linear-gradient(135deg, rgba(124, 77, 255, 0.08), rgba(0, 229, 255, 0.06));
-  border: 1px solid var(--border-color);
-  border-radius: 16px;
-  padding: 20px;
-  margin-bottom: 20px;
+  background: var(--bg-card);
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-xl);
+  padding: 32px;
+  position: relative;
+  overflow: hidden;
+}
+
+.userInfoCard::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; height: 2px;
+  background: var(--gradient-primary);
 }
 
 .userInfoTop {
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin-bottom: 16px;
+  gap: 16px;
+  margin-bottom: 24px;
 }
 
 .userAvatar {
-  width: 44px;
-  height: 44px;
-  border-radius: 12px;
-  background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--gradient-accent);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-weight: 700;
-  font-size: 18px;
   color: #fff;
+  font-weight: 800;
+  font-size: 24px;
+  box-shadow: 0 0 20px rgba(176, 38, 255, 0.3);
 }
 
 .userGreeting {
   display: flex;
   flex-direction: column;
+  align-items: flex-start;
   gap: 4px;
 }
 
 .userLogin {
-  font-weight: 600;
-  font-size: 16px;
+  font-size: 20px;
+  font-weight: 800;
   color: var(--text-primary);
 }
 
 .balanceRow {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 12px;
-  margin-bottom: 12px;
+  gap: 16px;
+  margin-bottom: 24px;
 }
 
 .balanceBox {
-  background: var(--bg-secondary);
-  border-radius: 12px;
-  padding: 12px;
+  padding: 20px;
+  background: var(--bg-glass);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 8px;
 }
 
 .balanceLabel {
-  font-size: 11px;
+  font-size: 13px;
   color: var(--text-muted);
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
 }
 
 .balanceAmount {
-  font-size: 18px;
-  font-weight: 700;
-  color: var(--color-success);
+  font-size: 24px;
+  font-weight: 800;
+  color: var(--color-primary);
+  text-shadow: 0 0 15px rgba(0, 255, 163, 0.2);
 }
 
 .refRow {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 8px 12px;
-  background: var(--bg-secondary);
-  border-radius: 10px;
+  padding: 16px;
+  background: rgba(0, 240, 255, 0.05);
+  border: 1px solid rgba(0, 240, 255, 0.15);
+  border-radius: var(--radius-md);
 }
 
 .refLabel {
-  font-size: 13px;
-  color: var(--text-secondary);
-  font-weight: 500;
+  font-size: 14px;
+  color: var(--color-secondary);
+  font-weight: 600;
 }
 
 .refCopyBtn {
   display: flex;
   align-items: center;
-  gap: 4px;
-  background: none;
-  border: none;
-  color: var(--color-primary);
-  font-size: 12px;
-  cursor: pointer;
+  gap: 6px;
+  padding: 6px 12px;
+  background: rgba(0, 240, 255, 0.1);
+  border-radius: var(--radius-sm);
+  color: var(--color-secondary);
+  font-size: 13px;
   font-weight: 600;
-  padding: 4px 8px;
-  border-radius: 6px;
-  transition: background 0.2s;
+  transition: all var(--transition-fast);
 }
 
 .refCopyBtn:hover {
-  background: rgba(124, 77, 255, 0.1);
+  background: rgba(0, 240, 255, 0.2);
+  box-shadow: 0 0 10px rgba(0, 240, 255, 0.2);
 }
 
 /* Summary Cards */
 .summary {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 12px;
-  margin-bottom: 24px;
+  gap: 16px;
 }
 
 .summaryCard {
   background: var(--bg-card);
-  border: 1px solid var(--border-color);
-  border-radius: 14px;
-  padding: 16px;
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-lg);
+  padding: 24px;
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 16px;
 }
 
 .summaryIcon {
-  width: 44px;
-  height: 44px;
-  border-radius: 12px;
-  background: rgba(0, 230, 118, 0.12);
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-sm);
+  background: rgba(255, 210, 0, 0.1);
+  color: var(--color-warning);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--color-success);
 }
 
 .summaryLabel {
-  font-size: 12px;
+  font-size: 13px;
   color: var(--text-muted);
-  margin-bottom: 2px;
+  font-weight: 600;
+  text-transform: uppercase;
+  margin-bottom: 4px;
 }
 
 .summaryValue {
   font-size: 20px;
-  font-weight: 700;
+  font-weight: 800;
   color: var(--text-primary);
 }
 
-/* Section Title */
 .sectionTitle {
-  font-size: 16px;
-  font-weight: 700;
-  margin-bottom: 12px;
+  font-size: 20px;
+  font-weight: 800;
   color: var(--text-primary);
+  margin-top: 8px;
 }
 
 /* Level List */
 .levelList {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
 }
 
 .levelCard {
-  background: var(--bg-card);
-  border: 1px solid var(--border-color);
-  border-radius: 14px;
-  padding: 16px;
-  transition: border-color 0.2s, box-shadow 0.2s;
+  background: var(--bg-glass);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  transition: all var(--transition-base);
 }
 
-.levelCard.levelReady {
-  border-color: var(--color-success);
-  box-shadow: 0 0 0 1px var(--color-success), 0 0 20px rgba(0, 230, 118, 0.08);
+.levelReady {
+  background: rgba(0, 255, 163, 0.05);
+  border-color: rgba(0, 255, 163, 0.3);
+  box-shadow: 0 0 20px rgba(0, 255, 163, 0.05);
 }
 
-.levelCard.levelClaimed {
+.levelClaimed {
   opacity: 0.6;
-  border-color: var(--border-color);
 }
 
 .levelHeader {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 10px;
 }
 
 .levelBadge {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.levelNum {
-  font-weight: 700;
-  font-size: 15px;
-  background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  background: var(--gradient-primary);
+  padding: 4px 12px;
+  border-radius: var(--radius-full);
+  color: #020205;
+  font-weight: 800;
+  font-size: 13px;
 }
 
 .levelBonus {
-  font-weight: 700;
-  font-size: 16px;
-  color: var(--color-warning);
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--color-primary);
 }
 
-/* Progress */
 .progressSection {
-  margin-bottom: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
 .progressLabel {
-  font-size: 12px;
-  color: var(--text-muted);
-  margin-bottom: 4px;
+  font-size: 13px;
+  color: var(--text-secondary);
+  text-align: right;
+  font-weight: 600;
 }
 
 .progressBar {
-  height: 6px;
-  background: var(--bg-secondary);
-  border-radius: 3px;
+  height: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-full);
   overflow: hidden;
 }
 
 .progressFill {
   height: 100%;
-  background: linear-gradient(90deg, var(--color-primary), var(--color-accent));
-  border-radius: 3px;
-  transition: width 0.4s ease;
+  background: var(--gradient-primary);
+  box-shadow: 0 0 10px var(--color-primary-glow);
+  transition: width 0.5s ease-out;
 }
 
-/* Required Packages */
 .reqPkgs {
   display: flex;
   align-items: center;
-  gap: 6px;
-  font-size: 12px;
-  color: var(--text-muted);
-  margin-bottom: 8px;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--text-secondary);
 }
 
-/* Level Action */
 .levelAction {
   display: flex;
   justify-content: flex-end;
 }
 
-/* Receive Modal */
 .receiveModal {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 16px;
 }
 
 .receiveInfo {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 12px;
-  background: var(--bg-secondary);
-  border-radius: 10px;
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--text-primary);
-}
-
-.receiveOption {
-  display: flex;
-  align-items: center;
+  justify-content: center;
   gap: 12px;
-  padding: 16px;
-  background: var(--bg-secondary);
-  border: 1px solid var(--border-color);
-  border-radius: 12px;
-  cursor: pointer;
-  transition: all 0.2s;
-  text-align: left;
+  font-size: 18px;
+  font-weight: 800;
   color: var(--text-primary);
-  width: 100%;
 }
 
-.receiveOption:hover {
-  border-color: var(--color-primary);
-  background: rgba(124, 77, 255, 0.06);
-}
-
-.receiveOption div {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.receiveOption strong {
-  font-size: 14px;
-}
-
-.receiveOption small {
-  font-size: 12px;
-  color: var(--text-muted);
-}
-
-/* Toast */
 .toast {
   position: fixed;
   bottom: 100px;
   left: 50%;
   transform: translateX(-50%);
-  background: var(--bg-card);
-  border: 1px solid var(--border-color);
-  color: var(--text-primary);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-default);
   padding: 12px 24px;
-  border-radius: 12px;
+  border-radius: var(--radius-full);
+  color: var(--text-primary);
+  font-weight: 600;
   font-size: 14px;
   z-index: 9999;
-  animation: fadeInUp 0.3s ease;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-  max-width: 90%;
-  text-align: center;
+  box-shadow: 0 0 30px rgba(0, 255, 163, 0.1);
 }
 
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateX(-50%) translateY(20px);
+@media (min-width: 768px) {
+  .levelList {
+    grid-template-columns: 1fr 1fr;
   }
-  to {
-    opacity: 1;
-    transform: translateX(-50%) translateY(0);
+}
+
+@media (max-width: 768px) {
+  .userInfoCard {
+    padding: 20px 16px;
+  }
+  .balanceRow {
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .balanceBox {
+    padding: 12px;
+  }
+  .balanceAmount {
+    font-size: 18px;
+  }
+  .summary {
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .summaryCard {
+    padding: 12px;
+    gap: 8px;
+  }
+  .summaryIcon {
+    width: 36px;
+    height: 36px;
+  }
+  .summaryIcon svg {
+    width: 18px;
+    height: 18px;
+  }
+  .summaryLabel {
+    font-size: 10px;
+  }
+  .summaryValue {
+    font-size: 16px;
+  }
+  .refRow {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px;
+  }
+  .refLabel {
+    font-size: 12px;
   }
 }

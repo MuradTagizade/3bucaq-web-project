@@ -31,8 +31,8 @@ export default function SlideUpMenu({ referralLink = '', onLogout }) {
     if (navigator.share) {
       try {
         await navigator.share({
-          title: '3bucaq - Referal Link',
-          text: '3bucaq platformasına qoşulun!',
+          title: '3bucaq - ' + t('referral_link', 'Referal Link'),
+          text: t('join_platform', '3bucaq platformasına qoşulun!'),
           url: referralLink,
         });
       } catch {

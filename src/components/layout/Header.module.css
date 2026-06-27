@@ -4,53 +4,72 @@
   left: 0;
   right: 0;
   height: var(--header-height);
-  background: var(--bg-card);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+  background: var(--bg-secondary);
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
   border-bottom: 1px solid var(--border-subtle);
   z-index: var(--z-sticky);
+  transition: all var(--transition-base);
+}
+
+.header::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(0, 255, 163, 0.2), transparent);
 }
 
 .inner {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  max-width: var(--max-width);
-  margin: 0 auto;
-  padding: 0 var(--space-md);
   height: 100%;
+  padding: 0 var(--space-md);
+  max-width: var(--max-width-lg);
+  margin: 0 auto;
+  gap: 16px;
 }
 
 .greeting {
-  font-size: var(--text-sm);
-  color: var(--text-secondary);
+  font-size: 13px;
+  color: var(--text-muted);
   font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .name {
   color: var(--color-primary);
   font-weight: 700;
-}
-
-.menuBtn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 40px;
-  height: 40px;
-  border-radius: var(--radius-sm);
-  color: var(--text-secondary);
-  transition: all var(--transition-fast);
-  cursor: pointer;
-}
-
-.menuBtn:hover {
-  background: var(--bg-glass-hover);
-  color: var(--text-primary);
+  text-shadow: 0 0 10px rgba(0, 255, 163, 0.2);
 }
 
 .actions {
   display: flex;
   align-items: center;
   gap: var(--space-sm);
+}
+
+.menuBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-sm);
+  background: var(--bg-glass);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-primary);
+  transition: all var(--transition-fast);
+  cursor: pointer;
+}
+
+.menuBtn:hover {
+  background: rgba(0, 255, 163, 0.1);
+  color: var(--color-primary);
+  border-color: rgba(0, 255, 163, 0.3);
 }

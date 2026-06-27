@@ -2,56 +2,31 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 38px;
-  height: 38px;
-  border-radius: var(--radius-md);
-  color: var(--text-secondary);
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
   background: var(--bg-glass);
   border: 1px solid var(--border-subtle);
+  color: var(--text-muted);
   cursor: pointer;
-  transition: all var(--transition-fast);
+  transition: all var(--transition-base);
+  position: relative;
+  overflow: hidden;
 }
 
 .toggleBtn:hover {
-  background: var(--bg-glass-hover);
-  color: var(--text-primary);
-  border-color: var(--border-hover);
-  transform: translateY(-1px);
-  box-shadow: var(--shadow-sm);
-}
-
-.toggleBtn:active {
-  transform: translateY(0);
+  background: rgba(0, 240, 255, 0.1);
+  color: var(--color-secondary);
+  border-color: rgba(0, 240, 255, 0.3);
+  box-shadow: 0 0 15px rgba(0, 240, 255, 0.2);
 }
 
 .iconSun {
   color: var(--color-warning);
-  animation: rotateIn var(--transition-base) ease-out;
+  filter: drop-shadow(0 0 5px rgba(255, 210, 0, 0.4));
 }
 
 .iconMoon {
   color: var(--color-secondary);
-  animation: scaleIn var(--transition-base) ease-out;
-}
-
-@keyframes rotateIn {
-  from {
-    transform: rotate(-90deg) scale(0.8);
-    opacity: 0;
-  }
-  to {
-    transform: rotate(0) scale(1);
-    opacity: 1;
-  }
-}
-
-@keyframes scaleIn {
-  from {
-    transform: scale(0.8);
-    opacity: 0;
-  }
-  to {
-    transform: scale(1);
-    opacity: 1;
-  }
+  filter: drop-shadow(0 0 5px rgba(0, 240, 255, 0.4));
 }

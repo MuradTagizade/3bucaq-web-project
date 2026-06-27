@@ -8,11 +8,13 @@ import { ShieldCheck, Upload, Camera, FileText, AlertTriangle } from 'lucide-rea
 import { KYC_DOC_TYPES } from '@/lib/utils/constants';
 import { getKYCStatusLabel, getKYCStatusVariant } from '@/lib/utils/formatters';
 import { useAuthStore } from '@/lib/store/authStore';
+import { useTranslation } from '@/lib/store/languageStore';
 import { submitKYC } from '@/lib/supabase/database';
 import { supabase } from '@/lib/supabase/config';
 
 export default function KYCPage() {
   const { user: authUser, setUser } = useAuthStore();
+  const { t } = useTranslation();
   const [docType, setDocType] = useState('id_card');
   const [docFile, setDocFile] = useState(null);
   const [docBackFile, setDocBackFile] = useState(null);
@@ -33,7 +35,7 @@ export default function KYCPage() {
 
   const handleSubmit = async () => {
     if (!docFile || !docBackFile || !selfieFile) {
-      setToast('Sənədin ön, arxa və selfie şəkillərini yükləyin');
+      setToast(t('upload_all_docs', 'Sənədin ön, arxa və selfie şəkillərini yükləyin'));
       setTimeout(() => setToast(null), 3000);
       return;
     }
@@ -48,12 +50,12 @@ export default function KYCPage() {
       await submitKYC(uid, docType, docPath, selfiePath, docBackPath);
 
       setUser({ ...authUser, kycStatus: 'pending' });
-      setToast('KYC sənədləriniz göndərildi! Admin yoxlayacaq.');
+      setToast(t('kyc_sent_success', 'KYC sənədləriniz göndərildi! Admin yoxlayacaq.'));
       setDocFile(null);
       setDocBackFile(null);
       setSelfieFile(null);
     } catch (err) {
-      setToast('Xəta: ' + err.message);
+      setToast(t('error_prefix', 'Xəta: ') + err.message);
     } finally {
       setLoading(false);
       setTimeout(() => setToast(null), 3000);
@@ -65,7 +67,7 @@ export default function KYCPage() {
       <div className={styles.header}>
         <h2 className={styles.title}>
           <ShieldCheck size={22} color="var(--color-primary)" />
-          KYC Identifikasiya
+          {t('kyc_identification', 'KYC Identifikasiya')}
         </h2>
         <Badge variant={getKYCStatusVariant(kycStatus)}>
           {getKYCStatusLabel(kycStatus)}
@@ -75,16 +77,16 @@ export default function KYCPage() {
       {kycStatus === 'approved' && (
         <div className={styles.successCard}>
           <ShieldCheck size={40} color="var(--color-success)" />
-          <h3>Şəxsiyyətiniz təsdiqlənib</h3>
-          <p>KYC prosesi uğurla tamamlanmışdır.</p>
+          <h3>{t('identity_verified', 'Şəxsiyyətiniz təsdiqlənib')}</h3>
+          <p>{t('kyc_approved_msg', 'KYC prosesi uğurla tamamlanmışdır.')}</p>
         </div>
       )}
 
       {kycStatus === 'pending' && (
         <div className={styles.pendingCard}>
           <AlertTriangle size={40} color="var(--color-warning)" />
-          <h3>Sənədləriniz yoxlanılır</h3>
-          <p>Admin sənədlərinizi yoxlayır. Zəhmət olmasa gözləyin.</p>
+          <h3>{t('documents_checking', 'Sənədləriniz yoxlanılır')}</h3>
+          <p>{t('kyc_pending_msg', 'Admin sənədlərinizi yoxlayır. Zəhmət olmasa gözləyin.')}</p>
         </div>
       )}
 
@@ -93,19 +95,21 @@ export default function KYCPage() {
           {kycStatus === 'rejected' && (
             <div className={styles.rejectedNotice}>
               <AlertTriangle size={16} />
-              <span>Əvvəlki sənədləriniz rədd edilib. Yenidən yükləyin.</span>
+              <span>{t('kyc_rejected_notice', 'Əvvəlki sənədləriniz rədd edilib. Yenidən yükləyin.')}</span>
             </div>
           )}
 
           <div className={styles.field}>
-            <label className={styles.label}>Sənəd Növü</label>
+            <label className={styles.label}>{t('doc_type_label', 'Sənəd Növü')}</label>
             <select
               value={docType}
               onChange={(e) => setDocType(e.target.value)}
               className={styles.select}
             >
-              {KYC_DOC_TYPES.map((t) => (
-                <option key={t.value} value={t.value}>{t.label}</option>
+              {KYC_DOC_TYPES.map((tItem) => (
+                <option key={tItem.value} value={tItem.value}>
+                  {t('doc_types.' + tItem.value, tItem.label)}
+                </option>
               ))}
             </select>
           </div>
@@ -114,10 +118,10 @@ export default function KYCPage() {
             {/* Front of Document */}
             <div className={styles.uploadBox}>
               <FileText size={24} color="var(--color-primary)" />
-              <span style={{ fontWeight: 600 }}>Sənəd Ön Üzü</span>
+              <span style={{ fontWeight: 600 }}>{t('doc_front', 'Sənəd Ön Üzü')}</span>
               <label className={styles.uploadBtn}>
                 <Upload size={14} />
-                {docFile ? docFile.name : 'Seçin...'}
+                {docFile ? docFile.name : t('select', 'Seçin...')}
                 <input
                   type="file"
                   accept="image/*"
@@ -130,10 +134,10 @@ export default function KYCPage() {
             {/* Back of Document */}
             <div className={styles.uploadBox}>
               <FileText size={24} color="var(--color-accent-light)" style={{ color: 'var(--color-info)' }} />
-              <span style={{ fontWeight: 600 }}>Sənəd Arxa Üzü</span>
+              <span style={{ fontWeight: 600 }}>{t('doc_back', 'Sənəd Arxa Üzü')}</span>
               <label className={styles.uploadBtn}>
                 <Upload size={14} />
-                {docBackFile ? docBackFile.name : 'Seçin...'}
+                {docBackFile ? docBackFile.name : t('select', 'Seçin...')}
                 <input
                   type="file"
                   accept="image/*"
@@ -146,10 +150,10 @@ export default function KYCPage() {
             {/* Selfie with Document */}
             <div className={styles.uploadBox}>
               <Camera size={24} color="var(--color-warning)" />
-              <span style={{ fontWeight: 600 }}>Selfie + Sənəd</span>
+              <span style={{ fontWeight: 600 }}>{t('selfie_doc', 'Selfie + Sənəd')}</span>
               <label className={styles.uploadBtn}>
                 <Upload size={14} />
-                {selfieFile ? selfieFile.name : 'Seçin...'}
+                {selfieFile ? selfieFile.name : t('select', 'Seçin...')}
                 <input
                   type="file"
                   accept="image/*"
@@ -167,7 +171,7 @@ export default function KYCPage() {
             loading={loading}
             disabled={!docFile || !docBackFile || !selfieFile}
           >
-            Sənədləri Göndər
+            {t('send_documents', 'Sənədləri Göndər')}
           </Button>
         </div>
       )}

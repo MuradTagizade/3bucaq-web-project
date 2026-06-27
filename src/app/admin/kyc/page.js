@@ -7,30 +7,13 @@ import {
   ShieldCheck, Headphones, Eye, Check, Info, ArrowUpDown
 } from 'lucide-react';
 import { useAuthStore } from '@/lib/store/authStore';
+import { useTranslation } from '@/lib/store/languageStore';
 import { getUsers, updateKYCStatus, addAdminLog } from '@/lib/supabase/database';
 import { supabase } from '@/lib/supabase/config';
 
-function timeAgo(dateString) {
-  if (!dateString) return '';
-  const now = new Date();
-  const diffMs = now - new Date(dateString);
-  const diffMins = Math.floor(diffMs / 60000);
-  if (diffMins < 1) return 'İndi';
-  if (diffMins < 60) return `${diffMins} dəq. əvvəl`;
-  const diffHours = Math.floor(diffMins / 60);
-  if (diffHours < 24) return `${diffHours} saat əvvəl`;
-  const diffDays = Math.floor(diffHours / 24);
-  return `${diffDays} gün əvvəl`;
-}
-
-const DOC_TYPE_LABELS = {
-  passport: 'Xarici Pasport',
-  id_card: 'Şəxsiyyət Vəsiqəsi (Ön)',
-  driving_license: 'Sürücülük Vəsiqəsi',
-};
-
 export default function AdminKYCRequestsPage() {
   const { user: adminUser } = useAuthStore();
+  const { t } = useTranslation();
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -40,6 +23,25 @@ export default function AdminKYCRequestsPage() {
   const [previewImage, setPreviewImage] = useState(null);
   const [rejectReasons, setRejectReasons] = useState({});
   const [stats, setStats] = useState({ pending: 0, approved: 0, rejected: 0 });
+
+  function timeAgo(dateString) {
+    if (!dateString) return '';
+    const now = new Date();
+    const diffMs = now - new Date(dateString);
+    const diffMins = Math.floor(diffMs / 60000);
+    if (diffMins < 1) return t('time_ago.now', 'İndi');
+    if (diffMins < 60) return t('time_ago.mins', '{{num}} dəq. əvvəl').replace('{{num}}', diffMins);
+    const diffHours = Math.floor(diffMins / 60);
+    if (diffHours < 24) return t('time_ago.hours', '{{num}} saat əvvəl').replace('{{num}}', diffHours);
+    const diffDays = Math.floor(diffHours / 24);
+    return t('time_ago.days', '{{num}} gün əvvəl').replace('{{num}}', diffDays);
+  }
+
+  const DOC_TYPE_LABELS = {
+    passport: t('doc_types.passport', 'Xarici Pasport'),
+    id_card: t('doc_types.id_card', 'Şəxsiyyət Vəsiqəsi'),
+    driving_license: t('doc_types.driving_license', 'Sürücülük Vəsiqəsi'),
+  };
 
   async function loadData() {
     try {
@@ -94,7 +96,7 @@ export default function AdminKYCRequestsPage() {
       await addAdminLog(adminUser?.uid, 'kyc_approved', user.id, 'KYC Verification Approved');
       await loadData();
     } catch (err) {
-      alert('Təsdiqləmə xətası: ' + err.message);
+      alert(t('error_prefix', 'Xəta: ') + err.message);
     }
   };
 
@@ -114,7 +116,7 @@ export default function AdminKYCRequestsPage() {
       setRejectReason('');
       await loadData();
     } catch (err) {
-      alert('Rədd etmə xətası: ' + err.message);
+      alert(t('error_prefix', 'Xəta: ') + err.message);
     }
   };
 
@@ -140,7 +142,7 @@ export default function AdminKYCRequestsPage() {
     return (
       <div className={styles.loadingState}>
         <div className={styles.spinner} />
-        <span>KYC Məlumatları Yüklənir...</span>
+        <span>{t('loading', 'Yüklənir...')}</span>
       </div>
     );
   }
@@ -153,12 +155,12 @@ export default function AdminKYCRequestsPage() {
     <div className={styles.page}>
       {/* Header Row */}
       <div className={styles.pageHeader}>
-        <h1 className={styles.pageTitle}>KYC Təsdiqləməsi</h1>
+        <h1 className={styles.pageTitle}>{t('kyc_verification_title', 'KYC Təsdiqləməsi')}</h1>
         <div className={styles.headerSearch}>
           <Search size={16} className={styles.searchIcon} />
           <input
             type="text"
-            placeholder="İstifadəçi axtar..."
+            placeholder={t('search_users_placeholder', 'İstifadəçi axtar...')}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className={styles.searchInput}
@@ -170,34 +172,34 @@ export default function AdminKYCRequestsPage() {
       <div className={styles.metricsGrid}>
         <div className={`${styles.metricCard} ${styles.pendingCard}`}>
           <div className={styles.metricHeader}>
-            <span className={styles.metricLabel}>GÖZLƏYƏN</span>
+            <span className={styles.metricLabel}>{t('pending', 'GÖZLƏYƏN')}</span>
             <Hourglass size={18} className={styles.pendingIcon} />
           </div>
           <div className={styles.metricValueBlock}>
             <span className={styles.metricValue}>{stats.pending}</span>
-            {stats.pending > 0 && <span className={styles.metricBadge}>+5 bu gün</span>}
+            {stats.pending > 0 && <span className={styles.metricBadge}>{t('pending_count_today', '+5 bu gün')}</span>}
           </div>
         </div>
 
         <div className={`${styles.metricCard} ${styles.approvedCard}`}>
           <div className={styles.metricHeader}>
-            <span className={styles.metricLabel}>TƏSDİQLƏNİB</span>
+            <span className={styles.metricLabel}>{t('approved', 'TƏSDİQLƏNİB')}</span>
             <CheckCircle size={18} className={styles.approvedIcon} />
           </div>
           <div className={styles.metricValueBlock}>
             <span className={styles.metricValue}>{stats.approved.toLocaleString()}</span>
-            <span className={styles.metricBadge}>{successRate}% müvəffəqiyyət</span>
+            <span className={styles.metricBadge}>{t('approved_with_rate', '{{rate}}% müvəffəqiyyət').replace('{{rate}}', successRate)}</span>
           </div>
         </div>
 
         <div className={`${styles.metricCard} ${styles.rejectedCard}`}>
           <div className={styles.metricHeader}>
-            <span className={styles.metricLabel}>RƏDD EDİLİB</span>
+            <span className={styles.metricLabel}>{t('rejected', 'RƏDD EDİLİB')}</span>
             <XCircle size={18} className={styles.rejectedIcon} />
           </div>
           <div className={styles.metricValueBlock}>
             <span className={styles.metricValue}>{stats.rejected}</span>
-            <span className={styles.metricBadge}>Dəqiqlik dərəcəsi</span>
+            <span className={styles.metricBadge}>{t('accuracy_rate', 'Dəqiqlik dərəcəsi')}</span>
           </div>
         </div>
       </div>
@@ -207,7 +209,7 @@ export default function AdminKYCRequestsPage() {
         <div className={styles.leftFilters}>
           <button className={styles.filterBtn}>
             <SlidersHorizontal size={14} />
-            Filtr
+            {t('filter', 'Filtr')}
           </button>
           
           <div className={styles.sortWrapper}>
@@ -217,15 +219,15 @@ export default function AdminKYCRequestsPage() {
               onChange={(e) => setSortBy(e.target.value)}
               className={styles.sortSelect}
             >
-              <option value="newest">Tarixə görə (Yeni)</option>
-              <option value="oldest">Tarixə görə (Köhnə)</option>
+              <option value="newest">{t('sort_newest', 'Tarixə görə (Yeni)')}</option>
+              <option value="oldest">{t('sort_oldest', 'Tarixə görə (Köhnə)')}</option>
             </select>
           </div>
         </div>
 
         <div className={styles.liveIndicator}>
           <span className={styles.liveDot} />
-          Canlı Yeniləmə Aktivdir
+          {t('live_update_active', 'Canlı Yeniləmə Aktivdir')}
         </div>
       </div>
 
@@ -233,14 +235,14 @@ export default function AdminKYCRequestsPage() {
       {sortedUsers.length === 0 ? (
         <div className={styles.emptyState}>
           <ShieldCheck size={48} color="var(--text-muted)" />
-          <p>Heç bir aktiv KYC sorğusu tapılmadı</p>
+          <p>{t('no_pending_kyc', 'Heç bir aktiv KYC sorğusu tapılmadı')}</p>
         </div>
       ) : (
         <div className={styles.requestsGrid}>
           {sortedUsers.map((user) => {
             const isPending = user.kyc_status === 'pending';
             const initials = (user.display_login || 'U').slice(0, 2).toUpperCase();
-            const rejectReasonText = rejectReasons[user.id] || 'Sənəd məlumatları oxunmur.';
+            const rejectReasonText = rejectReasons[user.id] || t('kyc_rejected_default', 'Sənəd məlumatları oxunmur.');
 
             return (
               <div key={user.id} className={styles.requestCard}>
@@ -258,13 +260,13 @@ export default function AdminKYCRequestsPage() {
 
                   <div className={styles.headerRight}>
                     <span className={`${styles.statusBadge} ${isPending ? styles.badgePending : styles.badgeRejected}`}>
-                      {isPending ? 'Gözləyir' : 'İmtina Edilib'}
+                      {isPending ? t('pending', 'Gözləyir') : t('rejected', 'İmtina Edilib')}
                     </span>
                     <span className={styles.timeLabel}>{timeAgo(user.created_at)}</span>
                   </div>
                 </div>
 
-                {/* Document Previews (Only for Pending, or display anyway if URLs exist) */}
+                {/* Document Previews */}
                 {isPending ? (
                   <div className={styles.documentsRow}>
                     {/* Front side */}
@@ -278,7 +280,7 @@ export default function AdminKYCRequestsPage() {
                       ) : (
                         <div className={styles.docPlaceholder}>Sənəd Ön Şəkli Yoxdur</div>
                       )}
-                      <span className={styles.docLabel}>Ön Üz ({DOC_TYPE_LABELS[user.kyc_document_type] || 'Sənəd'})</span>
+                      <span className={styles.docLabel}>{t('doc_front_label', 'Ön Üz')} ({DOC_TYPE_LABELS[user.kyc_document_type] || 'Sənəd'})</span>
                     </div>
 
                     {/* Back side */}
@@ -292,7 +294,7 @@ export default function AdminKYCRequestsPage() {
                       ) : (
                         <div className={styles.docPlaceholder}>Sənəd Arxa Şəkli Yoxdur</div>
                       )}
-                      <span className={styles.docLabel}>Arxa Üz ({DOC_TYPE_LABELS[user.kyc_document_type] || 'Sənəd'})</span>
+                      <span className={styles.docLabel}>{t('doc_back_label', 'Arxa Üz')} ({DOC_TYPE_LABELS[user.kyc_document_type] || 'Sənəd'})</span>
                     </div>
 
                     {/* Selfie side */}
@@ -306,7 +308,7 @@ export default function AdminKYCRequestsPage() {
                       ) : (
                         <div className={styles.docPlaceholder}>Selfi Şəkli Yoxdur</div>
                       )}
-                      <span className={styles.docLabel}>Sənədlə Selfi</span>
+                      <span className={styles.docLabel}>{t('selfie_doc_label', 'Sənədlə Selfi')}</span>
                     </div>
                   </div>
                 ) : (
@@ -314,7 +316,7 @@ export default function AdminKYCRequestsPage() {
                   <div className={styles.rejectionBanner}>
                     <Info size={18} className={styles.infoIcon} />
                     <div className={styles.rejectionContent}>
-                      <span className={styles.rejectionLabel}>Rədd Səbəbi:</span>
+                      <span className={styles.rejectionLabel}>{t('rejection_reason_label', 'Rədd Səbəbi:')}</span>
                       <p className={styles.rejectionText}>{rejectReasonText}</p>
                     </div>
                   </div>
@@ -329,14 +331,14 @@ export default function AdminKYCRequestsPage() {
                         className={styles.approveBtn}
                       >
                         <Check size={16} />
-                        Təsdiqlə
+                        {t('approve_btn_title', 'Təsdiqlə')}
                       </button>
                       <button 
                         onClick={() => handleOpenReject(user)}
                         className={styles.rejectBtn}
                       >
                         <X size={16} />
-                        Rədd et
+                        {t('reject_btn_title', 'Rədd et')}
                       </button>
                     </>
                   ) : (
@@ -345,7 +347,7 @@ export default function AdminKYCRequestsPage() {
                       className={styles.historyBtn}
                     >
                       <Eye size={16} />
-                      Tarixçəyə Bax
+                      {t('view_history_btn', 'Tarixçəyə Bax')}
                     </button>
                   )}
                 </div>
@@ -372,19 +374,20 @@ export default function AdminKYCRequestsPage() {
         <div className={styles.modalOverlay}>
           <div className={styles.modalContent}>
             <div className={styles.modalHeader}>
-              <h3>KYC Sorğusunu Rədd Et</h3>
+              <h3>{t('reject_kyc_title', 'KYC Sorğusunu Rədd Et')}</h3>
               <button onClick={() => setRejectModal({ open: false, user: null })} className={styles.closeModalBtn}>
                 <X size={18} />
               </button>
             </div>
             <div className={styles.modalBody}>
               <p className={styles.modalDesc}>
-                İstifadəçi <strong>{rejectModal.user?.full_name || rejectModal.user?.display_login}</strong> üçün rədd etmə səbəbini daxil edin:
+                {t('reject_kyc_desc', 'İstifadəçi {{user}} üçün rədd etmə səbəbini daxil edin:')
+                  .replace('{{user}}', rejectModal.user?.full_name || rejectModal.user?.display_login)}
               </p>
               <textarea
                 value={rejectReason}
                 onChange={(e) => setRejectReason(e.target.value)}
-                placeholder="Məsələn: Şəxsiyyət vəsiqəsinin şəkli bulanıqdır və məlumatlar oxunmur. Yenidən yükləmə tələb olunur."
+                placeholder={t('reject_kyc_placeholder', 'Məsələn: Şəxsiyyət vəsiqəsinin şəkli bulanıqdır...')}
                 className={styles.modalTextarea}
                 rows={4}
               />
@@ -394,14 +397,14 @@ export default function AdminKYCRequestsPage() {
                 onClick={() => setRejectModal({ open: false, user: null })}
                 className={styles.modalCancelBtn}
               >
-                Ləğv et
+                {t('cancel', 'Ləğv et')}
               </button>
               <button 
                 onClick={handleConfirmReject}
                 disabled={!rejectReason.trim()}
                 className={styles.modalConfirmBtn}
               >
-                Rədd Et
+                {t('kyc_reject', 'Rədd Et')}
               </button>
             </div>
           </div>

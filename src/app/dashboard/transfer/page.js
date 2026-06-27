@@ -10,11 +10,13 @@ import { formatCurrency, formatDateTime } from '@/lib/utils/formatters';
 import { validateAmount, validateUSDTAddress } from '@/lib/utils/validators';
 import { ArrowUpRight, CheckCircle2, User, Wallet, ArrowDownToLine, CreditCard, Image as ImageIcon } from 'lucide-react';
 import { useAuthStore } from '@/lib/store/authStore';
+import { useTranslation } from '@/lib/store/languageStore';
 import { transferFunds, getUserByLogin, getUserByUid, createWithdrawal, getWithdrawals, getSystemSetting } from '@/lib/supabase/database';
 import { supabase } from '@/lib/supabase/config';
 
 export default function TransferPage() {
   const { user: authUser, setUser } = useAuthStore();
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState('transfer');
 
   // Transfer state
@@ -88,8 +90,8 @@ export default function TransferPage() {
     e.preventDefault();
     const newErrors = {};
 
-    if (!recipient.trim()) newErrors.recipient = 'Login yazın';
-    else if (!recipientValid) newErrors.recipient = 'Qəbul edən tapılmadı';
+    if (!recipient.trim()) newErrors.recipient = t('enter_login', 'Login yazın');
+    else if (!recipientValid) newErrors.recipient = t('recipient_not_found', 'Qəbul edən tapılmadı');
 
     const amountErr = validateAmount(amount, balance);
     if (amountErr) newErrors.amount = amountErr;
@@ -142,9 +144,9 @@ export default function TransferPage() {
       if (addrErr) newErrors.address = addrErr;
     } else {
       if (!isCardActive) {
-        newErrors.cardNumber = 'Kart ilə çıxarış hazırda aktiv deyil.';
+        newErrors.cardNumber = t('card_withdrawal_inactive', 'Kart ilə çıxarış hazırda aktiv deyil.');
       } else if (formattedCard.length !== 16 || isNaN(Number(formattedCard))) {
-        newErrors.cardNumber = 'Kart nömrəsi 16 rəqəmdən ibarət olmalıdır';
+        newErrors.cardNumber = t('card_number_16_digits', 'Kart nömrəsi 16 rəqəmdən ibarət olmalıdır');
       }
     }
 
@@ -188,10 +190,10 @@ export default function TransferPage() {
 
   const getStatusBadge = (status) => {
     const map = {
-      pending: { variant: 'warning', label: 'Gözləyir' },
-      approved: { variant: 'info', label: 'Təsdiqlənib' },
-      done: { variant: 'success', label: 'Tamamlanıb' },
-      rejected: { variant: 'error', label: 'Rədd' },
+      pending: { variant: 'warning', label: t('pending', 'Gözləyir') },
+      approved: { variant: 'info', label: t('approved', 'Təsdiqlənib') },
+      done: { variant: 'success', label: t('completed', 'Tamamlanıb') },
+      rejected: { variant: 'error', label: t('rejected', 'Rədd') },
     };
     const s = map[status] || { variant: 'info', label: status };
     return <Badge variant={s.variant} size="sm">{s.label}</Badge>;
@@ -206,7 +208,7 @@ export default function TransferPage() {
     <div className={styles.transfer}>
       {/* Balance Display */}
       <div className={styles.balanceCard}>
-        <span className={styles.balanceLabel}>Ümumi Balans</span>
+        <span className={styles.balanceLabel}>{t('total_balance', 'Ümumi Balans')}</span>
         <span className={styles.balanceValue}>{formatCurrency(balance, '')}</span>
         <span className={styles.balanceCurrency}>USD</span>
       </div>
@@ -217,24 +219,24 @@ export default function TransferPage() {
           className={`${styles.tab} ${activeTab === 'transfer' ? styles.tabActive : ''}`}
           onClick={() => setActiveTab('transfer')}
         >
-          <ArrowUpRight size={16} /> Transfer
+          <ArrowUpRight size={16} /> {t('transfer', 'Transfer')}
         </button>
         <button
           className={`${styles.tab} ${activeTab === 'withdrawal' ? styles.tabActive : ''}`}
           onClick={() => setActiveTab('withdrawal')}
         >
-          <ArrowDownToLine size={16} /> Çıxarış
+          <ArrowDownToLine size={16} /> {t('withdrawal', 'Çıxarış')}
         </button>
       </div>
 
       {/* Transfer Form */}
       {activeTab === 'transfer' && (
         <div className={styles.formCard}>
-          <h2 className={styles.formTitle}>Köçürmə</h2>
+          <h2 className={styles.formTitle}>{t('internal_transfer', 'Köçürmə')}</h2>
           <form onSubmit={handleTransferSubmit} className={styles.form}>
             <Input
-              label="Kimə"
-              placeholder="Qəbul edənin logini"
+              label={t('recipient_label', 'Kimə')}
+              placeholder={t('recipient_placeholder', 'Qəbul edənin logini')}
               value={recipient}
               onChange={handleRecipientChange}
               error={errors.recipient}
@@ -243,7 +245,7 @@ export default function TransferPage() {
             />
 
             <Input
-              label="Məbləğ"
+              label={t('amount', 'Məbləğ')}
               type="number"
               placeholder="0.00"
               value={amount}
@@ -256,7 +258,7 @@ export default function TransferPage() {
             />
 
             <Button type="submit" fullWidth size="lg" loading={loading}>
-              Göndər
+              {t('submit', 'Göndər')}
             </Button>
           </form>
         </div>
@@ -266,7 +268,7 @@ export default function TransferPage() {
       {activeTab === 'withdrawal' && (
         <>
           <div className={styles.formCard}>
-            <h2 className={styles.formTitle}>Çıxarış Sorğusu</h2>
+            <h2 className={styles.formTitle}>{t('withdrawal_request', 'Çıxarış Sorğusu')}</h2>
             
             {/* Withdrawal Method Toggles */}
             {isCardActive && (
@@ -297,14 +299,14 @@ export default function TransferPage() {
                   }}
                 >
                   <CreditCard size={14} />
-                  <span>Bank Kartı</span>
+                  <span>{t('card_withdrawal_manual', 'Bank Kartı')}</span>
                 </button>
               </div>
             )}
 
             <form onSubmit={handleWithdrawalSubmit} className={styles.form}>
               <Input
-                label="Məbləğ (USD)"
+                label={t('amount_usd', 'Məbləğ (USD)')}
                 type="number"
                 placeholder="0.00"
                 value={wdAmount}
@@ -319,8 +321,8 @@ export default function TransferPage() {
               {wdMethod === 'usdt' ? (
                 <>
                   <Input
-                    label="USDT Ünvanı"
-                    placeholder="T... və ya 0x..."
+                    label={t('usdt_address', 'USDT Ünvanı')}
+                    placeholder={t('usdt_address_placeholder', 'T... və ya 0x...')}
                     value={wdAddress}
                     onChange={(e) => {
                       setWdAddress(e.target.value);
@@ -330,7 +332,7 @@ export default function TransferPage() {
                   />
 
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                    <label style={{ fontSize: 13, color: 'var(--text-muted)', fontWeight: 500 }}>Şəbəkə</label>
+                    <label style={{ fontSize: 13, color: 'var(--text-muted)', fontWeight: 500 }}>{t('network', 'Şəbəkə')}</label>
                     <select
                       value={wdNetwork}
                       onChange={(e) => setWdNetwork(e.target.value)}
@@ -348,7 +350,7 @@ export default function TransferPage() {
                 </>
               ) : (
                 <Input
-                  label="16 rəqəmli Bank Kart Nömrəniz"
+                  label={t('bank_card_label', '16 rəqəmli Bank Kart Nömrəniz')}
                   placeholder="1234 5678 1234 5678"
                   value={wdCardNumber}
                   maxLength={19}
@@ -364,17 +366,17 @@ export default function TransferPage() {
               )}
 
               <Button type="submit" fullWidth size="lg" loading={wdLoading}>
-                Çıxarış Sorğusu Göndər
+                {t('send_withdrawal_request', 'Çıxarış Sorğusu Göndər')}
               </Button>
             </form>
           </div>
 
           {/* Withdrawal History */}
-          <h3 className={styles.historyTitle}>Çıxarış Tarixçəsi</h3>
+          <h3 className={styles.historyTitle}>{t('withdrawal_history', 'Çıxarış Tarixçəsi')}</h3>
           {wdHistoryLoading ? (
-            <div style={{ textAlign: 'center', padding: 20 }}>Yüklənir...</div>
+            <div style={{ textAlign: 'center', padding: 20 }}>{t('loading', 'Yüklənir...')}</div>
           ) : withdrawals.length === 0 ? (
-            <div className={styles.empty}>Hələ çıxarış yoxdur</div>
+            <div className={styles.empty}>{t('no_withdrawals_yet', 'Hələ çıxarış yoxdur')}</div>
           ) : (
             <div className={styles.historyList}>
               {withdrawals.map((w) => (
@@ -385,7 +387,7 @@ export default function TransferPage() {
                     
                     {w.payment_method === 'card' ? (
                       <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>
-                        <span>Kart: **** {w.card_number?.slice(-4)}</span>
+                        <span>{t('card_prefix', 'Kart: ****')} {w.card_number?.slice(-4)}</span>
                         {w.status === 'done' && w.receipt_url && (
                           <div>
                             <button
@@ -397,7 +399,7 @@ export default function TransferPage() {
                                 textDecoration: 'underline', cursor: 'pointer', marginTop: 4
                               }}
                             >
-                              Ödəniş Qəbzinə Bax
+                              {t('view_payment_receipt', 'Ödəniş Qəbzinə Bax')}
                             </button>
                           </div>
                         )}
@@ -420,7 +422,7 @@ export default function TransferPage() {
       <Modal
         isOpen={!!viewerReceiptUrl}
         onClose={() => setViewerReceiptUrl(null)}
-        title="Admin Ödəniş Qəbzi"
+        title={t('admin_payment_receipt', 'Admin Ödəniş Qəbzi')}
         size="md"
       >
         {viewerReceiptUrl && (
@@ -431,7 +433,7 @@ export default function TransferPage() {
               style={{ maxWidth: '100%', maxHeight: '400px', borderRadius: 8, objectFit: 'contain', border: '1px solid var(--border-color)' }}
             />
             <Button onClick={() => window.open(viewerReceiptUrl, '_blank')}>
-              Tam Ekran Bax
+              {t('view_full_screen', 'Tam Ekran Bax')}
             </Button>
           </div>
         )}
@@ -443,7 +445,7 @@ export default function TransferPage() {
           <div className={styles.successPopup}>
             <CheckCircle2 size={64} color="var(--color-success)" />
             <span className={styles.successText}>
-              {success ? 'Transfer uğurlu!' : 'Sorğu göndərildi!'}
+              {success ? t('transfer_success', 'Transfer uğurlu!') : t('request_sent', 'Sorğu göndərildi!')}
             </span>
           </div>
         </div>

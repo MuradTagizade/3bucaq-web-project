@@ -9,6 +9,7 @@ import Modal from '@/components/ui/Modal';
 import Badge from '@/components/ui/Badge';
 import Pagination from '@/components/ui/Pagination';
 import { Search, Shield, Ban, Eye, DollarSign, Star, Package, UserCog, ShieldCheck } from 'lucide-react';
+import { useTranslation } from '@/lib/store/languageStore';
 import {
   getUsers, blockUser, unblockUser, updateUserRole,
   updateUserBalance, updateUserPoints,
@@ -23,6 +24,7 @@ const PER_PAGE = 15;
 
 export default function AdminUsersPage() {
   const { user: adminUser } = useAuthStore();
+  const { t } = useTranslation();
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -67,9 +69,9 @@ export default function AdminUsersPage() {
       await addAdminLog(adminUser?.uid, 'update_role', targetUser.id, `Role: ${newRole}`);
       await loadUsers();
       setSelectedUser(null);
-      showToast(`Rol dəyişdirildi: ${newRole}`);
+      showToast(t('role_updated', 'Rol dəyişdirildi: {{role}}').replace('{{role}}', newRole));
     } catch (err) {
-      showToast('Xəta: ' + err.message);
+      showToast(t('error_prefix', 'Xəta: ') + err.message);
     }
   };
 
@@ -80,9 +82,9 @@ export default function AdminUsersPage() {
         await addAdminLog(adminUser?.uid, 'unblock_user', targetUser.id, 'User unblocked');
         await loadUsers();
         setSelectedUser(null);
-        showToast('Blok açıldı');
+        showToast(t('unblocked', 'Blok açıldı'));
       } catch (err) {
-        showToast('Xəta: ' + err.message);
+        showToast(t('error_prefix', 'Xəta: ') + err.message);
       }
     } else {
       setBlockReasonInput('');
@@ -100,9 +102,9 @@ export default function AdminUsersPage() {
       await loadUsers();
       setBlockModal(false);
       setSelectedUser(null);
-      showToast(`İstifadəçi ${blockDuration} günlük bloklandı`);
+      showToast(t('user_blocked_msg', 'İstifadəçi {{days}} günlük bloklandı').replace('{{days}}', blockDuration));
     } catch (err) {
-      showToast('Xəta: ' + err.message);
+      showToast(t('error_prefix', 'Xəta: ') + err.message);
     }
   };
 
@@ -114,9 +116,9 @@ export default function AdminUsersPage() {
       await loadUsers();
       setBalanceModal(false);
       setBalanceAmount('');
-      showToast('Balans yeniləndi');
+      showToast(t('balance_updated', 'Balans yeniləndi'));
     } catch (err) {
-      showToast('Xəta: ' + err.message);
+      showToast(t('error_prefix', 'Xəta: ') + err.message);
     }
   };
 
@@ -128,13 +130,11 @@ export default function AdminUsersPage() {
       await loadUsers();
       setPointsModal(false);
       setPointsAmount('');
-      showToast('Points yeniləndi');
+      showToast(t('points_updated', 'Points yeniləndi'));
     } catch (err) {
-      showToast('Xəta: ' + err.message);
+      showToast(t('error_prefix', 'Xəta: ') + err.message);
     }
   };
-
-
 
   const handleKYCAction = async (status) => {
     if (!selectedUser) return;
@@ -143,9 +143,10 @@ export default function AdminUsersPage() {
       await addAdminLog(adminUser?.uid, `kyc_${status}`, selectedUser.id, `KYC: ${status}`);
       await loadUsers();
       setSelectedUser(null);
-      showToast(`KYC ${status === 'approved' ? 'təsdiqləndi' : 'rədd edildi'}`);
+      const statusText = status === 'approved' ? t('approved', 'təsdiqləndi') : t('rejected', 'rədd edildi');
+      showToast(t('kyc_status_action', 'KYC {{status}}').replace('{{status}}', statusText));
     } catch (err) {
-      showToast('Xəta: ' + err.message);
+      showToast(t('error_prefix', 'Xəta: ') + err.message);
     }
   };
 
@@ -157,9 +158,9 @@ export default function AdminUsersPage() {
       await loadUsers();
       setEditModal(false);
       setSelectedUser(null);
-      showToast('Profil yeniləndi');
+      showToast(t('profile_updated', 'Profil yeniləndi'));
     } catch (err) {
-      showToast('Xəta: ' + err.message);
+      showToast(t('error_prefix', 'Xəta: ') + err.message);
     }
   };
 
@@ -169,9 +170,9 @@ export default function AdminUsersPage() {
       const { error } = await supabase.auth.resetPasswordForEmail(selectedUser.email);
       if (error) throw error;
       await addAdminLog(adminUser?.uid, 'reset_password', selectedUser.id, 'Password reset email sent');
-      showToast('Şifrə sıfırlama emaili göndərildi');
+      showToast(t('pwd_reset_sent', 'Şifrə sıfırlama emaili göndərildi'));
     } catch (err) {
-      showToast('Xəta: ' + err.message);
+      showToast(t('error_prefix', 'Xəta: ') + err.message);
     }
   };
 
@@ -198,19 +199,19 @@ export default function AdminUsersPage() {
   const pageData = filtered.slice(start, start + PER_PAGE);
 
   if (loading) {
-    return <div style={{ textAlign: 'center', padding: '40px 0' }}><span>Yüklənir...</span></div>;
+    return <div style={{ textAlign: 'center', padding: '40px 0' }}><span>{t('loading', 'Yüklənir...')}</span></div>;
   }
 
   return (
     <div>
       <div className={uStyles.topRow}>
-        <h1 className={styles.pageTitle}>İstifadəçilər</h1>
-        <Badge variant="info">{filtered.length} nəfər</Badge>
+        <h1 className={styles.pageTitle}>{t('admin_users_title', 'İstifadəçilər')}</h1>
+        <Badge variant="info">{t('user_count', '{{count}} nəfər').replace('{{count}}', filtered.length)}</Badge>
       </div>
 
       <div className={uStyles.searchBar}>
         <Input
-          placeholder="Login və ya email ilə axtar..."
+          placeholder={t('search_users_placeholder', 'Login və ya email ilə axtar...')}
           value={search}
           onChange={(e) => { setSearch(e.target.value); setCurrentPage(1); }}
           icon={<Search size={18} />}
@@ -219,7 +220,11 @@ export default function AdminUsersPage() {
 
       <div className={styles.table}>
         <div className={uStyles.userHeader}>
-          <span>Login</span><span>Balans</span><span>Level</span><span>Status</span><span></span>
+          <span>{t('login', 'Login')}</span>
+          <span>{t('balance', 'Balans')}</span>
+          <span>{t('level', 'Level')}</span>
+          <span>{t('status', 'Status')}</span>
+          <span></span>
         </div>
         {pageData.map((u) => (
           <div key={u.id} className={uStyles.userRow}>
@@ -231,11 +236,11 @@ export default function AdminUsersPage() {
             <span>LVL {u.current_level}</span>
             <span>
               {u.is_blocked ? (
-                <Badge variant="error" size="sm">Blok</Badge>
+                <Badge variant="error" size="sm">{t('blocked_badge', 'Blok')}</Badge>
               ) : u.role === 'admin' ? (
-                <Badge variant="gold" size="sm">Admin</Badge>
+                <Badge variant="gold" size="sm">{t('admin_panel', 'Admin')}</Badge>
               ) : (
-                <Badge variant="success" size="sm">Aktiv</Badge>
+                <Badge variant="success" size="sm">{t('active', 'Aktiv')}</Badge>
               )}
             </span>
             <button className={uStyles.viewBtn} onClick={() => setSelectedUser(u)}>
@@ -249,19 +254,19 @@ export default function AdminUsersPage() {
 
       {/* User Detail Modal */}
       <Modal isOpen={!!selectedUser && !blockModal && !balanceModal && !pointsModal && !editModal}
-        onClose={() => setSelectedUser(null)} title="İstifadəçi İdarəetmə" size="lg">
+        onClose={() => setSelectedUser(null)} title={t('user_management', 'İstifadəçi İdarəetmə')} size="lg">
         {selectedUser && (
           <div className={uStyles.detail}>
             <div className={uStyles.detailGrid}>
-              <div className={uStyles.detailItem}><span>Login</span><strong>{selectedUser.display_login}</strong></div>
-              <div className={uStyles.detailItem}><span>Ad</span><strong>{selectedUser.full_name}</strong></div>
-              <div className={uStyles.detailItem}><span>Email</span><strong>{selectedUser.email}</strong></div>
-              <div className={uStyles.detailItem}><span>Balans</span><strong>{formatCurrency(selectedUser.balance)}</strong></div>
-              <div className={uStyles.detailItem}><span>Transfer</span><strong>{formatCurrency(selectedUser.transfer_balance)}</strong></div>
-              <div className={uStyles.detailItem}><span>Points</span><strong>{Number(selectedUser.total_points).toFixed(1)}</strong></div>
-              <div className={uStyles.detailItem}><span>Ölkə</span><strong>{selectedUser.country || '—'}</strong></div>
-              <div className={uStyles.detailItem}><span>Şəhər</span><strong>{selectedUser.city || '—'}</strong></div>
-              <div className={uStyles.detailItem}><span>Telefon</span><strong>{selectedUser.phone || '—'}</strong></div>
+              <div className={uStyles.detailItem}><span>{t('login', 'Login')}</span><strong>{selectedUser.display_login}</strong></div>
+              <div className={uStyles.detailItem}><span>{t('fullname', 'Ad Soyad')}</span><strong>{selectedUser.full_name}</strong></div>
+              <div className={uStyles.detailItem}><span>{t('email', 'Email')}</span><strong>{selectedUser.email}</strong></div>
+              <div className={uStyles.detailItem}><span>{t('balance', 'Balans')}</span><strong>{formatCurrency(selectedUser.balance)}</strong></div>
+              <div className={uStyles.detailItem}><span>{t('transfer', 'Transfer')}</span><strong>{formatCurrency(selectedUser.transfer_balance)}</strong></div>
+              <div className={uStyles.detailItem}><span>{t('points', 'Points')}</span><strong>{Number(selectedUser.total_points).toFixed(1)}</strong></div>
+              <div className={uStyles.detailItem}><span>{t('country', 'Ölkə')}</span><strong>{selectedUser.country || '—'}</strong></div>
+              <div className={uStyles.detailItem}><span>{t('city', 'Şəhər')}</span><strong>{selectedUser.city || '—'}</strong></div>
+              <div className={uStyles.detailItem}><span>{t('phone', 'Telefon')}</span><strong>{selectedUser.phone || '—'}</strong></div>
               <div className={uStyles.detailItem}>
                 <span>KYC</span>
                 <Badge variant={getKYCStatusVariant(selectedUser.kyc_status || 'none')} size="sm">
@@ -272,7 +277,7 @@ export default function AdminUsersPage() {
 
             {/* Packages */}
             <div className={uStyles.packageSection}>
-              <h4 className={uStyles.sectionLabel}>Aktiv Paketlər</h4>
+              <h4 className={uStyles.sectionLabel}>{t('active_packages', 'Aktiv Paketlər')}</h4>
               <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 8 }}>
                 {PACKAGES.map((pkg) => {
                   const isActive = selectedUser.active_packages?.[pkg.id] || false;
@@ -284,7 +289,7 @@ export default function AdminUsersPage() {
                   );
                 })}
                 {Object.values(selectedUser.active_packages || {}).filter(Boolean).length === 0 && (
-                  <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>Aktiv paket yoxdur</span>
+                  <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>{t('no_active_packages', 'Aktiv paket yoxdur')}</span>
                 )}
               </div>
             </div>
@@ -292,27 +297,27 @@ export default function AdminUsersPage() {
             {/* Actions */}
             <div className={uStyles.detailActions}>
               <Button variant="ghost" size="sm" onClick={openEditModal}>
-                <UserCog size={14} /> Profil Dəyiş
+                <UserCog size={14} /> {t('edit_profile_btn', 'Profil Dəyiş')}
               </Button>
               <Button variant="ghost" size="sm" onClick={() => { setBalanceAmount(''); setBalanceModal(true); }}>
-                <DollarSign size={14} /> Balans
+                <DollarSign size={14} /> {t('balance', 'Balans')}
               </Button>
               <Button variant="ghost" size="sm" onClick={() => { setPointsAmount(''); setPointsModal(true); }}>
-                <Star size={14} /> Points
+                <Star size={14} /> {t('points', 'Points')}
               </Button>
               <Button variant="ghost" size="sm" onClick={handleResetPassword}>
-                Şifrə Sıfırla
+                {t('reset_pwd_btn', 'Şifrə Sıfırla')}
               </Button>
               <Button variant="ghost" size="sm" onClick={() => handleToggleAdmin(selectedUser)}>
-                <Shield size={14} /> {selectedUser.role === 'admin' ? 'Admin sil' : 'Admin et'}
+                <Shield size={14} /> {selectedUser.role === 'admin' ? t('demote_admin', 'Admin sil') : t('promote_admin', 'Admin et')}
               </Button>
               {selectedUser.kyc_status === 'pending' && (
                 <>
                   <Button variant="ghost" size="sm" onClick={() => handleKYCAction('approved')}>
-                    <ShieldCheck size={14} /> KYC Təsdiq
+                    <ShieldCheck size={14} /> {t('kyc_approve', 'KYC Təsdiq')}
                   </Button>
                   <Button variant="danger" size="sm" onClick={() => handleKYCAction('rejected')}>
-                    KYC Rədd
+                    {t('kyc_reject', 'KYC Rədd')}
                   </Button>
                 </>
               )}
@@ -321,7 +326,7 @@ export default function AdminUsersPage() {
                 size="sm"
                 onClick={() => handleBlockToggle(selectedUser)}
               >
-                <Ban size={14} /> {selectedUser.is_blocked ? 'Bloku aç' : 'Blokla'}
+                <Ban size={14} /> {selectedUser.is_blocked ? t('unblock_btn', 'Bloku aç') : t('block_btn', 'Blokla')}
               </Button>
             </div>
           </div>
@@ -329,68 +334,68 @@ export default function AdminUsersPage() {
       </Modal>
 
       {/* Block Modal */}
-      <Modal isOpen={blockModal} onClose={() => setBlockModal(false)} title="İstifadəçini Blokla" size="sm">
+      <Modal isOpen={blockModal} onClose={() => setBlockModal(false)} title={t('block_user_title', 'İstifadəçini Blokla')} size="sm">
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-          <Input label="Bloklama səbəbi" placeholder="Məs: Qaydaları pozma" value={blockReasonInput}
+          <Input label={t('block_reason', 'Bloklama səbəbi')} placeholder={t('block_reason_placeholder', 'Məs: Qaydaları pozma')} value={blockReasonInput}
             onChange={(e) => setBlockReasonInput(e.target.value)} />
           <div>
-            <label style={{ fontSize: 13, color: 'var(--text-muted)', display: 'block', marginBottom: 6 }}>Müddət</label>
+            <label style={{ fontSize: 13, color: 'var(--text-muted)', display: 'block', marginBottom: 6 }}>{t('duration', 'Müddət')}</label>
             <select value={blockDuration} onChange={(e) => setBlockDuration(Number(e.target.value))}
               style={{ width: '100%', padding: '10px 12px', borderRadius: 8, background: 'var(--bg-secondary)',
                 color: 'var(--text-primary)', border: '1px solid var(--border-color)', fontSize: 14 }}>
               {BLOCK_DURATIONS.map((d) => (
-                <option key={d.value} value={d.value}>{d.label}</option>
+                <option key={d.value} value={d.value}>{d.value} {t('days_left', 'gün')}</option>
               ))}
             </select>
           </div>
           <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 12 }}>
-            <Button variant="ghost" onClick={() => setBlockModal(false)}>Ləğv et</Button>
-            <Button variant="danger" onClick={handleConfirmBlock}>Təsdiqlə</Button>
+            <Button variant="ghost" onClick={() => setBlockModal(false)}>{t('cancel', 'Ləğv et')}</Button>
+            <Button variant="danger" onClick={handleConfirmBlock}>{t('confirm', 'Təsdiqlə')}</Button>
           </div>
         </div>
       </Modal>
 
       {/* Balance Modal */}
-      <Modal isOpen={balanceModal} onClose={() => setBalanceModal(false)} title="Balans Dəyiş" size="sm">
+      <Modal isOpen={balanceModal} onClose={() => setBalanceModal(false)} title={t('change_balance_title', 'Balans Dəyiş')} size="sm">
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-          <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>Müsbət: əlavə et, Mənfi: çıxar</p>
-          <Input label="Məbləğ" type="number" placeholder="50 və ya -20" value={balanceAmount}
+          <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>{t('balance_change_desc', 'Müsbət: əlavə et, Mənfi: çıxar')}</p>
+          <Input label={t('amount', 'Məbləğ')} type="number" placeholder="50 və ya -20" value={balanceAmount}
             onChange={(e) => setBalanceAmount(e.target.value)} />
           <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 12 }}>
-            <Button variant="ghost" onClick={() => setBalanceModal(false)}>Ləğv et</Button>
-            <Button onClick={handleBalanceUpdate}>Təsdiqlə</Button>
+            <Button variant="ghost" onClick={() => setBalanceModal(false)}>{t('cancel', 'Ləğv et')}</Button>
+            <Button onClick={handleBalanceUpdate}>{t('confirm', 'Təsdiqlə')}</Button>
           </div>
         </div>
       </Modal>
 
       {/* Points Modal */}
-      <Modal isOpen={pointsModal} onClose={() => setPointsModal(false)} title="Points Dəyiş" size="sm">
+      <Modal isOpen={pointsModal} onClose={() => setPointsModal(false)} title={t('change_points_title', 'Points Dəyiş')} size="sm">
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-          <Input label="Points Məbləği" type="number" placeholder="10" value={pointsAmount}
+          <Input label={t('points_amount_label', 'Points Məbləği')} type="number" placeholder="10" value={pointsAmount}
             onChange={(e) => setPointsAmount(e.target.value)} />
           <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 12 }}>
-            <Button variant="ghost" onClick={() => setPointsModal(false)}>Ləğv et</Button>
-            <Button onClick={handlePointsUpdate}>Təsdiqlə</Button>
+            <Button variant="ghost" onClick={() => setPointsModal(false)}>{t('cancel', 'Ləğv et')}</Button>
+            <Button onClick={handlePointsUpdate}>{t('confirm', 'Təsdiqlə')}</Button>
           </div>
         </div>
       </Modal>
 
       {/* Edit Profile Modal */}
-      <Modal isOpen={editModal} onClose={() => setEditModal(false)} title="Profil Redaktə Et" size="md">
+      <Modal isOpen={editModal} onClose={() => setEditModal(false)} title={t('edit_profile_title', 'Profil Redaktə Et')} size="md">
         <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-          <Input label="Ad Soyad" value={editForm.full_name || ''}
+          <Input label={t('fullname', 'Ad Soyad')} value={editForm.full_name || ''}
             onChange={(e) => setEditForm({ ...editForm, full_name: e.target.value })} />
-          <Input label="Login" value={editForm.display_login || ''}
+          <Input label={t('login', 'Login')} value={editForm.display_login || ''}
             onChange={(e) => setEditForm({ ...editForm, display_login: e.target.value })} />
-          <Input label="Ölkə" value={editForm.country || ''}
+          <Input label={t('country', 'Ölkə')} value={editForm.country || ''}
             onChange={(e) => setEditForm({ ...editForm, country: e.target.value })} />
-          <Input label="Şəhər" value={editForm.city || ''}
+          <Input label={t('city', 'Şəhər')} value={editForm.city || ''}
             onChange={(e) => setEditForm({ ...editForm, city: e.target.value })} />
-          <Input label="Telefon" value={editForm.phone || ''}
+          <Input label={t('phone', 'Telefon')} value={editForm.phone || ''}
             onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })} />
           <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 12 }}>
-            <Button variant="ghost" onClick={() => setEditModal(false)}>Ləğv et</Button>
-            <Button onClick={handleEditProfile}>Yadda Saxla</Button>
+            <Button variant="ghost" onClick={() => setEditModal(false)}>{t('cancel', 'Ləğv et')}</Button>
+            <Button onClick={handleEditProfile}>{t('save_btn', 'Yadda Saxla')}</Button>
           </div>
         </div>
       </Modal>

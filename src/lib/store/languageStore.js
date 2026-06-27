@@ -29,8 +29,23 @@ export function useTranslation() {
 
   const t = (key, fallback) => {
     const dict = translations[language] || translations.az;
-    if (dict && dict[key] !== undefined) {
-      return dict[key];
+    if (dict) {
+      if (key.includes('.')) {
+        const parts = key.split('.');
+        let current = dict;
+        for (const part of parts) {
+          if (current === undefined || current === null) {
+            current = undefined;
+            break;
+          }
+          current = current[part];
+        }
+        if (current !== undefined) {
+          return current;
+        }
+      } else if (dict[key] !== undefined) {
+        return dict[key];
+      }
     }
     return fallback !== undefined ? fallback : key;
   };

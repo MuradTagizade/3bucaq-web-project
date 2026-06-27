@@ -65,7 +65,7 @@ export default function Sidebar({ userName, transferBalance, referralLink, onLog
       {/* User Info Card */}
       <div className={styles.userCard}>
         <div className={styles.greeting}>
-          Hi: <span className={styles.name}>{userName || 'User'}</span>
+          {t('hi', 'Hi')}: <span className={styles.name}>{userName || 'User'}</span>
         </div>
         
         <div className={styles.balances}>

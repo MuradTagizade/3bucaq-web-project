@@ -103,7 +103,7 @@ export default function AdminLayout({ children }) {
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         minHeight: '100vh', background: '#060a13', color: 'var(--text-secondary)'
       }}>
-        <span>Yüklənir...</span>
+        <span>{t('loading', 'Yüklənir...')}</span>
       </div>
     );
   }

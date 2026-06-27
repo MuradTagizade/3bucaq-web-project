@@ -6,6 +6,7 @@ import styles from './FooterNav.module.css';
 import { Triangle, ArrowLeftRight, Flame, Users } from 'lucide-react';
 import { NAV_ITEMS } from '@/lib/utils/constants';
 import { formatCompactNumber } from '@/lib/utils/formatters';
+import { useTranslation } from '@/lib/store/languageStore';
 
 const iconMap = {
   triangle: Triangle,
@@ -16,6 +17,7 @@ const iconMap = {
 
 export default function FooterNav({ transferBalance = 0 }) {
   const pathname = usePathname();
+  const { t } = useTranslation();
 
   return (
     <nav className={styles.nav}>
@@ -40,7 +42,7 @@ export default function FooterNav({ transferBalance = 0 }) {
                   </span>
                 )}
               </div>
-              <span className={styles.label}>{item.label}</span>
+              <span className={styles.label}>{t(item.id, item.label)}</span>
             </Link>
           );
         })}
