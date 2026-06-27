@@ -342,7 +342,7 @@ export default function AdminUsersPage() {
             <label style={{ fontSize: 13, color: 'var(--text-muted)', display: 'block', marginBottom: 6 }}>{t('duration', 'Müddət')}</label>
             <select value={blockDuration} onChange={(e) => setBlockDuration(Number(e.target.value))}
               style={{ width: '100%', padding: '10px 12px', borderRadius: 8, background: 'var(--bg-secondary)',
-                color: 'var(--text-primary)', border: '1px solid var(--border-color)', fontSize: 14 }}>
+                color: 'var(--text-primary)', border: '1px solid var(--border-default)', fontSize: 14 }}>
               {BLOCK_DURATIONS.map((d) => (
                 <option key={d.value} value={d.value}>{d.value} {t('days_left', 'gün')}</option>
               ))}
@@ -404,7 +404,7 @@ export default function AdminUsersPage() {
       {toast && (
         <div style={{
           position: 'fixed', bottom: 40, left: '50%', transform: 'translateX(-50%)',
-          background: 'var(--bg-card)', border: '1px solid var(--border-color)',
+          background: 'var(--bg-card)', border: '1px solid var(--border-default)',
           color: 'var(--text-primary)', padding: '12px 24px', borderRadius: 12,
           fontSize: 14, zIndex: 9999, boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
         }}>

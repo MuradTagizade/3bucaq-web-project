@@ -77,7 +77,7 @@ export default function DashboardLayout({ children }) {
         </p>
         <button onClick={handleLogout} style={{
           padding: '10px 24px', borderRadius: 10, background: 'var(--bg-secondary)',
-          border: '1px solid var(--border-color)', color: 'var(--text-primary)',
+          border: '1px solid var(--border-default)', color: 'var(--text-primary)',
           fontSize: 14, cursor: 'pointer',
         }}>
           {t('logout', 'Çıxış')}
