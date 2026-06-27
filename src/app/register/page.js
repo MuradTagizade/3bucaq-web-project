@@ -10,6 +10,7 @@ import Select from '@/components/ui/Select';
 import Button from '@/components/ui/Button';
 import LanguageToggle from '@/components/ui/LanguageToggle';
 import ThemeToggle from '@/components/ui/ThemeToggle';
+import NeuralBackground from '@/components/ui/flow-field-background';
 import { useTranslation } from '@/lib/store/languageStore';
 import { Mail, Lock, User, Globe, MapPin, Phone, Link2 } from 'lucide-react';
 import {
@@ -151,6 +152,7 @@ function RegisterForm() {
       <div className={styles.bgGlow1} />
       <div className={styles.bgGlow2} />
       <div className={styles.bgGlow3} />
+      <NeuralBackground color="var(--color-primary)" />
       <div className={styles.container}>
         <div className={styles.card}>
           <Link href="/" className={styles.logoLink}>

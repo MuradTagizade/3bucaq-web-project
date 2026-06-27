@@ -9,6 +9,7 @@ import { supabase } from '@/lib/supabase/config';
 import { OTPInput } from '@/components/ui/be-ui-otp-input';
 import LanguageToggle from '@/components/ui/LanguageToggle';
 import ThemeToggle from '@/components/ui/ThemeToggle';
+import NeuralBackground from '@/components/ui/flow-field-background';
 
 function VerifyForm() {
   const router = useRouter();
@@ -106,6 +107,7 @@ function VerifyForm() {
       <div className={styles.bgGlow1} />
       <div className={styles.bgGlow2} />
       <div className={styles.bgGlow3} />
+      <NeuralBackground color="var(--color-primary)" />
       <div className={styles.container}>
         <div className={styles.card}>
           <div className={styles.logoWrap}>

@@ -9,6 +9,7 @@ import Input from '@/components/ui/Input';
 import Button from '@/components/ui/Button';
 import LanguageToggle from '@/components/ui/LanguageToggle';
 import ThemeToggle from '@/components/ui/ThemeToggle';
+import NeuralBackground from '@/components/ui/flow-field-background';
 import { useTranslation } from '@/lib/store/languageStore';
 import { Mail, Lock } from 'lucide-react';
 import { validateEmail } from '@/lib/utils/validators';
@@ -66,6 +67,7 @@ export default function LoginPage() {
       <div className={styles.bgGlow1} />
       <div className={styles.bgGlow2} />
       <div className={styles.bgGlow3} />
+      <NeuralBackground color="var(--color-primary)" />
       <div className={styles.container}>
         <div className={styles.card}>
           <Link href="/" className={styles.logoLink}>
