@@ -1,80 +1,77 @@
 'use client';
 
-import { useState, useRef, useEffect, Suspense } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import styles from './verify.module.css';
 import Logo from '@/components/layout/Logo';
 import Button from '@/components/ui/Button';
 import { supabase } from '@/lib/supabase/config';
+import { OTPInput } from '@/components/ui/be-ui-otp-input';
 
 function VerifyForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const email = searchParams.get('email') || '';
 
-  const [code, setCode] = useState(['', '', '', '', '', '']);
+  const [code, setCode] = useState('');
+  const [status, setStatus] = useState('idle');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const inputRefs = useRef([]);
-
-  useEffect(() => {
-    inputRefs.current[0]?.focus();
-  }, []);
-
-  const handleChange = (index, value) => {
-    if (!/^\d*$/.test(value)) return;
-
-    const newCode = [...code];
-    newCode[index] = value.slice(-1);
-    setCode(newCode);
-    setError('');
-
-    if (value && index < 5) {
-      inputRefs.current[index + 1]?.focus();
-    }
-  };
-
-  const handleKeyDown = (index, e) => {
-    if (e.key === 'Backspace' && !code[index] && index > 0) {
-      inputRefs.current[index - 1]?.focus();
-    }
-  };
-
-  const handlePaste = (e) => {
-    e.preventDefault();
-    const text = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 6);
-    const newCode = [...code];
-    text.split('').forEach((char, i) => {
-      if (i < 6) newCode[i] = char;
-    });
-    setCode(newCode);
-    if (text.length >= 6) inputRefs.current[5]?.focus();
-  };
 
   const handleSubmit = async () => {
-    const fullCode = code.join('');
-    if (fullCode.length !== 6) {
+    if (code.length !== 6) {
       setError('6 rəqəmli kodu daxil edin');
+      setStatus('error');
       return;
     }
 
     if (!email) {
       setError('Email ünvanı tapılmadı. Zəhmət olmasa yenidən qeydiyyatdan keçin.');
+      setStatus('error');
       return;
     }
 
     setLoading(true);
+    setStatus('idle');
     try {
       const { error: verifyErr } = await supabase.auth.verifyOtp({
         email,
-        token: fullCode,
+        token: code,
         type: 'signup',
       });
       if (verifyErr) throw new Error(verifyErr.message);
 
-      router.push('/dashboard');
+      setStatus('success');
+      setTimeout(() => {
+        router.push('/dashboard');
+      }, 800);
     } catch (err) {
       setError(err.message);
+      setStatus('error');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleComplete = async (completedCode) => {
+    setError('');
+    setStatus('idle');
+    setLoading(true);
+    try {
+      const { error: verifyErr } = await supabase.auth.verifyOtp({
+        email,
+        token: completedCode,
+        type: 'signup',
+      });
+      if (verifyErr) throw new Error(verifyErr.message);
+
+      setStatus('success');
+      setTimeout(() => {
+        router.push('/dashboard');
+      }, 800);
+    } catch (err) {
+      setError(err.message);
+      setStatus('error');
     } finally {
       setLoading(false);
     }
@@ -111,29 +108,28 @@ function VerifyForm() {
             {email ? <strong>{email}</strong> : 'Email'} ünvanına göndərilən 6 rəqəmli kodu daxil edin
           </p>
 
-          <div className={styles.codeInputs} onPaste={handlePaste}>
-            {code.map((digit, i) => (
-              <input
-                key={i}
-                ref={(el) => (inputRefs.current[i] = el)}
-                type="text"
-                inputMode="numeric"
-                maxLength={1}
-                value={digit}
-                onChange={(e) => handleChange(i, e.target.value)}
-                onKeyDown={(e) => handleKeyDown(i, e)}
-                className={`${styles.codeInput} ${digit ? styles.filled : ''}`}
-              />
-            ))}
+          <div style={{ display: 'flex', justifyContent: 'center', margin: '24px 0 16px' }}>
+            <OTPInput
+              length={6}
+              value={code}
+              status={status}
+              onChange={(val) => {
+                setCode(val);
+                setError('');
+                setStatus('idle');
+              }}
+              onComplete={handleComplete}
+              autoFocus
+            />
           </div>
 
-          {error && <div className={styles.error}>{error}</div>}
+          {error && <div className={styles.error} style={{ marginTop: '0', marginBottom: '16px' }}>{error}</div>}
 
-          <Button fullWidth size="lg" onClick={handleSubmit} loading={loading}>
+          <Button fullWidth size="lg" onClick={handleSubmit} loading={loading} disabled={status === 'success'}>
             İrəli
           </Button>
 
-          <button className={styles.resend} onClick={handleResend} disabled={!email}>
+          <button className={styles.resend} onClick={handleResend} disabled={!email || loading}>
             Kodu yenidən göndər
           </button>
         </div>
