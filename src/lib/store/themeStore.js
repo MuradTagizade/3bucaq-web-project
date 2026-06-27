@@ -4,31 +4,24 @@ export const useThemeStore = create((set, get) => ({
   theme: 'dark',
   
   setTheme: (theme) => {
+    // Light mode disabled — always force dark
     if (typeof window !== 'undefined') {
-      localStorage.setItem('theme', theme);
-      document.documentElement.setAttribute('data-theme', theme);
+      localStorage.setItem('theme', 'dark');
+      document.documentElement.setAttribute('data-theme', 'dark');
     }
-    set({ theme });
+    set({ theme: 'dark' });
   },
   
   toggleTheme: () => {
-    const current = get().theme;
-    const next = current === 'dark' ? 'light' : 'dark';
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('theme', next);
-      document.documentElement.setAttribute('data-theme', next);
-    }
-    set({ theme: next });
+    // Light mode disabled — no-op
   },
   
   initTheme: () => {
+    // Light mode disabled — always init as dark
     if (typeof window !== 'undefined') {
-      let saved = localStorage.getItem('theme');
-      if (!saved) {
-        saved = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-      }
-      document.documentElement.setAttribute('data-theme', saved);
-      set({ theme: saved });
+      localStorage.setItem('theme', 'dark');
+      document.documentElement.setAttribute('data-theme', 'dark');
+      set({ theme: 'dark' });
     }
   }
 }));
