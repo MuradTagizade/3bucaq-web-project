@@ -1,5 +1,5 @@
 /**
- * 3bucaq — Language Store (Zustand)
+ * Level Up — Language Store (Zustand)
  */
 
 import { create } from 'zustand';

@@ -1,5 +1,5 @@
 /**
- * 3bucaq — Auth Store (Zustand)
+ * Level Up — Auth Store (Zustand)
  */
 
 import { create } from 'zustand';

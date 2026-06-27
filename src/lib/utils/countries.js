@@ -1,5 +1,5 @@
 /**
- * 3bucaq — Ölkələr, Telefon Kodları və Şəhərlər siyahısı
+ * Level Up — Ölkələr, Telefon Kodları və Şəhərlər siyahısı
  */
 
 export const COUNTRIES = [

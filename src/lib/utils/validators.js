@@ -1,5 +1,5 @@
 /**
- * 3bucaq — Form Validators
+ * Level Up — Form Validators
  */
 
 import { PASSWORD_RULES } from './constants';

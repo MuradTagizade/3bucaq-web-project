@@ -392,7 +392,7 @@ export default function PersonalInfoPage() {
 
             <button
               type="button"
-              onClick={() => window.open('mailto:support@3bucaq.com')}
+              onClick={() => window.open('mailto:support@levelup.com')}
               className={styles.supportBtn}
             >
               <Headphones size={16} />

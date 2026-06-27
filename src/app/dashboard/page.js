@@ -125,7 +125,7 @@ export default function DashboardPage() {
       .join(', ');
   };
 
-  const referralLink = `https://3bucaq.com/register?ref=${user.referralCode}`;
+  const referralLink = `https://levelup.com/register?ref=${user.referralCode}`;
 
   const handleCopyRef = async () => {
     try {

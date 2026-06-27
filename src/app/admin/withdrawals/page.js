@@ -87,7 +87,7 @@ export default function AdminWithdrawalsPage() {
       
       // Mock notification & Email log
       console.log(`[Notification Engine] Bildiriş göndərildi: @${w.login} adlı istifadəçinin ${formatCurrency(w.amount)} çıxarışı tamamlandı.`);
-      console.log(`[Email Engine] E-poçt göndərildi: ${w.login}@3bucaq.com ünvanına qəbz (${receiptPath || txHash}) göndərildi.`);
+      console.log(`[Email Engine] E-poçt göndərildi: ${w.login}@levelup.com ünvanına qəbz (${receiptPath || txHash}) göndərildi.`);
       
       alert(t('approved_sent_msg', 'Çıxarış sorğusu uğurla təsdiqləndi! Müştəriyə bildiriş və e-poçt (mock) göndərildi.'));
       

@@ -41,7 +41,7 @@ export default function DashboardLayout({ children }) {
 
   const userName = user?.fullName?.split(' ')[0] || '';
   const transferBalance = user?.transferBalance || 0;
-  const referralLink = user?.referralCode ? `https://3bucaq.com/register?ref=${user.referralCode}` : '';
+  const referralLink = user?.referralCode ? `https://levelup.com/register?ref=${user.referralCode}` : '';
 
   const handleLogout = async () => {
     try {

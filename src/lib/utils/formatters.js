@@ -1,5 +1,5 @@
 /**
- * 3bucaq — Formatters
+ * Level Up — Formatters
  */
 
 import { useLanguageStore } from '@/lib/store/languageStore';

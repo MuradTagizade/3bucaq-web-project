@@ -97,7 +97,7 @@ export default function SubscribersPage() {
 
   // Referral link
   const referralLink = authUser?.referralCode
-    ? `https://3bucaq.com/register?ref=${authUser.referralCode}`
+    ? `https://levelup.com/register?ref=${authUser.referralCode}`
     : '';
 
   useEffect(() => {
@@ -136,8 +136,8 @@ export default function SubscribersPage() {
     if (navigator.share) {
       try {
         await navigator.share({
-          title: '3bucaq - Referal Link',
-          text: t('join_platform', '3bucaq platformasına qoşulun!'),
+          title: 'Level Up - Referal Link',
+          text: t('join_platform', 'Level Up platformasına qoşulun!'),
           url: referralLink,
         });
       } catch { /* user cancelled */ }

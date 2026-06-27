@@ -1,5 +1,5 @@
 /**
- * 3bucaq — Translation Dictionary (AZ / EN)
+ * Level Up — Translation Dictionary (AZ / EN)
  */
 
 export const translations = {
@@ -29,7 +29,7 @@ export const translations = {
     your_ref_link: "Referal Linkiniz",
     menu: "Menyu",
     share: "Paylaş",
-    join_platform: "3bucaq platformasına qoşulun!",
+    join_platform: "Level Up platformasına qoşulun!",
 
     // Common Buttons & Actions
     submit: "Göndər",
@@ -569,7 +569,7 @@ export const translations = {
     your_ref_link: "Your Referral Link",
     menu: "Menu",
     share: "Share",
-    join_platform: "Join 3bucaq platform!",
+    join_platform: "Join Level Up platform!",
 
     // Common Buttons & Actions
     submit: "Submit",

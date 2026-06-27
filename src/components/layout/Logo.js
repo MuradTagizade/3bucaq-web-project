@@ -8,7 +8,7 @@ export default function Logo({ size = 40, showText = true, className = '' }) {
     <div className={`${styles.logo} ${className}`}>
       <Image
         src="/3bucaq-logo.png"
-        alt="3bucaq Logo"
+        alt="Level Up Logo"
         width={size}
         height={size}
         className={styles.icon}
@@ -16,7 +16,7 @@ export default function Logo({ size = 40, showText = true, className = '' }) {
       />
       {showText && (
         <span className={styles.text}>
-          3<span className={styles.highlight}>bucaq</span>
+          Level <span className={styles.highlight}>Up</span>
         </span>
       )}
     </div>

@@ -269,7 +269,7 @@ export default function AdminsPage() {
 
   const handleRemoveAdmin = async () => {
     if (!selectedAdmin) return;
-    if (selectedAdmin.email === 'admin@3bucaq.com') {
+    if (selectedAdmin.email === 'admin@3bucaq.com' || selectedAdmin.email === 'admin@levelup.com') {
       showToast(t('cannot_demote_main_admin', 'Əsas adminin səlahiyyətlərini almaq olmaz!'));
       return;
     }
@@ -604,7 +604,7 @@ export default function AdminsPage() {
                   <span className={styles.subtext}>{selectedAdmin.email}</span>
                 </div>
               </div>
-              {selectedAdmin.email === 'admin@3bucaq.com' && (
+              {(selectedAdmin.email === 'admin@3bucaq.com' || selectedAdmin.email === 'admin@levelup.com') && (
                 <Badge variant="gold">{t('main_super_admin', 'Əsas Super Admin')}</Badge>
               )}
             </div>
@@ -617,14 +617,14 @@ export default function AdminsPage() {
                   <Toggle
                     checked={adminPerms[key]}
                     onChange={(e) => handleTogglePerm(key, e.target.checked, false)}
-                    disabled={selectedAdmin.email === 'admin@3bucaq.com'}
+                    disabled={selectedAdmin.email === 'admin@3bucaq.com' || selectedAdmin.email === 'admin@levelup.com'}
                   />
                 </div>
               ))}
             </div>
 
             <div className={styles.modalActionsBetween}>
-              {selectedAdmin.email !== 'admin@3bucaq.com' ? (
+              {(selectedAdmin.email !== 'admin@3bucaq.com' && selectedAdmin.email !== 'admin@levelup.com') ? (
                 <Button type="button" variant="danger" onClick={handleRemoveAdmin} loading={actionLoading}>
                   {t('demote_admin_btn', 'Adminlikdən Çıxar')}
                 </Button>
@@ -635,7 +635,7 @@ export default function AdminsPage() {
                 <Button type="button" variant="secondary" onClick={() => setEditModal(false)}>
                   {t('cancel', 'İmtina')}
                 </Button>
-                <Button type="submit" loading={actionLoading} disabled={selectedAdmin.email === 'admin@3bucaq.com'}>
+                <Button type="submit" loading={actionLoading} disabled={selectedAdmin.email === 'admin@3bucaq.com' || selectedAdmin.email === 'admin@levelup.com'}>
                   {t('save_btn', 'Yadda Saxla')}
                 </Button>
               </div>

@@ -1,5 +1,5 @@
 /**
- * 3bucaq — UI Store (Zustand)
+ * Level Up — UI Store (Zustand)
  */
 
 import { create } from 'zustand';
