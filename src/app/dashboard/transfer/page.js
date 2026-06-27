@@ -278,8 +278,8 @@ export default function TransferPage() {
                   onClick={() => { setWdMethod('usdt'); setWdErrors({}); }}
                   style={{
                     flex: 1, padding: '10px', borderRadius: 8, fontSize: 13, fontWeight: 600,
-                    background: wdMethod === 'usdt' ? 'rgba(124,77,255,0.08)' : 'var(--bg-secondary)',
-                    border: `1px solid ${wdMethod === 'usdt' ? 'var(--color-primary)' : 'var(--border-color)'}`,
+                    background: wdMethod === 'usdt' ? 'var(--color-primary-subtle)' : 'var(--bg-secondary)',
+                    border: `1px solid ${wdMethod === 'usdt' ? 'var(--color-primary)' : 'var(--border-default)'}`,
                     color: wdMethod === 'usdt' ? 'var(--color-primary)' : 'var(--text-secondary)', cursor: 'pointer',
                     display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6
                   }}
@@ -292,8 +292,8 @@ export default function TransferPage() {
                   onClick={() => { setWdMethod('card'); setWdErrors({}); }}
                   style={{
                     flex: 1, padding: '10px', borderRadius: 8, fontSize: 13, fontWeight: 600,
-                    background: wdMethod === 'card' ? 'rgba(0, 230, 118, 0.08)' : 'var(--bg-secondary)',
-                    border: `1px solid ${wdMethod === 'card' ? 'var(--color-primary)' : 'var(--border-color)'}`,
+                    background: wdMethod === 'card' ? 'var(--color-primary-subtle)' : 'var(--bg-secondary)',
+                    border: `1px solid ${wdMethod === 'card' ? 'var(--color-primary)' : 'var(--border-default)'}`,
                     color: wdMethod === 'card' ? 'var(--color-primary)' : 'var(--text-secondary)', cursor: 'pointer',
                     display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6
                   }}
@@ -339,7 +339,7 @@ export default function TransferPage() {
                       style={{
                         width: '100%', padding: '10px 12px', borderRadius: 8,
                         background: 'var(--bg-secondary)', color: 'var(--text-primary)',
-                        border: '1px solid var(--border-color)', fontSize: 14,
+                        border: '1px solid var(--border-default)', fontSize: 14,
                       }}
                     >
                       <option value="TRC20">USDT TRC20</option>

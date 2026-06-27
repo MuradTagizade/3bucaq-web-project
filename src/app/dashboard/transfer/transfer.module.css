@@ -3,10 +3,10 @@
 }
 
 .balanceCard {
-  background: var(--bg-card);
-  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
-  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
-  border: 1px solid var(--border-subtle);
+  background: var(--glass-card-bg);
+  backdrop-filter: var(--glass-card-blur);
+  -webkit-backdrop-filter: var(--glass-card-blur);
+  border: var(--glass-card-border);
   border-radius: var(--radius-lg);
   padding: 24px;
   display: flex;
@@ -16,6 +16,7 @@
   margin-bottom: 24px;
   position: relative;
   overflow: hidden;
+  box-shadow: var(--glass-card-shadow);
 }
 
 .balanceCard::before {
@@ -61,14 +62,17 @@
   justify-content: center;
   gap: 8px;
   padding: 14px;
-  background: var(--bg-glass);
-  border: 1px solid var(--border-subtle);
+  background: var(--glass-card-bg);
+  backdrop-filter: var(--glass-card-blur);
+  -webkit-backdrop-filter: var(--glass-card-blur);
+  border: var(--glass-card-border);
   border-radius: var(--radius-sm);
   color: var(--text-secondary);
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
   transition: all var(--transition-base);
+  box-shadow: var(--glass-card-shadow);
 }
 
 .tab:hover {
@@ -77,19 +81,21 @@
 }
 
 .tabActive {
-  background: rgba(0, 240, 255, 0.1);
-  color: var(--color-secondary);
-  border-color: rgba(0, 240, 255, 0.3);
-  box-shadow: 0 0 15px rgba(0, 240, 255, 0.1);
+  background: var(--color-primary-subtle) !important;
+  color: var(--color-primary) !important;
+  border-color: var(--color-primary) !important;
+  box-shadow: 0 0 15px var(--color-primary-glow) !important;
 }
 
 .formCard {
-  background: var(--bg-card);
-  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
-  border: 1px solid var(--border-default);
+  background: var(--glass-card-bg);
+  backdrop-filter: var(--glass-card-blur);
+  -webkit-backdrop-filter: var(--glass-card-blur);
+  border: var(--glass-card-border);
   border-radius: var(--radius-lg);
   padding: 32px;
   margin-bottom: 32px;
+  box-shadow: var(--glass-card-shadow);
 }
 
 .formTitle {

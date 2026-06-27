@@ -28,13 +28,13 @@
 /* Variants */
 .btn--primary {
   background: var(--color-primary);
-  color: #020205; /* Dark text for neon background */
-  box-shadow: 0 0 20px rgba(0, 255, 163, 0.2);
+  color: var(--primary-foreground, #020205);
+  box-shadow: 0 4px 12px var(--color-primary-glow);
 }
 
 .btn--primary:hover {
-  background: #33FFB5;
-  box-shadow: 0 0 30px rgba(0, 255, 163, 0.4);
+  background: var(--color-primary-light);
+  box-shadow: 0 6px 16px var(--color-primary-glow);
   transform: translateY(-1px);
 }
 
