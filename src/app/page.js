@@ -22,8 +22,23 @@ export default function LandingPage() {
       <NeuralBackground color="var(--color-primary)" />
 
       <div className={styles.topBar}>
-        <LanguageToggle size={15} />
-        <ThemeToggle size={18} />
+        <div className={styles.topBarActions}>
+          <Link href="/login">
+            <Button size="sm" variant="ghost">
+              {t('login', 'Giriş')}
+            </Button>
+          </Link>
+          <Link href="/register">
+            <Button size="sm">
+              {t('landing.create_account_btn', 'Hesab Yarat')}
+            </Button>
+          </Link>
+        </div>
+        <div className={styles.topBarDivider} />
+        <div className={styles.topBarToggles}>
+          <LanguageToggle size={15} />
+          <ThemeToggle size={18} />
+        </div>
       </div>
 
       {/* Hero Section */}
@@ -40,19 +55,6 @@ export default function LandingPage() {
           <p className={styles.subtitle}>
             {t('landing.subtitle', 'Investisiya edin, referallar cəlb edin, gündəlik qazanc əldə edin. USDT ilə ödəniş alın.')}
           </p>
-
-          <div className={styles.heroActions}>
-            <Link href="/register">
-              <Button size="lg" iconRight={<ArrowRight size={20} />}>
-                {t('landing.create_account_btn', 'Hesab Yarat')}
-              </Button>
-            </Link>
-            <Link href="/login">
-              <Button size="lg" variant="ghost">
-                {t('login', 'Giriş')}
-              </Button>
-            </Link>
-          </div>
         </div>
 
         {/* Floating Stats */}

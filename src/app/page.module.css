@@ -59,6 +59,36 @@
   align-items: center;
 }
 
+.topBarActions {
+  display: flex;
+  gap: var(--space-sm);
+  align-items: center;
+}
+
+.topBarDivider {
+  width: 1px;
+  height: 20px;
+  background: var(--border-default);
+  opacity: 0.5;
+}
+
+.topBarToggles {
+  display: flex;
+  gap: var(--space-sm);
+  align-items: center;
+}
+
+@media (max-width: 576px) {
+  .topBar {
+    top: 12px;
+    right: 12px;
+    gap: var(--space-xs);
+  }
+  .topBarDivider {
+    height: 16px;
+  }
+}
+
 /* === Hero === */
 .hero {
   position: relative;
