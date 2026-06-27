@@ -162,12 +162,12 @@
 }
 
 .phonePrefixSelect {
-  width: 110px;
-  flex-shrink: 0;
+  width: 90px !important;
+  flex-shrink: 0 !important;
 }
 
 .phoneInput {
-  flex: 1;
+  flex: 1 !important;
 }
 
 /* Common form styles for register/forgot-password/verify */
