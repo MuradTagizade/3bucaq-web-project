@@ -23,10 +23,10 @@
   --color-accent-light: #C553FF;
   --color-accent-glow: rgba(176, 38, 255, 0.4);
 
-  /* Backgrounds — Dark Mode (Deep Space / Pitch Black) */
-  --bg-primary: #020205;
-  --bg-secondary: #0A0A0F;
-  --bg-tertiary: #12121A;
+  /* Backgrounds — Dark Mode (Deep Space / Slate Blue) */
+  --bg-primary: #0b0f19;
+  --bg-secondary: #111625;
+  --bg-tertiary: #1a2035;
   
   /* Glass Cards — Ultra clear, minimal tint */
   --bg-card: rgba(255, 255, 255, 0.02);
@@ -40,7 +40,7 @@
   --text-primary: #FFFFFF;
   --text-secondary: #A0A5B5;
   --text-muted: #6B7280;
-  --text-inverse: #020205;
+  --text-inverse: #0b0f19;
 
   /* Status Colors — Neon Vibrancy */
   --color-success: #00FFA3;
@@ -69,7 +69,7 @@
   --glass-saturate: 180%;
 
   /* Gradients */
-  --gradient-hero: radial-gradient(circle at 50% 0%, #0A0A0F 0%, #020205 100%);
+  --gradient-hero: radial-gradient(circle at 50% 0%, #111625 0%, #0b0f19 100%);
   --gradient-primary: linear-gradient(135deg, #00FFA3, #00F0FF);
   --gradient-accent: linear-gradient(135deg, #B026FF, #FF2A5F);
   --gradient-glass: linear-gradient(135deg, rgba(255,255,255,0.05), rgba(255,255,255,0.01));
