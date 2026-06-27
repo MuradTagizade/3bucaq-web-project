@@ -169,6 +169,18 @@ Lokal yoxlamalar üçün istifadə olunan test giriş məlumatları:
 *   **Mobil və Masaüstü Layout Tənzimləmələri (Responsiveness):** 
     *   Masaüstündə (`min-width: 769px`) sabit sol Sidebar-ın kontent sahəsinin üstünə minməsini əngəlləmək üçün `.app-content-wrapper` sinfinə `margin-left` əlavə edildi.
     *   Ana səhifədəki xal statistika kartları (`Toplam Xallar` / `Aktiv Paketlər`), bakiye sahələri (`Əsas Balans` / `Transfer Balansı`) və referal kodu sətiri mobil cihazlarda da şaquli yığılmaq (stack) əvəzinə masaüstü kimi yan-yana (2 sütunlu grid) dizayn edildi.
-*   **Aydınlıq Rejiminin Təkmilləşdirilməsi və Devredışı Buraxılması:**
+*   **Aydınlıq Rejiminin Təkmilləşdirilməsi:**
     *   Aydınlıq rejimində (Light Mode) ağ fon üzərində oxunmayan parlaq neon rənglər kontrastlığı yüksək olan zümrüd yaşılı (`#008F5A`) və göy-sian tona keçirildi. Arxa plan tam ağ əvəzinə Apple dizaynlarına uyğun platin-boz (`#F0F2F6`) tona çəkildi.
-    *   İstifadəçinin tələbi ilə aydınlıq rejimi **müvəqqəti olaraq tamamilə ləğv edildi**; `ThemeToggle` butonu tətbiqdən çıxarıldı və `themeStore.js` vasitəsilə platforma kalıcı olaraq yalnız qaranlıq rejimdə (Koyu Mod) işləyəcək şəkildə sabitləndi.
+
+---
+
+## 7. Son Sessiyada Görülən Təkmilləşdirmələr (Buzlu Şüşə & Animasiyalar)
+*   **Animasiyalı OTP Giriş Komponenti (Yeni):** Təmiz JavaScript, CSS Modulu və Framer Motion ilə hazırlanan `be-ui-otp-input` komponenti yaradıldı və `/verify` (e-poçt doğrulama) səhifəsinə qoşuldu. Kod daxil edildikdə avtomatik təsdiqləmə (auto-submit), xətalarda silkələnmə (shake) və uğurlu doğrulama zamanı animasiyalı yaşıl işarə tətbiq edildi.
+*   **İşıqlı Rejim və Theme Toggle Bərpası:** Əvvəllər deaktiv edilmiş aydınlıq rejimi yenidən aktivləşdirildi. `ThemeToggle` komponenti və `themeStore` yenidən tam funksional hala gətirildi. Toggle düyməsi `/login`, `/register` və `/verify` səhifələrinin yuxarı sağ küncünə yerləşdirildi.
+*   **Premium "Buzlu Şüşə" (Frosted Glass) Kartları:** Giriş, qeydiyyat, doğrulama kartları və dashboard elementləri üçün mövzuya duyarlı frosted glass dizaynı yaradıldı. Yüksək arxa plan bulanıqlığı (`blur(48px)`), sol küncdən düşən işıq əks olunması (radial highlight), incə kənar haşiyələri və arxa planda üzən 3 ədəd rəngli ambient dairə (`.bgGlow1-3`) tətbiq edildi.
+*   **Dashboard və Mobil Naviqasiya Şüşə Effekti:** Dashboard-dakı profil kartı, balans qutuları, stat kartları, səviyyə cədvəli və mobil cihazlar üçün alt menyu (`FooterNav.js`) tamamilə bu dinamik şüşə dizaynına keçirildi.
+*   **Yumşaq İşıqlı Mod Fonu (Gradient BG):** Aydınlıq rejimindəki dümdüz arxa plan ekran görüntüsünə uyğun olaraq ağ-nanə yaşılına keçən zərif gradientlə (`linear-gradient(180deg, #ffffff 0%, #e8faf4 50%, #c4f2e3 100%)`) əvəzləndi və scrolling zamanı sabitləndi (`fixed`).
+*   **Düymə Kontrastı və Səviyyə Xətti Düzəlişləri:**
+    *   İşıqlı modda primary düymələrdəki (məs. "GÖNDƏR" və "Çıxarış Sorğusu Göndər") yazı rənginin qara qalaraq görünməməsi xətası yazı rəngini `--primary-foreground` (ağ) dəyişəninə bağlamaqla həll edildi.
+    *   Səviyyə kartlarının üstündəki tərəqqi xəttinin arxa fonu işıqlı mod üçün aydın görünən boz şərkildə tənzimləndi (`--progress-track-bg`).
+*   **Masaüstü Sürüşmə (Flex Shift) Xətasının Həlli:** `NeuralBackground` arxa fon komponentindəki Tailwind sinifləri raw CSS inline stillərlə əvəzlənərək flexbox layoutunun pozulması və kartın sağa sürüşməsi xətası tamamilə aradan qaldırıldı. Animasiya həmçinin ana səhifəyə də inteqrasiya olundu.
