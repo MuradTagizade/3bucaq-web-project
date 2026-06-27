@@ -97,6 +97,9 @@ function VerifyForm() {
 
   return (
     <div className={styles.page}>
+      <div className={styles.bgGlow1} />
+      <div className={styles.bgGlow2} />
+      <div className={styles.bgGlow3} />
       <div className={styles.container}>
         <div className={styles.card}>
           <div className={styles.logoWrap}>

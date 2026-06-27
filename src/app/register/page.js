@@ -146,6 +146,9 @@ function RegisterForm() {
         <LanguageToggle />
       </div>
       <div className={styles.bgGrid} />
+      <div className={styles.bgGlow1} />
+      <div className={styles.bgGlow2} />
+      <div className={styles.bgGlow3} />
       <div className={styles.container}>
         <div className={styles.card}>
           <Link href="/" className={styles.logoLink}>
