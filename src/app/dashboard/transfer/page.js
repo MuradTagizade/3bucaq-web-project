@@ -267,7 +267,7 @@ function TransferContent() {
                 placeholder={t('recipient_placeholder', 'Qəbul edənin logini')}
                 value={recipient}
                 onChange={handleRecipientChange}
-                error={errors.recipient}
+                error={recipient.length >= 3 && recipientValid === false ? t('recipient_not_found', 'Qəbul edən tapılmadı') : errors.recipient}
                 success={recipientValid}
                 icon={<User size={18} />}
               />
@@ -285,7 +285,7 @@ function TransferContent() {
                 icon={<ArrowUpRight size={18} />}
               />
 
-              <Button type="submit" fullWidth size="lg" loading={loading}>
+              <Button type="submit" fullWidth size="lg" loading={loading} disabled={!recipientValid}>
                 {t('submit', 'Göndər')}
               </Button>
             </form>
