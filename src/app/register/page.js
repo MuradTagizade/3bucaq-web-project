@@ -134,7 +134,9 @@ function RegisterForm() {
         phone: fullPhone,
         referralCode: form.referralCode || null,
       });
-      router.push(`/verify?email=${encodeURIComponent(form.email)}`);
+      // Temporarily deactivated OTP verification. Will be re-enabled later.
+      // router.push(`/verify?email=${encodeURIComponent(form.email)}`);
+      router.push('/dashboard');
     } catch (err) {
       setErrors({ general: err.message });
     } finally {
