@@ -8,7 +8,7 @@ import Spinner from '@/components/ui/Spinner';
 import { useAuthStore } from '@/lib/store/authStore';
 import { useTranslation } from '@/lib/store/languageStore';
 import { getSystemSetting, updateSystemSetting, addAdminLog } from '@/lib/supabase/database';
-import { Coins, Save } from 'lucide-react';
+import { Coins, Save, CreditCard } from 'lucide-react';
 
 export default function AdminWalletsPage() {
   const { user: adminUser } = useAuthStore();
@@ -26,6 +26,11 @@ export default function AdminWalletsPage() {
     wallet_usdc_bep20: '',
   });
 
+  const [depositCard, setDepositCard] = useState('');
+  const [updatingCard, setUpdatingCard] = useState(false);
+  const [isCardActive, setIsCardActive] = useState(false);
+  const [updatingToggle, setUpdatingToggle] = useState(false);
+
   const showToast = (msg) => {
     setToast(msg);
     setTimeout(() => setToast(null), 3000);
@@ -36,7 +41,8 @@ export default function AdminWalletsPage() {
       try {
         const [
           usdtTRC, usdtERC, usdtBEP,
-          usdcTRC, usdcERC, usdcBEP
+          usdcTRC, usdcERC, usdcBEP,
+          activeCard, cardActiveSetting
         ] = await Promise.all([
           getSystemSetting('wallet_usdt_trc20'),
           getSystemSetting('wallet_usdt_erc20'),
@@ -44,6 +50,8 @@ export default function AdminWalletsPage() {
           getSystemSetting('wallet_usdc_trc20'),
           getSystemSetting('wallet_usdc_erc20'),
           getSystemSetting('wallet_usdc_bep20'),
+          getSystemSetting('admin_deposit_card'),
+          getSystemSetting('card_payment_active'),
         ]);
 
         setWallets({
@@ -54,6 +62,11 @@ export default function AdminWalletsPage() {
           wallet_usdc_erc20: usdcERC || '',
           wallet_usdc_bep20: usdcBEP || '',
         });
+
+        if (activeCard) {
+          setDepositCard(activeCard);
+        }
+        setIsCardActive(cardActiveSetting === 'true');
       } catch (err) {
         console.error('Failed to load wallet settings:', err);
       } finally {
@@ -92,6 +105,45 @@ export default function AdminWalletsPage() {
       showToast(t('error_prefix', 'Xəta: ') + err.message);
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleUpdateCard = async () => {
+    const cleanCard = depositCard.replace(/\s+/g, '');
+    if (cleanCard.length !== 16 || isNaN(Number(cleanCard))) {
+      showToast(t('card_number_16_digit_err', 'Kart nömrəsi 16 rəqəmli olmalıdır.'));
+      return;
+    }
+    setUpdatingCard(true);
+    try {
+      await updateSystemSetting('admin_deposit_card', cleanCard);
+      await addAdminLog(adminUser?.uid, 'update_admin_deposit_card', null, `Admin deposit card updated to: ${cleanCard}`);
+      showToast(t('admin_deposit_card_updated', 'Mədaxil kart hesabı uğurla yeniləndi!'));
+    } catch (err) {
+      showToast(t('error_prefix', 'Xəta: ') + err.message);
+    } finally {
+      setUpdatingCard(false);
+    }
+  };
+
+  const handleToggleCardPayment = async () => {
+    setUpdatingToggle(true);
+    const newStatus = !isCardActive;
+    try {
+      await updateSystemSetting('card_payment_active', newStatus ? 'true' : 'false');
+      await addAdminLog(
+        adminUser?.uid,
+        newStatus ? 'enable_card_payment' : 'disable_card_payment',
+        null,
+        `Admin ${newStatus ? 'enabled' : 'disabled'} card payments system-wide`
+      );
+      setIsCardActive(newStatus);
+      const statusText = newStatus ? t('activate', 'aktiv edildi') : t('deactivate', 'deaktiv edildi');
+      showToast(t('card_payment_active_msg', 'Kart ilə ödəniş sistemi {{status}}!').replace('{{status}}', statusText));
+    } catch (err) {
+      showToast(t('error_prefix', 'Xəta: ') + err.message);
+    } finally {
+      setUpdatingToggle(false);
     }
   };
 
@@ -181,6 +233,68 @@ export default function AdminWalletsPage() {
             >
               <Save size={16} /> USDC Cüzdanlarını Yadda Saxla
             </Button>
+          </div>
+        </div>
+
+        {/* Bank Card Settings Card */}
+        <div className={styles.card}>
+          <h3 className={styles.title}>
+            <CreditCard size={18} color="var(--color-primary)" />
+            Bank Kartı Tənzimləmələri
+          </h3>
+          
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+            {/* Toggle Status */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: 16, borderBottom: '1px solid var(--border-subtle)' }}>
+              <div style={{ flex: 1, paddingRight: 12 }}>
+                <strong style={{ fontSize: 13, color: 'var(--text-primary)' }}>Kart ilə Ödəniş Sistemi</strong>
+                <p style={{ fontSize: 11, color: 'var(--text-muted)', margin: '4px 0 0 0', lineHeight: '1.4' }}>
+                  Bütün istifadəçi profillərində kart ilə mədaxil və məxarici aktiv/deaktiv edin.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={handleToggleCardPayment}
+                disabled={updatingToggle}
+                style={{
+                  padding: '8px 16px',
+                  borderRadius: 8,
+                  fontSize: 13,
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  background: isCardActive ? 'rgba(0, 230, 118, 0.1)' : 'rgba(255, 23, 68, 0.1)',
+                  border: `1px solid ${isCardActive ? 'var(--color-success)' : 'var(--color-error)'}`,
+                  color: isCardActive ? 'var(--color-success)' : 'var(--color-error)',
+                  transition: 'all 0.2s ease',
+                  whiteSpace: 'nowrap'
+                }}
+              >
+                {isCardActive ? t('deactivate', 'Deaktiv Et') : t('activate', 'Aktiv Et')}
+              </button>
+            </div>
+
+            {/* Target Card Input */}
+            <div className={styles.inputs}>
+              <Input
+                label="Mədaxil üçün Kart Hesabı"
+                placeholder="1234 5678 1234 5678"
+                value={depositCard}
+                maxLength={19}
+                onChange={(e) => {
+                  const val = e.target.value.replace(/\D/g, '');
+                  const formatted = val.match(/.{1,4}/g)?.join(' ') || val;
+                  setDepositCard(formatted.slice(0, 19));
+                }}
+              />
+              <Button
+                onClick={handleUpdateCard}
+                loading={updatingCard}
+                fullWidth
+                style={{ marginTop: 8 }}
+              >
+                <Save size={16} /> Kart Hesabını Yadda Saxla
+              </Button>
+            </div>
           </div>
         </div>
       </div>

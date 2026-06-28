@@ -8,7 +8,7 @@ import Modal from '@/components/ui/Modal';
 import Input from '@/components/ui/Input';
 import { useTranslation } from '@/lib/store/languageStore';
 import { CheckCircle2, XCircle, Wallet, CreditCard, Save, Eye, FileText, Image as ImageIcon } from 'lucide-react';
-import { getDeposits, approveDeposit, rejectDeposit, addAdminLog, getSystemSetting, updateSystemSetting } from '@/lib/supabase/database';
+import { getDeposits, approveDeposit, rejectDeposit, addAdminLog } from '@/lib/supabase/database';
 import { formatCurrency, formatDateTime } from '@/lib/utils/formatters';
 import { useAuthStore } from '@/lib/store/authStore';
 import { supabase } from '@/lib/supabase/config';
@@ -20,27 +20,15 @@ export default function AdminDepositsPage() {
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState('pending');
   
-  // Admin deposit card state
-  const [depositCard, setDepositCard] = useState('');
-  const [updatingCard, setUpdatingCard] = useState(false);
-  const [isCardActive, setIsCardActive] = useState(false);
-  const [updatingToggle, setUpdatingToggle] = useState(false);
+  // Removed admin deposit card config states (moved to /admin/wallets)
 
   // Receipt Modal viewer
   const [viewerReceiptUrl, setViewerReceiptUrl] = useState(null);
 
   async function load() {
     try {
-      const [data, activeCard, cardActiveSetting] = await Promise.all([
-        getDeposits(),
-        getSystemSetting('admin_deposit_card'),
-        getSystemSetting('card_payment_active')
-      ]);
+      const data = await getDeposits();
       setDeposits(data);
-      if (activeCard) {
-        setDepositCard(activeCard);
-      }
-      setIsCardActive(cardActiveSetting === 'true');
     } catch (err) {
       console.error('Failed to load deposits:', err.message);
     } finally {
@@ -52,44 +40,7 @@ export default function AdminDepositsPage() {
 
   const filtered = deposits.filter((d) => d.status === tab);
 
-  const handleUpdateCard = async () => {
-    const cleanCard = depositCard.replace(/\s+/g, '');
-    if (cleanCard.length !== 16 || isNaN(Number(cleanCard))) {
-      alert(t('card_number_16_digit_err', 'Kart nömrəsi 16 rəqəmli olmalıdır.'));
-      return;
-    }
-    setUpdatingCard(true);
-    try {
-      await updateSystemSetting('admin_deposit_card', cleanCard);
-      await addAdminLog(adminUser?.uid, 'update_admin_deposit_card', null, `Admin deposit card updated to: ${cleanCard}`);
-      alert(t('admin_deposit_card_updated', 'Mədaxil kart hesabı uğurla yeniləndi!'));
-    } catch (err) {
-      alert(t('error_prefix', 'Xəta: ') + err.message);
-    } finally {
-      setUpdatingCard(false);
-    }
-  };
-
-  const handleToggleCardPayment = async () => {
-    setUpdatingToggle(true);
-    const newStatus = !isCardActive;
-    try {
-      await updateSystemSetting('card_payment_active', newStatus ? 'true' : 'false');
-      await addAdminLog(
-        adminUser?.uid,
-        newStatus ? 'enable_card_payment' : 'disable_card_payment',
-        null,
-        `Admin ${newStatus ? 'enabled' : 'disabled'} card payments system-wide`
-      );
-      setIsCardActive(newStatus);
-      const statusText = newStatus ? t('activate', 'aktiv edildi') : t('deactivate', 'deaktiv edildi');
-      alert(t('card_payment_active_msg', 'Kart ilə ödəniş sistemi {{status}}!').replace('{{status}}', statusText));
-    } catch (err) {
-      alert(t('error_prefix', 'Xəta: ') + err.message);
-    } finally {
-      setUpdatingToggle(false);
-    }
-  };
+  // Removed card config handlers (moved to /admin/wallets)
 
   const handleApprove = async (deposit) => {
     try {
@@ -128,68 +79,6 @@ export default function AdminDepositsPage() {
         <Wallet size={24} style={{ display: 'inline', verticalAlign: 'middle', marginRight: 8 }} />
         {t('deposits', 'Depozitlər')}
       </h1>
-
-      {/* Admin Deposit Card Configuration Card */}
-      <div style={{
-        background: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: 16,
-        padding: 20, marginBottom: 24, boxShadow: '0 4px 20px rgba(0,0,0,0.1)'
-      }}>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-          {/* Card payment active toggle */}
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: 16, borderBottom: '1px solid var(--border-color)' }}>
-            <div>
-              <strong style={{ fontSize: 14, color: 'var(--text-primary)' }}>{t('card_active_system', 'Kart ilə Ödəniş Sistemi')}</strong>
-              <p style={{ fontSize: 12, color: 'var(--text-muted)', margin: '4px 0 0 0' }}>{t('card_active_desc', 'Bütün istifadəçi profillərində kart ilə mədaxil və məxarici aktiv/deaktiv edin.')}</p>
-            </div>
-            <button
-              onClick={handleToggleCardPayment}
-              disabled={updatingToggle}
-              style={{
-                padding: '8px 16px',
-                borderRadius: 8,
-                fontSize: 13,
-                fontWeight: 600,
-                cursor: 'pointer',
-                background: isCardActive ? 'rgba(0, 230, 118, 0.1)' : 'rgba(255, 23, 68, 0.1)',
-                border: `1px solid ${isCardActive ? 'var(--color-success)' : 'var(--color-error)'}`,
-                color: isCardActive ? 'var(--color-success)' : 'var(--color-error)',
-                transition: 'all 0.2s ease',
-              }}
-            >
-              {isCardActive ? t('deactivate', 'Deaktiv Et') : t('activate', 'Aktiv Et')}
-            </button>
-          </div>
-
-          <div>
-            <h3 style={{ fontSize: 14, fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-secondary)', marginBottom: 12 }}>
-              {t('deposit_card_setting', 'Mədaxil üçün Kart Hesabı Tənzimləməsi')}
-            </h3>
-            <div style={{ display: 'flex', gap: 12, alignItems: 'flex-end', flexWrap: 'wrap' }}>
-              <div style={{ flex: '1 1 250px' }}>
-                <label style={{ fontSize: 12, color: 'var(--text-muted)', display: 'block', marginBottom: 6 }}>{t('card_number_16_digit', '16 Rəqəmli Bank Kart Nömrəsi')}</label>
-                <input
-                  type="text"
-                  value={depositCard}
-                  maxLength={19}
-                  onChange={(e) => {
-                    const val = e.target.value.replace(/\D/g, '');
-                    const formatted = val.match(/.{1,4}/g)?.join(' ') || val;
-                    setDepositCard(formatted.slice(0, 19));
-                  }}
-                  placeholder="1234 5678 1234 5678"
-                  style={{
-                    width: '100%', height: 42, background: 'var(--bg-secondary)', border: '1px solid var(--border-color)',
-                    borderRadius: 8, padding: '0 12px', color: 'var(--text-primary)', outline: 'none', fontSize: 14, fontFamily: 'monospace'
-                  }}
-                />
-              </div>
-              <Button onClick={handleUpdateCard} loading={updatingCard}>
-                <Save size={16} style={{ marginRight: 6 }} /> {t('save_btn', 'Yadda Saxla')}
-              </Button>
-            </div>
-          </div>
-        </div>
-      </div>
 
       <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
         {['pending', 'approved', 'rejected'].map((tVal) => (
