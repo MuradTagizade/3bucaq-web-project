@@ -10,7 +10,7 @@ import Badge from '@/components/ui/Badge';
 import Modal from '@/components/ui/Modal';
 import { formatCurrency, formatDateTime } from '@/lib/utils/formatters';
 import { validateAmount, validateUSDTAddress } from '@/lib/utils/validators';
-import { ArrowUpRight, CheckCircle2, User, Wallet, ArrowDownToLine, CreditCard, Image as ImageIcon, ArrowDown } from 'lucide-react';
+import { ArrowUpRight, CheckCircle2, User, Wallet, ArrowDownToLine, CreditCard, Image as ImageIcon, ArrowDown, ChevronDown } from 'lucide-react';
 import { useAuthStore } from '@/lib/store/authStore';
 import { useTranslation } from '@/lib/store/languageStore';
 import { transferFunds, getUserByLogin, getUserByUid, createWithdrawal, getWithdrawals, getSystemSetting } from '@/lib/supabase/database';
@@ -42,6 +42,7 @@ function TransferContent() {
   const [wdAmount, setWdAmount] = useState('');
   const [wdAddress, setWdAddress] = useState('');
   const [wdNetwork, setWdNetwork] = useState('TRC20');
+  const [networkDropdownOpen, setNetworkDropdownOpen] = useState(false);
   const [wdCardNumber, setWdCardNumber] = useState('');
   const [wdErrors, setWdErrors] = useState({});
   const [wdLoading, setWdLoading] = useState(false);
@@ -380,21 +381,53 @@ function TransferContent() {
                     error={wdErrors.address}
                   />
 
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 6, position: 'relative' }}>
                     <label style={{ fontSize: 13, color: 'var(--text-muted)', fontWeight: 500 }}>{t('network', 'Şəbəkə')}</label>
-                    <select
-                      value={wdNetwork}
-                      onChange={(e) => setWdNetwork(e.target.value)}
+                    <button
+                      type="button"
+                      onClick={() => setNetworkDropdownOpen(!networkDropdownOpen)}
                       style={{
+                        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                         width: '100%', padding: '10px 12px', borderRadius: 8,
                         background: 'var(--bg-secondary)', color: 'var(--text-primary)',
-                        border: '1px solid var(--border-default)', fontSize: 14,
+                        border: '1px solid var(--border-default)', fontSize: 14, textAlign: 'left',
+                        cursor: 'pointer'
                       }}
                     >
-                      <option value="TRC20">USDT TRC20</option>
-                      <option value="ERC20">USDT ERC20</option>
-                      <option value="BEP20">USDT BEP20</option>
-                    </select>
+                      <span>USDT {wdNetwork}</span>
+                      <ChevronDown size={16} />
+                    </button>
+                    {networkDropdownOpen && (
+                      <div
+                        style={{
+                          position: 'absolute', top: '100%', left: 0, right: 0,
+                          background: 'var(--bg-secondary)', border: '1px solid var(--border-default)',
+                          borderRadius: 8, marginTop: 4, padding: 4, zIndex: 100,
+                          display: 'flex', flexDirection: 'column', gap: 2,
+                          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.5)'
+                        }}
+                      >
+                        {['TRC20', 'ERC20', 'BEP20'].map((net) => (
+                          <button
+                            key={net}
+                            type="button"
+                            onClick={() => {
+                              setWdNetwork(net);
+                              setNetworkDropdownOpen(false);
+                            }}
+                            style={{
+                              width: '100%', padding: '8px 12px', borderRadius: 6,
+                              background: wdNetwork === net ? 'rgba(0, 240, 255, 0.1)' : 'transparent',
+                              color: wdNetwork === net ? 'var(--color-secondary)' : 'var(--text-primary)',
+                              border: 'none', fontSize: 13, fontWeight: wdNetwork === net ? '600' : '500',
+                              textAlign: 'left', cursor: 'pointer', transition: 'all 0.15s ease'
+                            }}
+                          >
+                            USDT {net}
+                          </button>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 </>
               ) : (
