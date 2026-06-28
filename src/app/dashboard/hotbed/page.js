@@ -279,7 +279,7 @@ export default function HotBedPage() {
                 setInsufficientModal({ open: false, pkg: null });
                 router.push('/dashboard/deposit');
               }}>
-                {t('go_to_deposit', 'Zəhmət olmasa balansa depozit əlavə edin')}
+                {t('go_to_deposit', 'Depozit edin')}
               </Button>
             </div>
           </div>
