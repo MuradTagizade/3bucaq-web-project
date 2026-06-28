@@ -15,7 +15,7 @@ const iconMap = {
   users: Users,
 };
 
-export default function FooterNav({ transferBalance = 0 }) {
+export default function FooterNav() {
   const pathname = usePathname();
   const { t } = useTranslation();
 
@@ -25,7 +25,6 @@ export default function FooterNav({ transferBalance = 0 }) {
         {NAV_ITEMS.map((item) => {
           const Icon = iconMap[item.icon];
           const isActive = pathname === item.href;
-          const showBalance = item.id === 'transfer' && transferBalance > 0;
 
           return (
             <Link
@@ -49,11 +48,6 @@ export default function FooterNav({ transferBalance = 0 }) {
                   <Icon size={20} />
                 )}
                 {isActive && <span className={styles.glow} />}
-                {showBalance && (
-                  <span className={styles.badge}>
-                    {formatCompactNumber(transferBalance)}
-                  </span>
-                )}
               </div>
               <span className={styles.label}>{t(item.id, item.label)}</span>
             </Link>

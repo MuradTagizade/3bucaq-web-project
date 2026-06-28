@@ -53,7 +53,7 @@ function TransferContent() {
   // Receipt Modal viewer
   const [viewerReceiptUrl, setViewerReceiptUrl] = useState(null);
 
-  const transferBalance = authUser?.transferBalance || 0;
+  const balance = authUser?.balance || 0;
 
   useEffect(() => {
     async function loadWd() {
@@ -103,7 +103,7 @@ function TransferContent() {
     if (!recipient.trim()) newErrors.recipient = t('enter_login', 'Login yazın');
     else if (!recipientValid) newErrors.recipient = t('recipient_not_found', 'Qəbul edən tapılmadı');
 
-    const amountErr = validateAmount(amount, transferBalance);
+    const amountErr = validateAmount(amount, balance);
     if (amountErr) newErrors.amount = amountErr;
 
     if (Object.keys(newErrors).length > 0) {
@@ -121,7 +121,6 @@ function TransferContent() {
         setUser({
           ...authUser,
           balance: Number(updatedProfile.balance),
-          transferBalance: Number(updatedProfile.transfer_balance),
         });
       }
 
@@ -144,7 +143,7 @@ function TransferContent() {
     e.preventDefault();
     const newErrors = {};
 
-    const amountErr = validateAmount(wdAmount, transferBalance);
+    const amountErr = validateAmount(wdAmount, balance);
     if (amountErr) newErrors.amount = amountErr;
 
     const formattedCard = wdCardNumber.replace(/\s+/g, '');
@@ -178,7 +177,6 @@ function TransferContent() {
         setUser({
           ...authUser,
           balance: Number(updatedProfile.balance),
-          transferBalance: Number(updatedProfile.transfer_balance),
         });
       }
 
@@ -219,8 +217,8 @@ function TransferContent() {
     <div className={styles.transfer}>
       {/* Balance Display */}
       <div className={styles.balanceCard}>
-        <span className={styles.balanceLabel}>{t('transfer_balance', 'Transfer Balansı')}</span>
-        <span className={styles.balanceValue}>{formatCurrency(transferBalance, '')}</span>
+        <span className={styles.balanceLabel}>{t('balance', 'Balans')}</span>
+        <span className={styles.balanceValue}>{formatCurrency(balance, '')}</span>
         <span className={styles.balanceCurrency}>USD</span>
       </div>
 

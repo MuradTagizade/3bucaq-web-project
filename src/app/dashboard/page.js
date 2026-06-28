@@ -26,7 +26,6 @@ export default function DashboardPage() {
   const user = {
     login: authUser?.displayLogin || 'User',
     balance: authUser?.balance || 0,
-    transferBalance: authUser?.transferBalance || 0,
     totalPoints: authUser?.totalPoints || 0,
     currentLevel: authUser?.currentLevel || 0,
     referralCode: authUser?.referralCode || '',
@@ -45,18 +44,15 @@ export default function DashboardPage() {
         const levels = await getUserClaimedLevels(activeUser.uid);
         setClaimedLevels(levels);
       } catch (err) {
-        console.error('Failed to load claimed levels:', err);
+        console.error('Failed to load claimed levels: ', err);
       }
     }
     loadClaimed();
-  }, [authUser?.uid]);
+  }, []);
 
   const checkLevelStatus = (level) => {
-    const levelData = LEVELS[level.level - 1];
-    const hasPoints = user.totalPoints >= levelData.points;
-    const hasPackages = levelData.requiredPkgs.every(
-      (pkg) => user.activePackages[pkg]
-    );
+    const hasPoints = user.totalPoints >= level.points;
+    const hasPackages = level.requiredPkgs.every((pkgId) => user.activePackages[pkgId] === true);
     const isClaimed = claimedLevels.includes(level.level);
     return { hasPoints, hasPackages, isReady: hasPoints && hasPackages && !isClaimed, isClaimed };
   };
@@ -93,7 +89,6 @@ export default function DashboardPage() {
         setUser({
           ...activeUser,
           balance: Number(updatedProfile.balance),
-          transferBalance: Number(updatedProfile.transfer_balance),
           totalPoints: Number(updatedProfile.total_points),
           currentLevel: Number(updatedProfile.current_level),
           claimedLevels: updatedProfile.claimed_levels || [],
@@ -103,7 +98,7 @@ export default function DashboardPage() {
       setClaimedLevels((prev) => [...prev, receiveModal.level.level]);
       setReceiveModal({ open: false, level: null });
 
-      const successMsg = t('bonus_added_to_transfer_balance', '{{bonus}} transfer balansınıza əlavə edildi!')
+      const successMsg = t('bonus_added_to_balance', '{{bonus}} balansınıza əlavə edildi!')
         .replace('{{bonus}}', formatUSDT(receiveModal.level.bonus));
       showToast(successMsg);
     } catch (err) {
@@ -130,33 +125,28 @@ export default function DashboardPage() {
   const handleCopyRef = async () => {
     try {
       await navigator.clipboard.writeText(referralLink);
-      showToast(t('ref_link_copied', 'Referal link kopyalandı!'));
-    } catch { /* ignore */ }
+      showToast(t('copied', 'Kopyalandı!'));
+    } catch (err) {
+      showToast(t('error', 'Xəta') + ': ' + err.message);
+    }
   };
 
   return (
     <div className={styles.dashboard}>
-      {/* User Info Card */}
-      <div className={styles.userInfoCard}>
-        <div className={styles.userInfoTop}>
-          <div className={styles.userAvatar}>
-            {user.login.charAt(0).toUpperCase()}
-          </div>
-          <div className={styles.userGreeting}>
-            <span className={styles.userLogin}>@{user.login}</span>
-            <Badge variant={getKYCStatusVariant(user.kycStatus)} size="sm">
-              KYC: {t(user.kycStatus, getKYCStatusLabel(user.kycStatus))}
-            </Badge>
+      {/* Welcome Card */}
+      <div className={styles.welcomeCard}>
+        <div className={styles.welcomeHeader}>
+          <div>
+            <h2 className={styles.welcomeTitle}>{t('welcome_back', 'Xoş Gəldiniz')}, {user.login}!</h2>
+            <span className={styles.kycBadge}>
+              KYC: <span className={styles[getKYCStatusVariant(user.kycStatus)]}>{getKYCStatusLabel(user.kycStatus, t)}</span>
+            </span>
           </div>
         </div>
         <div className={styles.balanceRow}>
-          <div className={styles.balanceBox}>
-            <span className={styles.balanceLabel}>{t('main_balance', 'Əsas Balans')}</span>
+          <div className={styles.balanceBox} style={{ flex: 1, minWidth: '100%' }}>
+            <span className={styles.balanceLabel}>{t('balance', 'Balans')}</span>
             <span className={styles.balanceAmount}>{formatCurrency(user.balance)}</span>
-          </div>
-          <div className={styles.balanceBox}>
-            <span className={styles.balanceLabel}>{t('transfer_balance', 'Transfer Balansı')}</span>
-            <span className={styles.balanceAmount}>{formatCurrency(user.transferBalance)}</span>
           </div>
         </div>
         <div className={styles.refRow}>

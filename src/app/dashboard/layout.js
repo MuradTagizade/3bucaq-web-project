@@ -40,7 +40,6 @@ export default function DashboardLayout({ children }) {
   if (!user) return null;
 
   const userName = user?.fullName?.split(' ')[0] || '';
-  const transferBalance = user?.transferBalance || 0;
   const referralLink = user?.referralCode ? `https://levelup.com/register?ref=${user.referralCode}` : '';
 
   const handleLogout = async () => {
@@ -90,7 +89,6 @@ export default function DashboardLayout({ children }) {
     <div className="app-layout">
       <Sidebar
         userName={userName}
-        transferBalance={transferBalance}
         referralLink={referralLink}
         onLogout={handleLogout}
       />
@@ -104,7 +102,7 @@ export default function DashboardLayout({ children }) {
           </div>
         </main>
         <div className="mobile-only">
-          <FooterNav transferBalance={transferBalance} />
+          <FooterNav />
           <SlideUpMenu referralLink={referralLink} onLogout={handleLogout} />
         </div>
       </div>

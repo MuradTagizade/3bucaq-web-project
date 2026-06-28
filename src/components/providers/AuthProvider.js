@@ -74,7 +74,6 @@ export function AuthProvider({ children }) {
                 fullName: profile.full_name,
                 displayLogin: profile.display_login,
                 balance: Number(profile.balance),
-                transferBalance: Number(profile.transfer_balance),
                 totalPoints: Number(profile.total_points),
                 currentLevel: Number(profile.current_level),
                 referralCode: profile.referral_code,

@@ -37,10 +37,10 @@ const SIDEBAR_ITEMS = [
   { id: 'kyc', label: 'KYC', href: '/dashboard/kyc', icon: ShieldCheck },
 ];
 
-export default function Sidebar({ userName, transferBalance, referralLink, onLogout }) {
+export default function Sidebar({ userName, referralLink, onLogout }) {
   const pathname = usePathname();
   const { user } = useAuthStore();
-  const { t, language } = useTranslation();
+  const { t } = useTranslation();
   const [copied, setCopied] = useState(false);
 
   const balance = user?.balance || 0;
@@ -70,12 +70,8 @@ export default function Sidebar({ userName, transferBalance, referralLink, onLog
         
         <div className={styles.balances}>
           <div className={styles.balanceItem}>
-            <span className={styles.balanceLabel}>{t('main_balance', 'Əsas Balans')}</span>
+            <span className={styles.balanceLabel}>{t('balance', 'Balans')}</span>
             <span className={styles.balanceValue}>{formatCurrency(balance)}</span>
-          </div>
-          <div className={styles.balanceItem}>
-            <span className={styles.balanceLabel}>{t('transfer_balance', 'Transfer Balansı')}</span>
-            <span className={styles.balanceValue}>{formatCurrency(transferBalance)}</span>
           </div>
         </div>
       </div>

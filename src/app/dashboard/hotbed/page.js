@@ -73,7 +73,6 @@ export default function HotBedPage() {
       setUser({
         ...authUser,
         balance: Number(updatedProfile.balance),
-        transferBalance: Number(updatedProfile.transfer_balance),
         totalPoints: Number(updatedProfile.total_points),
         activePackages: {
           pkg19: updatedProfile.active_packages?.pkg19 || false,
@@ -91,9 +90,9 @@ export default function HotBedPage() {
   const confirmPurchase = async () => {
     if (!confirmModal.pkg || !authUser) return;
 
-    // Client-side transferBalance check
-    const transferBalance = authUser.transferBalance || 0;
-    if (transferBalance < confirmModal.pkg.price) {
+    // Client-side balance check
+    const balance = authUser.balance || 0;
+    if (balance < confirmModal.pkg.price) {
       const pkg = confirmModal.pkg;
       setConfirmModal({ open: false, pkg: null });
       setInsufficientModal({ open: true, pkg });
@@ -218,7 +217,7 @@ export default function HotBedPage() {
                 .replace('{{price}}', formatCurrency(confirmModal.pkg.price))}
             </p>
             <p className={styles.confirmNote}>
-              {t('price_deducted_from_transfer_balance', 'Məbləğ transfer balansınızdan çıxılacaq və əsas balansda kilidlənəcək.')}
+              {t('price_deducted_from_balance', 'Məbləğ əsas balansınızdan çıxılacaq.')}
             </p>
             <p className={styles.confirmNote}>
               <Clock size={13} style={{ display: 'inline', verticalAlign: 'middle' }} />
@@ -246,7 +245,7 @@ export default function HotBedPage() {
         {deactivateModal.pkg && (
           <div className={styles.confirmContent}>
             <p>
-              {t('confirm_deactivate_desc', '{{package}} paketini deaktiv etmək istəyirsiniz? {{price}} transfer balansınıza qaytarılacaq.')
+              {t('confirm_deactivate_desc', '{{package}} paketini deaktiv etmək istəyirsiniz? {{price}} balansınıza qaytarılacaq.')
                 .replace('{{package}}', deactivateModal.pkg.displayName)
                 .replace('{{price}}', formatCurrency(deactivateModal.pkg.price))}
             </p>
