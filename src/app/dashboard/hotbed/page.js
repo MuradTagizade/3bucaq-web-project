@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import styles from './hotbed.module.css';
 import Toggle from '@/components/ui/Toggle';
 import Modal from '@/components/ui/Modal';
@@ -14,10 +15,12 @@ import { useTranslation } from '@/lib/store/languageStore';
 import { buyPackage, deactivatePackage, getUserByUid } from '@/lib/supabase/database';
 
 export default function HotBedPage() {
+  const router = useRouter();
   const { t } = useTranslation();
   const { user: authUser, setUser } = useAuthStore();
   const [confirmModal, setConfirmModal] = useState({ open: false, pkg: null });
   const [deactivateModal, setDeactivateModal] = useState({ open: false, pkg: null });
+  const [insufficientModal, setInsufficientModal] = useState({ open: false, pkg: null });
   const [infoModal, setInfoModal] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -87,15 +90,33 @@ export default function HotBedPage() {
 
   const confirmPurchase = async () => {
     if (!confirmModal.pkg || !authUser) return;
+
+    // Client-side transferBalance check
+    const transferBalance = authUser.transferBalance || 0;
+    if (transferBalance < confirmModal.pkg.price) {
+      const pkg = confirmModal.pkg;
+      setConfirmModal({ open: false, pkg: null });
+      setInsufficientModal({ open: true, pkg });
+      return;
+    }
+
     setLoading(true);
     try {
       await buyPackage(authUser.uid, confirmModal.pkg.id, confirmModal.pkg.price);
       await refreshUser();
+      setConfirmModal({ open: false, pkg: null });
     } catch (err) {
-      alert(t('error_occurred', 'Xəta baş verdi') + ': ' + err.message);
+      const errMsg = err.message || '';
+      if (errMsg.includes('kifayət etmir') || errMsg.includes('balance') || errMsg.includes('insufficient')) {
+        const pkg = confirmModal.pkg;
+        setConfirmModal({ open: false, pkg: null });
+        setInsufficientModal({ open: true, pkg });
+      } else {
+        alert(t('error_occurred', 'Xəta baş verdi') + ': ' + err.message);
+        setConfirmModal({ open: false, pkg: null });
+      }
     } finally {
       setLoading(false);
-      setConfirmModal({ open: false, pkg: null });
     }
   };
 
@@ -235,6 +256,30 @@ export default function HotBedPage() {
               </Button>
               <Button onClick={confirmDeactivate} loading={loading}>
                 {t('yes_deactivate', 'Bəli, Deaktiv Et')}
+              </Button>
+            </div>
+          </div>
+        )}
+      </Modal>
+
+      {/* Insufficient Balance Modal */}
+      <Modal
+        isOpen={insufficientModal.open}
+        onClose={() => setInsufficientModal({ open: false, pkg: null })}
+        title={t('insufficient_balance_title', 'Balans Kifayət Etmir')}
+        size="sm"
+      >
+        {insufficientModal.pkg && (
+          <div className={styles.confirmContent}>
+            <p style={{ fontWeight: '500', color: 'var(--text-primary)' }}>
+              {t('insufficient_balance_desc', 'Balansınızda kifayət qədər məbləğ yoxdur. Zəhmət olmasa balansa depozit əlavə edin.')}
+            </p>
+            <div className={styles.confirmActions} style={{ gridTemplateColumns: '1fr' }}>
+              <Button onClick={() => {
+                setInsufficientModal({ open: false, pkg: null });
+                router.push('/dashboard/deposit');
+              }}>
+                {t('go_to_deposit', 'Zəhmət olmasa balansa depozit əlavə edin')}
               </Button>
             </div>
           </div>
