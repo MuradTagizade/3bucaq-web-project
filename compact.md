@@ -93,23 +93,23 @@ create or replace trigger on_auth_user_created
 2.  **Serveri başlatmaq:** `npm run dev` (bu skript Webpack rejimi ilə `next dev --webpack` icra edir).
 
 ### 5.1 Test Hesabları (Supabase Auth)
-Lokal yoxlamalar üçün istifadə olunan test giriş məlumatları:
-*   **Admin Hesabı:**
-    *   **Email:** `admin@3bucaq.com`
+Lokal yoxlamalar və test üçün istifadə olunan, `LEVEL UP` domenlərinə köçürülmüş və təsdiqlənmiş test giriş məlumatları:
+*   **Yönetici Hesabı (Admin):**
+    *   **Email:** `admin@levelup.com` (və ya İstifadəçi adı: `admin`)
     *   **Şifrə:** `Admin123!`
-    *   **Login:** `admin`
-*   **Yeni Zəngin Mock Admin Hesabı (Super Admin):**
-    *   **Email:** `mockadmin@3bucaq.com`
+    *   **Rol:** `ADMIN`
+*   **Zəngin Mock Yönetici Hesabı (Super Admin):**
+    *   **Email:** `mockadmin@levelup.com` (və ya İstifadəçi adı: `mockadmin`)
     *   **Şifrə:** `Mockadmin123!`
-    *   **Login:** `mockadmin`
-*   **Adi İstifadəçi Hesabı:**
-    *   **Email:** `user@3bucaq.com`
+    *   **Rol:** `ADMIN`
+*   **Normal İstifadəçi Hesabı:**
+    *   **Email:** `user@levelup.com` (və ya İstifadəçi adı: `user`)
     *   **Şifrə:** `User123!`
-    *   **Login:** `testuser`
-*   **Yeni Zəngin Mock İstifadəçi Hesabı:**
-    *   **Email:** `testmock@3bucaq.com`
+    *   **Rol:** `USER`
+*   **Zəngin Mock İstifadəçi Hesabı:**
+    *   **Email:** `testmock@levelup.com` (və ya İstifadəçi adı: `testmock`)
     *   **Şifrə:** `Testmock123!`
-    *   **Login:** `mockuser`
+    *   **Rol:** `USER`
 
 ---
 
@@ -184,3 +184,16 @@ Lokal yoxlamalar üçün istifadə olunan test giriş məlumatları:
     *   İşıqlı modda primary düymələrdəki (məs. "GÖNDƏR" və "Çıxarış Sorğusu Göndər") yazı rənginin qara qalaraq görünməməsi xətası yazı rəngini `--primary-foreground` (ağ) dəyişəninə bağlamaqla həll edildi.
     *   Səviyyə kartlarının üstündəki tərəqqi xəttinin arxa fonu işıqlı mod üçün aydın görünən boz şərkildə tənzimləndi (`--progress-track-bg`).
 *   **Masaüstü Sürüşmə (Flex Shift) Xətasının Həlli:** `NeuralBackground` arxa fon komponentindəki Tailwind sinifləri raw CSS inline stillərlə əvəzlənərək flexbox layoutunun pozulması və kartın sağa sürüşməsi xətası tamamilə aradan qaldırıldı. Animasiya həmçinin ana səhifəyə də inteqrasiya olundu.
+
+---
+
+## 8. Son Sessiyada Görülən Təkmilləşdirmələr (LEVEL UP Rebrendinqi, Giriş Təkmilləşdirmələri və Mövzu Kilidi)
+*   **LEVEL UP Rebrendinqi (Bütün Layihə üzrə):** Layihədəki bütün "3bucaq" marka adları, loqo mətnləri, SEO başlıqları, tərcümə lüğətləri və referal link paylaşım parametrləri böyük hərflərlə **`LEVEL UP`** olaraq yeniləndi. 
+    *   Loqo mətni `LEVEL UP` kimi yazıldı, "LEVEL" düz və "UP" yaşıl/sian gradyanlı neon formatda tərtib edildi.
+    *   Domen ünvanları `3bucaq.com` yerinə `levelup.com` olaraq dəyişdirildi.
+*   **Supabase OTP Doğrulama Koduna Keçid:** Supabase e-poçt şablonunun tənzimlənməsi üçün SMTP provider inteqrasiya addımları və şablonun `{{ .Token }}` istifadə edərək e-posta ilə 6 rəqəmli OTP doğrulama kodu göndərəcək şəkildə dəyişdirilməsi təsvir edildi.
+*   **Yeni Loqonun İnteqrasiyası:** İndirilənlərdəki yeni `logo-level-up.png` şimşək formalı mavi-mor loqosu projedəki bütün loqo resursları ilə (`3bucaq-logo.png`, `icon-192.png`, `icon-512.png`) əvəz olundu. Next.js resim cache-i sıfırlanaraq təmiz yüklənməsi təmin edildi.
+*   **E-poçt və ya İstifadəçi Adı ilə Giriş Dəstəyi (Login):** Giriş səhifəsindəki validation xətası (keçərli e-poçtları rədd edən tərs yazılmış `validateEmail` məntiqi) düzəldildi. Həmçinin input tipi `email` əvəzinə `text` edilərək istifadəçinin həm e-poçt (məs: `admin@levelup.com`), həm də birbaşa istifadəçi adı (məs: `admin`, `mockadmin`, `user`) daxil edərək problemsiz giriş etməsi təmin olundu.
+*   **Aydınlıq Rejiminin (Light Mode) Müvəqqəti Deaktiv edilməsi:** İşıqlı rejim müvəqqəti olaraq deaktiv edildi və sistem tamamilə qaranlıq moda (dark mode) kilidləndi. HTML head script və `themeStore` tənzimlənərək sistem hər zaman dark modda açılacaq şəkildə quruldu, `ThemeToggle` düyməsi isə arayüzdən tamamilə gizlədildi.
+*   **Partiküllü Arka Plan İdeal Şəffaflığı (NeuralBackground):** Canvas elementinin hər frame-də fon rəngi ilə doldurulub digər arxa plan ızgaralarını örtməsi problemi aradan qaldırıldı. Canvas-da `destination-out` kompozit metodu tətbiq edilərək, partikül quyruqları (trail) saxlanılmaqla canvas tamamilə transparent (şəffaf) edildi. Beləliklə, neon partikül hərəkətləri və yaşıl ızgara (grid) fonu eyni anda problemsiz görünür.
+*   **Butonların Sağ Üstə Köçürülməsi:** Ana səhifənin ortasındakı böyük "Giriş" və "Hesab Yarat" butonları silindi və sağ üst küncdəki topBar sahəsinə ikisi də `variant="ghost"` olqraq yerləşdirilərək çox daha səliqəli və responsive bir navbar quruluşu təmin edildi.
