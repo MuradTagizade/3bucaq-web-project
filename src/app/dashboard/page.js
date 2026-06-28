@@ -145,10 +145,6 @@ export default function DashboardPage() {
           </div>
         </div>
         <div className={styles.balanceRow}>
-          <div className={styles.balanceBox}>
-            <span className={styles.balanceLabel}>{t('balance', 'Balans')}</span>
-            <span className={styles.balanceAmount}>{formatCurrency(user.balance)}</span>
-          </div>
           <Link href="/dashboard/personal-info" className={`${styles.balanceBox} ${styles.balanceBoxLink}`}>
             <span className={styles.balanceLabel} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
               <span>{t('personal_info', 'Şəxsi Məlumat')}</span>
@@ -158,6 +154,10 @@ export default function DashboardPage() {
               {t('manage_profile', 'Hesabı İdarə Et')} →
             </span>
           </Link>
+          <div className={styles.balanceBox}>
+            <span className={styles.balanceLabel}>{t('balance', 'Balans')}</span>
+            <span className={styles.balanceAmount}>{formatCurrency(user.balance)}</span>
+          </div>
         </div>
         <div className={styles.refRow}>
           <span className={styles.refLabel}>{t('referral_code', 'Referal Kodu')}: {user.referralCode}</span>
