@@ -20,7 +20,7 @@ export default function DashboardPage() {
   const [submitting, setSubmitting] = useState(false);
 
   const { t } = useTranslation();
-  const { authUser, setUser } = useAuthStore();
+  const { user: authUser, setUser } = useAuthStore();
   
   // Resolve authUser from store
   const user = {
