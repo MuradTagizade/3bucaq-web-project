@@ -1,6 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
+import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import styles from './transfer.module.css';
 import Input from '@/components/ui/Input';
 import Button from '@/components/ui/Button';
@@ -8,16 +10,24 @@ import Badge from '@/components/ui/Badge';
 import Modal from '@/components/ui/Modal';
 import { formatCurrency, formatDateTime } from '@/lib/utils/formatters';
 import { validateAmount, validateUSDTAddress } from '@/lib/utils/validators';
-import { ArrowUpRight, CheckCircle2, User, Wallet, ArrowDownToLine, CreditCard, Image as ImageIcon } from 'lucide-react';
+import { ArrowUpRight, CheckCircle2, User, Wallet, ArrowDownToLine, CreditCard, Image as ImageIcon, ArrowDown } from 'lucide-react';
 import { useAuthStore } from '@/lib/store/authStore';
 import { useTranslation } from '@/lib/store/languageStore';
 import { transferFunds, getUserByLogin, getUserByUid, createWithdrawal, getWithdrawals, getSystemSetting } from '@/lib/supabase/database';
 import { supabase } from '@/lib/supabase/config';
 
-export default function TransferPage() {
+function TransferContent() {
   const { user: authUser, setUser } = useAuthStore();
   const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState('transfer');
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    const tabParam = searchParams.get('tab');
+    if (tabParam === 'transfer' || tabParam === 'withdrawal') {
+      setActiveTab(tabParam);
+    }
+  }, [searchParams]);
 
   // Transfer state
   const [recipient, setRecipient] = useState('');
@@ -215,11 +225,17 @@ export default function TransferPage() {
 
       {/* Tabs */}
       <div className={styles.tabs}>
+        <Link
+          href="/dashboard/deposit"
+          className={styles.tab}
+        >
+          <ArrowDown size={16} /> {t('deposit', 'Depozit')}
+        </Link>
         <button
           className={`${styles.tab} ${activeTab === 'transfer' ? styles.tabActive : ''}`}
           onClick={() => setActiveTab('transfer')}
         >
-          <ArrowUpRight size={16} /> {t('transfer', 'Transfer')}
+          <ArrowUpRight size={16} /> {t('transfer', 'Köçürmə')}
         </button>
         <button
           className={`${styles.tab} ${activeTab === 'withdrawal' ? styles.tabActive : ''}`}
@@ -451,5 +467,17 @@ export default function TransferPage() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function TransferPage() {
+  return (
+    <Suspense fallback={
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '200px' }}>
+        <span>Yüklənir...</span>
+      </div>
+    }>
+      <TransferContent />
+    </Suspense>
   );
 }

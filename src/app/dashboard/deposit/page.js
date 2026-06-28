@@ -1,12 +1,13 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import styles from './deposit.module.css';
 import Input from '@/components/ui/Input';
 import Button from '@/components/ui/Button';
 import Badge from '@/components/ui/Badge';
 import Modal from '@/components/ui/Modal';
-import { Wallet, ArrowDown, Clock, CheckCircle2, XCircle, Copy, Upload, CreditCard, Image as ImageIcon } from 'lucide-react';
+import { Wallet, ArrowDown, Clock, CheckCircle2, XCircle, Copy, Upload, CreditCard, Image as ImageIcon, ArrowUpRight, ArrowDownToLine } from 'lucide-react';
 import { formatCurrency, formatDateTime } from '@/lib/utils/formatters';
 import { validateAmount } from '@/lib/utils/validators';
 import { useAuthStore } from '@/lib/store/authStore';
@@ -183,19 +184,45 @@ export default function DepositPage() {
     setViewerReceiptUrl(data.publicUrl);
   };
 
+  const balance = authUser?.balance || 0;
+
   return (
     <div className={styles.page}>
-      <h2 className={styles.title}>
-        <Wallet size={22} color="var(--color-primary)" />
-        {t('deposit', 'Depozit')}
-      </h2>
+      {/* Balance Display */}
+      <div className={styles.balanceCard}>
+        <span className={styles.balanceLabel}>{t('total_balance', 'Ümumi Balans')}</span>
+        <span className={styles.balanceValue}>{formatCurrency(balance, '')}</span>
+        <span className={styles.balanceCurrency}>USD</span>
+      </div>
+
+      {/* Operation Tabs */}
+      <div className={styles.tabs}>
+        <button
+          className={`${styles.tab} ${styles.tabActive}`}
+          disabled
+        >
+          <ArrowDown size={16} /> {t('deposit', 'Depozit')}
+        </button>
+        <Link
+          href="/dashboard/transfer?tab=transfer"
+          className={styles.tab}
+        >
+          <ArrowUpRight size={16} /> {t('transfer', 'Köçürmə')}
+        </Link>
+        <Link
+          href="/dashboard/transfer?tab=withdrawal"
+          className={styles.tab}
+        >
+          <ArrowDownToLine size={16} /> {t('withdrawal', 'Çıxarış')}
+        </Link>
+      </div>
 
       {/* Payment Method Tabs (Only show if card payments are active in system_settings) */}
       {isCardActive && (
-        <div className={styles.tabs}>
+        <div className={styles.methodTabs}>
           <button
             type="button"
-            className={`${styles.tab} ${activeTab === 'usdt' ? styles.tabActive : ''}`}
+            className={`${styles.methodTab} ${activeTab === 'usdt' ? styles.methodTabActive : ''}`}
             onClick={() => setActiveTab('usdt')}
           >
             <Wallet size={16} />
@@ -203,11 +230,11 @@ export default function DepositPage() {
           </button>
           <button
             type="button"
-            className={`${styles.tab} ${activeTab === 'card' ? styles.tabActive : ''}`}
+            className={`${styles.methodTab} ${activeTab === 'card' ? styles.methodTabActive : ''}`}
             onClick={() => setActiveTab('card')}
           >
             <CreditCard size={16} />
-            <span>{t('bank_card_manual', 'Bank Kartı (Manuel)')}</span>
+            <span>{t('bank_card_manual', 'Bank Kartı')}</span>
           </button>
         </div>
       )}
