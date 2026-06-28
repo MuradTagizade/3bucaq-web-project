@@ -92,6 +92,16 @@
   transform: translateY(-2px);
 }
 
+.balanceLinkText {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--color-secondary);
+  margin-top: 10px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
 .balanceLabel {
   font-size: 13px;
   color: var(--text-muted);

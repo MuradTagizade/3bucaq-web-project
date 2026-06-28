@@ -154,7 +154,7 @@ export default function DashboardPage() {
               <span>{t('personal_info', 'Şəxsi Məlumat')}</span>
               <User size={16} color="var(--color-secondary)" />
             </span>
-            <span style={{ fontSize: '18px', fontWeight: '800', color: 'var(--text-primary)', marginTop: '4px' }}>
+            <span className={styles.balanceLinkText}>
               {t('manage_profile', 'Hesabı İdarə Et')} →
             </span>
           </Link>
