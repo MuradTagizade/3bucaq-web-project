@@ -120,8 +120,10 @@ export default function AdminLayout({ children }) {
       {/* Mobile Header */}
       <header className={styles.mobileHeader}>
         <div className={styles.mobileHeaderLeft}>
-          <Logo size={42} />
-          <span className={styles.adminBadge}>{t('admin_panel', 'ADMIN')}</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'nowrap' }}>
+            <Logo size={32} />
+            <span className={styles.adminBadge}>{t('admin_panel', 'ADMIN')}</span>
+          </div>
         </div>
         <div className={styles.mobileHeaderRight}>
           <LanguageToggle size={15} />
@@ -170,8 +172,10 @@ export default function AdminLayout({ children }) {
       {/* Sidebar (Desktop only) */}
       <aside className={styles.sidebar}>
         <div className={styles.sidebarTop}>
-          <Logo size={54} />
-          <span className={styles.adminBadge}>{t('admin_panel', 'ADMIN')}</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'nowrap' }}>
+            <Logo size={36} />
+            <span className={styles.adminBadge}>{t('admin_panel', 'ADMIN')}</span>
+          </div>
         </div>
 
         <nav className={styles.nav}>

@@ -8,16 +8,18 @@ import Button from '@/components/ui/Button';
 import Badge from '@/components/ui/Badge';
 import { PACKAGES } from '@/lib/utils/constants';
 import { formatCurrency } from '@/lib/utils/formatters';
-import { Info, Flame, Zap } from 'lucide-react';
+import { Info, Flame, Zap, Lock, Unlock, Clock } from 'lucide-react';
 import { useAuthStore } from '@/lib/store/authStore';
 import { useTranslation } from '@/lib/store/languageStore';
-import { buyPackage, getUserByUid } from '@/lib/supabase/database';
+import { buyPackage, deactivatePackage, getUserByUid } from '@/lib/supabase/database';
 
 export default function HotBedPage() {
   const { t } = useTranslation();
   const { user: authUser, setUser } = useAuthStore();
   const [confirmModal, setConfirmModal] = useState({ open: false, pkg: null });
+  const [deactivateModal, setDeactivateModal] = useState({ open: false, pkg: null });
   const [infoModal, setInfoModal] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const packages = authUser?.activePackages || {
     pkg19: false,
@@ -28,37 +30,86 @@ export default function HotBedPage() {
     pkg799: false,
   };
 
+  const activatedAt = authUser?.packageActivatedAt || {};
+
+  const getDaysRemaining = (pkgId) => {
+    const activationDate = activatedAt[pkgId];
+    if (!activationDate) return null;
+
+    const pkg = PACKAGES.find((p) => p.id === pkgId);
+    if (!pkg) return null;
+
+    const activated = new Date(activationDate);
+    const unlockDate = new Date(activated.getTime() + pkg.expiryDays * 24 * 60 * 60 * 1000);
+    const now = new Date();
+    const remaining = Math.ceil((unlockDate - now) / (1000 * 60 * 60 * 24));
+
+    return remaining;
+  };
+
+  const isUnlocked = (pkgId) => {
+    const remaining = getDaysRemaining(pkgId);
+    return remaining !== null && remaining <= 0;
+  };
+
   const handleToggle = (pkg) => {
-    if (packages[pkg.id]) return; // Can't turn off
+    if (packages[pkg.id]) {
+      // Package is active — try to deactivate
+      if (isUnlocked(pkg.id)) {
+        setDeactivateModal({ open: true, pkg });
+      }
+      return;
+    }
+    // Package is inactive — buy
     setConfirmModal({ open: true, pkg });
+  };
+
+  const refreshUser = async () => {
+    const updatedProfile = await getUserByUid(authUser.uid);
+    if (updatedProfile) {
+      setUser({
+        ...authUser,
+        balance: Number(updatedProfile.balance),
+        transferBalance: Number(updatedProfile.transfer_balance),
+        totalPoints: Number(updatedProfile.total_points),
+        activePackages: {
+          pkg19: updatedProfile.active_packages?.pkg19 || false,
+          pkg49: updatedProfile.active_packages?.pkg49 || false,
+          pkg99: updatedProfile.active_packages?.pkg99 || false,
+          pkg199: updatedProfile.active_packages?.pkg199 || false,
+          pkg399: updatedProfile.active_packages?.pkg399 || false,
+          pkg799: updatedProfile.active_packages?.pkg799 || false,
+        },
+        packageActivatedAt: updatedProfile.package_activated_at || {},
+      });
+    }
   };
 
   const confirmPurchase = async () => {
     if (!confirmModal.pkg || !authUser) return;
+    setLoading(true);
     try {
       await buyPackage(authUser.uid, confirmModal.pkg.id, confirmModal.pkg.price);
-      
-      const updatedProfile = await getUserByUid(authUser.uid);
-      if (updatedProfile) {
-        setUser({
-          ...authUser,
-          balance: Number(updatedProfile.balance),
-          totalPoints: Number(updatedProfile.total_points),
-          activePackages: {
-            pkg19: updatedProfile.active_packages?.pkg19 || false,
-            pkg49: updatedProfile.active_packages?.pkg49 || false,
-            pkg99: updatedProfile.active_packages?.pkg99 || false,
-            pkg199: updatedProfile.active_packages?.pkg199 || false,
-            pkg399: updatedProfile.active_packages?.pkg399 || false,
-            pkg799: updatedProfile.active_packages?.pkg799 || false,
-          },
-          packageActivatedAt: updatedProfile.package_activated_at || {},
-        });
-      }
+      await refreshUser();
     } catch (err) {
       alert(t('error_occurred', 'Xəta baş verdi') + ': ' + err.message);
     } finally {
+      setLoading(false);
       setConfirmModal({ open: false, pkg: null });
+    }
+  };
+
+  const confirmDeactivate = async () => {
+    if (!deactivateModal.pkg || !authUser) return;
+    setLoading(true);
+    try {
+      await deactivatePackage(deactivateModal.pkg.id);
+      await refreshUser();
+    } catch (err) {
+      alert(t('error_occurred', 'Xəta baş verdi') + ': ' + err.message);
+    } finally {
+      setLoading(false);
+      setDeactivateModal({ open: false, pkg: null });
     }
   };
 
@@ -75,35 +126,60 @@ export default function HotBedPage() {
       </div>
 
       <div className={styles.packageList}>
-        {PACKAGES.map((pkg) => (
-          <div
-            key={pkg.id}
-            className={`${styles.packageCard} ${packages[pkg.id] ? styles.active : ''}`}
-          >
-            <div className={styles.pkgHeader}>
-              <div className={styles.pkgPrice} style={{ color: pkg.color }}>
-                {formatCurrency(pkg.price)}
+        {PACKAGES.map((pkg) => {
+          const isActive = packages[pkg.id];
+          const daysLeft = getDaysRemaining(pkg.id);
+          const canDeactivate = isActive && isUnlocked(pkg.id);
+
+          return (
+            <div
+              key={pkg.id}
+              className={`${styles.packageCard} ${isActive ? styles.active : ''}`}
+            >
+              <div className={styles.pkgHeader}>
+                <div className={styles.pkgPrice} style={{ color: pkg.color }}>
+                  {formatCurrency(pkg.price)}
+                </div>
+                <Toggle
+                  checked={isActive}
+                  onChange={() => handleToggle(pkg)}
+                  label
+                />
               </div>
-              <Toggle
-                checked={packages[pkg.id]}
-                onChange={() => handleToggle(pkg)}
-                label
-              />
-            </div>
-            <div className={styles.pkgInfo}>
-              <Badge variant={pkg.type === 'earning' ? 'gold' : 'info'} size="sm">
-                {pkg.type === 'earning' ? t('earning', 'Qazanc') : t('investment', 'Yatırım')}
-              </Badge>
-              <span className={styles.pkgDesc}>{t(pkg.id + '_desc', pkg.description)}</span>
-            </div>
-            {pkg.dailyEarning > 0 && (
-              <div className={styles.dailyTag}>
-                <Zap size={14} />
-                {t('daily_gain', 'Gündəlik')} {formatCurrency(pkg.dailyEarning)}
+              <div className={styles.pkgInfo}>
+                <Badge variant={pkg.type === 'earning' ? 'gold' : 'info'} size="sm">
+                  {pkg.type === 'earning' ? t('earning', 'Qazanc') : t('investment', 'Yatırım')}
+                </Badge>
+                <span className={styles.pkgDesc}>{t(pkg.id + '_desc', pkg.description)}</span>
               </div>
-            )}
-          </div>
-        ))}
+              {pkg.dailyEarning > 0 && (
+                <div className={styles.dailyTag}>
+                  <Zap size={14} />
+                  {t('daily_gain', 'Gündəlik')} {formatCurrency(pkg.dailyEarning)}
+                </div>
+              )}
+
+              {/* Lock Status */}
+              {isActive && daysLeft !== null && (
+                <div className={styles.lockStatus}>
+                  {daysLeft > 0 ? (
+                    <>
+                      <Lock size={13} />
+                      <span>{daysLeft} {t('days_remaining', 'gün qalıb')}</span>
+                    </>
+                  ) : (
+                    <>
+                      <Unlock size={13} color="var(--color-success)" />
+                      <span style={{ color: 'var(--color-success)' }}>
+                        {t('unlock_ready', 'Açıla bilər')}
+                      </span>
+                    </>
+                  )}
+                </div>
+              )}
+            </div>
+          );
+        })}
       </div>
 
       {/* Confirm Purchase Modal */}
@@ -121,14 +197,44 @@ export default function HotBedPage() {
                 .replace('{{price}}', formatCurrency(confirmModal.pkg.price))}
             </p>
             <p className={styles.confirmNote}>
-              {t('price_deducted_from_balance', 'Məbləğ əsas balansınızdan çıxılacaq.')}
+              {t('price_deducted_from_transfer_balance', 'Məbləğ transfer balansınızdan çıxılacaq və əsas balansda kilidlənəcək.')}
+            </p>
+            <p className={styles.confirmNote}>
+              <Clock size={13} style={{ display: 'inline', verticalAlign: 'middle' }} />
+              {' '}{t('lock_period_info', 'Kilid müddəti: {{days}} gün').replace('{{days}}', confirmModal.pkg.expiryDays)}
             </p>
             <div className={styles.confirmActions}>
               <Button variant="ghost" onClick={() => setConfirmModal({ open: false, pkg: null })}>
                 {t('no', 'Xeyr')}
               </Button>
-              <Button onClick={confirmPurchase}>
+              <Button onClick={confirmPurchase} loading={loading}>
                 {t('yes', 'Bəli')}
+              </Button>
+            </div>
+          </div>
+        )}
+      </Modal>
+
+      {/* Confirm Deactivate Modal */}
+      <Modal
+        isOpen={deactivateModal.open}
+        onClose={() => setDeactivateModal({ open: false, pkg: null })}
+        title={t('confirm_deactivate_title', 'Paketi Deaktiv Edin?')}
+        size="sm"
+      >
+        {deactivateModal.pkg && (
+          <div className={styles.confirmContent}>
+            <p>
+              {t('confirm_deactivate_desc', '{{package}} paketini deaktiv etmək istəyirsiniz? {{price}} transfer balansınıza qaytarılacaq.')
+                .replace('{{package}}', deactivateModal.pkg.displayName)
+                .replace('{{price}}', formatCurrency(deactivateModal.pkg.price))}
+            </p>
+            <div className={styles.confirmActions}>
+              <Button variant="ghost" onClick={() => setDeactivateModal({ open: false, pkg: null })}>
+                {t('no', 'Xeyr')}
+              </Button>
+              <Button onClick={confirmDeactivate} loading={loading}>
+                {t('yes_deactivate', 'Bəli, Deaktiv Et')}
               </Button>
             </div>
           </div>
@@ -149,17 +255,22 @@ export default function HotBedPage() {
           <h4>{t('earning_packages', 'Qazanc Paketləri')}</h4>
           <p>{t('pkg_desc_earn', 'Bu paketlər həm xal, həm gündəlik dollar qazandırır. Qazanc Transfer balansına yığılır.')}</p>
 
+          <h4>{t('lock_info_title', 'Kilid Müddətləri')}</h4>
+          <p>{t('lock_info_desc', 'Paket alındıqda məbləğ kilidlənir. $19-$199 paketlər 180 gün, $399-$799 paketlər isə 120 gün sonra açıla bilər.')}</p>
+
           <div className={styles.infoTable}>
             <div className={styles.infoRow}>
               <span>{t('package', 'Paket')}</span>
               <span>{t('points', 'Point')}</span>
               <span>{t('daily', 'Gündəlik')}</span>
+              <span>{t('lock_days', 'Kilid')}</span>
             </div>
             {PACKAGES.map((pkg) => (
               <div key={pkg.id} className={styles.infoRow}>
                 <span style={{ color: pkg.color }}>{pkg.displayName}</span>
                 <span>{pkg.points > 0 ? pkg.points : '-'}</span>
                 <span>{pkg.dailyEarning > 0 ? formatCurrency(pkg.dailyEarning) : '-'}</span>
+                <span>{pkg.expiryDays} {t('days_short', 'gün')}</span>
               </div>
             ))}
           </div>

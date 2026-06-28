@@ -100,7 +100,7 @@ export const translations = {
     claim_level_bonus: "Səviyyə Bonusunu Al",
     confirm_and_activate: "Təsdiqlə və Aktiv Et",
     required: "Tələb",
-    claim_modal_desc: "Bu səviyyəni aktiv etmək istəyirsiniz? Səviyyə üçün tələb olunan {{points}} point balansınızdan çıxılacaq və {{bonus}} bonus dərhal USDT balansınıza əlavə olunacaq.",
+    claim_modal_desc: "Bu səviyyəni aktiv etmək istəyirsiniz? Səviyyə üçün tələb olunan {{points}} point balansınızdan çıxılacaq və {{bonus}} bonus dərhal transfer balansınıza əlavə olunacaq.",
 
     // Hot Bed Page
     investment_packages: "Yatırım Paketləri",
@@ -648,7 +648,7 @@ export const translations = {
     claim_level_bonus: "Claim Level Bonus",
     confirm_and_activate: "Confirm & Activate",
     required: "Required",
-    claim_modal_desc: "Do you want to activate this level? The required {{points}} points for this level will be deducted from your balance, and {{bonus}} bonus will be immediately added to your USDT balance.",
+    claim_modal_desc: "Do you want to activate this level? The required {{points}} points for this level will be deducted from your balance, and {{bonus}} bonus will be immediately added to your transfer balance.",
 
     // Hot Bed Page
     investment_packages: "Investment Packages",

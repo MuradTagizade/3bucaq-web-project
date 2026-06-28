@@ -228,6 +228,19 @@ export async function buyPackage(uid, pkgId, price) {
   return { success: true };
 }
 
+export async function deactivatePackage(pkgId) {
+  const { data, error } = await supabase.rpc('deactivate_package', {
+    pkg_id: pkgId,
+  });
+
+  if (error) throw new Error(error.message);
+  if (data && data.success === false) {
+    throw new Error(data.error || 'Paket deaktiv edilə bilmədi');
+  }
+
+  return data;
+}
+
 // ============================================
 // REFERRALS (5-line tree)
 // ============================================

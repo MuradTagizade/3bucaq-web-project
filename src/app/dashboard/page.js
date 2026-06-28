@@ -103,7 +103,7 @@ export default function DashboardPage() {
       setClaimedLevels((prev) => [...prev, receiveModal.level.level]);
       setReceiveModal({ open: false, level: null });
 
-      const successMsg = t('bonus_added_to_balance', '{{bonus}} balansınıza əlavə edildi!')
+      const successMsg = t('bonus_added_to_transfer_balance', '{{bonus}} transfer balansınıza əlavə edildi!')
         .replace('{{bonus}}', formatUSDT(receiveModal.level.bonus));
       showToast(successMsg);
     } catch (err) {
