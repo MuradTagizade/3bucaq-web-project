@@ -79,6 +79,19 @@
   box-shadow: var(--glass-card-shadow);
 }
 
+.balanceBoxLink {
+  transition: all var(--transition-fast);
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.balanceBoxLink:hover {
+  background: var(--bg-card-hover);
+  border-color: rgba(0, 240, 255, 0.3);
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-2px);
+}
+
 .balanceLabel {
   font-size: 13px;
   color: var(--text-muted);

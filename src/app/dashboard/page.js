@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import styles from './dashboard.module.css';
 import Button from '@/components/ui/Button';
 import Badge from '@/components/ui/Badge';
@@ -8,7 +9,7 @@ import Modal from '@/components/ui/Modal';
 import Input from '@/components/ui/Input';
 import { LEVELS, PACKAGES } from '@/lib/utils/constants';
 import { formatUSDT, formatPoints, formatCurrency, getKYCStatusLabel, getKYCStatusVariant } from '@/lib/utils/formatters';
-import { Trophy, ChevronRight, Lock, Check, Clock, Wallet, Copy, Shield, DollarSign, ArrowDownToLine } from 'lucide-react';
+import { Trophy, ChevronRight, Lock, Check, Clock, Wallet, Copy, Shield, DollarSign, ArrowDownToLine, User } from 'lucide-react';
 import { useAuthStore } from '@/lib/store/authStore';
 import { useTranslation } from '@/lib/store/languageStore';
 import { createLevelClaim, getUserClaimedLevels, getUserByUid } from '@/lib/supabase/database';
@@ -144,10 +145,19 @@ export default function DashboardPage() {
           </div>
         </div>
         <div className={styles.balanceRow}>
-          <div className={styles.balanceBox} style={{ flex: 1, minWidth: '100%' }}>
+          <div className={styles.balanceBox}>
             <span className={styles.balanceLabel}>{t('balance', 'Balans')}</span>
             <span className={styles.balanceAmount}>{formatCurrency(user.balance)}</span>
           </div>
+          <Link href="/dashboard/personal-info" className={`${styles.balanceBox} ${styles.balanceBoxLink}`}>
+            <span className={styles.balanceLabel} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+              <span>{t('personal_info', 'Şəxsi Məlumat')}</span>
+              <User size={16} color="var(--color-secondary)" />
+            </span>
+            <span style={{ fontSize: '18px', fontWeight: '800', color: 'var(--text-primary)', marginTop: '4px' }}>
+              {t('manage_profile', 'Hesabı İdarə Et')} →
+            </span>
+          </Link>
         </div>
         <div className={styles.refRow}>
           <span className={styles.refLabel}>{t('referral_code', 'Referal Kodu')}: {user.referralCode}</span>
