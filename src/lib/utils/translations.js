@@ -227,7 +227,7 @@ export const translations = {
     internal_transfer_title: "Daxili Köçürmə",
     internal_transfer_desc: "Digər istifadəçilərə daxili balans köçürməsi edin. Köçürmə anında (dərhal) baş tutur.",
     usdt_withdrawal_title: "USDT Çıxarış",
-    usdt_withdrawal_desc: "USDT TRC20 şəbəkəsi vasitəsilə balansınızı çıxarın. Sorğunuz 24 saat ərzində icra olunacaq.",
+    usdt_withdrawal_desc: "Kripto vasitəsilə balansınızdan çıxarış edin. Cüzdan ünvanınızı daxil edib şəbəkəni seçin, sorğunuz 24 saat ərzində icra olunacaq.",
     card_withdrawal_title: "Bank Kartına Çıxarış",
     card_withdrawal_desc: "Bank kartınıza birbaşa çıxarış edin. Sorğunuz 24 saat ərzində icra olunacaq.",
 
@@ -773,7 +773,7 @@ export const translations = {
     internal_transfer_title: "Internal Transfer",
     internal_transfer_desc: "Make an internal balance transfer to other users. The transfer happens instantly.",
     usdt_withdrawal_title: "USDT Withdrawal",
-    usdt_withdrawal_desc: "Withdraw your balance via USDT TRC20 network. Your request will be processed within 24 hours.",
+    usdt_withdrawal_desc: "Withdraw from your balance via crypto. Enter your wallet address and select the network, your request will be processed within 24 hours.",
     card_withdrawal_title: "Withdrawal to Bank Card",
     card_withdrawal_desc: "Withdraw directly to your bank card. Your request will be processed within 24 hours.",
 
