@@ -2,6 +2,7 @@
 
 import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import Link from 'next/link';
 import styles from './verify.module.css';
 import Logo from '@/components/layout/Logo';
 import Button from '@/components/ui/Button';
@@ -101,8 +102,13 @@ function VerifyForm() {
   return (
     <div className={styles.page}>
       <div className={styles.topBar}>
-        <LanguageToggle />
-        <ThemeToggle />
+        <Link href="/" className={styles.topBarLogo}>
+          <Logo size={54} showText={true} />
+        </Link>
+        <div className={styles.topBarRight}>
+          <LanguageToggle />
+          <ThemeToggle />
+        </div>
       </div>
       <div className={styles.bgGlow1} />
       <div className={styles.bgGlow2} />
@@ -111,7 +117,7 @@ function VerifyForm() {
       <div className={styles.container}>
         <div className={styles.card}>
           <div className={styles.logoWrap}>
-            <Logo size={48} showText={false} />
+            <Logo size={72} showText={false} />
           </div>
 
           <h1 className={styles.title}>Email Təsdiqi</h1>

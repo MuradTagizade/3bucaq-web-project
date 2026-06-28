@@ -119,7 +119,7 @@ export default function AdminLayout({ children }) {
       {/* Mobile Header */}
       <header className={styles.mobileHeader}>
         <div className={styles.mobileHeaderLeft}>
-          <Logo size={28} />
+          <Logo size={42} />
           <span className={styles.adminBadge}>{t('admin_panel', 'ADMIN')}</span>
         </div>
         <div className={styles.mobileHeaderRight}>
@@ -169,7 +169,7 @@ export default function AdminLayout({ children }) {
       {/* Sidebar (Desktop only) */}
       <aside className={styles.sidebar}>
         <div className={styles.sidebarTop}>
-          <Logo size={36} />
+          <Logo size={54} />
           <span className={styles.adminBadge}>{t('admin_panel', 'ADMIN')}</span>
         </div>
 

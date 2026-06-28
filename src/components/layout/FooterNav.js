@@ -39,8 +39,8 @@ export default function FooterNav({ transferBalance = 0 }) {
                     src="/3bucaq-logo.png"
                     alt="Logo"
                     style={{
-                      width: '20px',
-                      height: '20px',
+                      width: '26px',
+                      height: '26px',
                       borderRadius: '4px',
                       objectFit: 'contain'
                     }}

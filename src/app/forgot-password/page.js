@@ -74,13 +74,18 @@ export default function ForgotPasswordPage() {
   return (
     <div className={styles.page}>
       <div className={styles.topBar}>
-        <LanguageToggle />
+        <Link href="/" className={styles.topBarLogo}>
+          <Logo size={54} showText={true} />
+        </Link>
+        <div className={styles.topBarRight}>
+          <LanguageToggle />
+        </div>
       </div>
       <div className={styles.bgGrid} />
       <div className={styles.container}>
         <div className={styles.card}>
           <Link href="/" className={styles.logoLink}>
-            <Logo size={48} />
+            <Logo size={72} />
           </Link>
 
           <h1 className={styles.title}>{t('forgot_password_title', 'Parolu Unutdum')}</h1>

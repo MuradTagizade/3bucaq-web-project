@@ -59,7 +59,7 @@ export default function Sidebar({ userName, transferBalance, referralLink, onLog
     <aside className={styles.sidebar}>
       {/* Brand Logo */}
       <div className={styles.brand}>
-        <Logo size={36} />
+        <Logo size={54} />
       </div>
 
       {/* User Info Card */}

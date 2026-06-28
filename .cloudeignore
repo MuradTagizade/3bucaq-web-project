@@ -1,0 +1,23 @@
+# AI Agent Ignore File (.cloudeignore)
+# These files and directories should not be read, searched, or processed by the AI agent to save tokens and avoid unnecessary processing.
+
+# Dependencies
+node_modules/
+
+# Next.js Build Output
+.next/
+
+# Package Lock files
+package-lock.json
+
+# Git Directory
+.git/
+
+# OS generated files
+.DS_Store
+
+# Graphify output
+graphify-out/
+
+# Lock files
+skills-lock.json

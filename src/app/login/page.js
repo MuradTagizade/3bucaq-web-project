@@ -79,8 +79,13 @@ export default function LoginPage() {
   return (
     <div className={styles.page}>
       <div className={styles.topBar}>
-        <LanguageToggle />
-        <ThemeToggle />
+        <Link href="/" className={styles.topBarLogo}>
+          <Logo size={54} showText={true} />
+        </Link>
+        <div className={styles.topBarRight}>
+          <LanguageToggle />
+          <ThemeToggle />
+        </div>
       </div>
       <div className={styles.bgGrid} />
       <div className={styles.bgGlow1} />
@@ -90,7 +95,7 @@ export default function LoginPage() {
       <div className={styles.container}>
         <div className={styles.card}>
           <Link href="/" className={styles.logoLink}>
-            <Logo size={48} />
+            <Logo size={72} />
           </Link>
 
           <h1 className={styles.title}>{t('welcome_back', 'Xoş gəldiniz')}</h1>

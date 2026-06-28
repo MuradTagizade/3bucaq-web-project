@@ -22,30 +22,33 @@ export default function LandingPage() {
       <NeuralBackground color="var(--color-primary)" />
 
       <div className={styles.topBar}>
-        <div className={styles.topBarActions}>
-          <Link href="/login">
-            <Button size="sm" variant="ghost">
-              {t('login', 'Giriş')}
-            </Button>
-          </Link>
-          <Link href="/register">
-            <Button size="sm" variant="ghost">
-              {t('landing.create_account_btn', 'Hesab Yarat')}
-            </Button>
-          </Link>
-        </div>
-        <div className={styles.topBarDivider} />
-        <div className={styles.topBarToggles}>
-          <LanguageToggle size={15} />
-          <ThemeToggle size={18} />
+        <Link href="/" className={styles.topBarLogo}>
+          <Logo size={54} showText={true} />
+        </Link>
+        <div className={styles.topBarRight}>
+          <div className={styles.topBarActions}>
+            <Link href="/login">
+              <Button size="sm" variant="ghost">
+                {t('login', 'Giriş')}
+              </Button>
+            </Link>
+            <Link href="/register">
+              <Button size="sm" variant="ghost">
+                {t('landing.create_account_btn', 'Hesab Yarat')}
+              </Button>
+            </Link>
+          </div>
+          <div className={styles.topBarDivider} />
+          <div className={styles.topBarToggles}>
+            <LanguageToggle size={15} />
+            <ThemeToggle size={18} />
+          </div>
         </div>
       </div>
 
       {/* Hero Section */}
       <section className={styles.hero}>
         <div className={styles.heroContent}>
-          <Logo size={64} showText={false} className={styles.heroLogo} />
-
           <h1 className={styles.title}>
             {t('landing.title_make', 'MAKE WORLD')}{' '}
             <span className="text-gradient">{t('landing.title_green', 'GREEN')}</span>{' '}
@@ -106,7 +109,7 @@ export default function LandingPage() {
 
       {/* Footer */}
       <footer className={styles.footer}>
-        <Logo size={28} />
+        <Logo size={42} />
         <p className={styles.footerText}>© 2026 LEVEL UP. {t('landing.all_rights_reserved', 'Bütün hüquqlar qorunur.')}</p>
       </footer>
     </div>

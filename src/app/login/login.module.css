@@ -11,10 +11,30 @@
 .topBar {
   position: absolute;
   top: 20px;
+  left: 20px;
   right: 20px;
   z-index: 10;
   display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.topBarLogo {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+  filter: drop-shadow(0 0 10px rgba(0, 255, 163, 0.3));
+  transition: transform var(--transition-base);
+}
+
+.topBarLogo:hover {
+  transform: scale(1.02);
+}
+
+.topBarRight {
+  display: flex;
   gap: 12px;
+  align-items: center;
 }
 
 /* Neon space grid */
@@ -317,5 +337,13 @@
   .formRow {
     grid-template-columns: 1fr;
     gap: var(--space-md);
+  }
+  .topBarLogo span {
+    display: none;
+  }
+  .topBar {
+    top: 12px;
+    left: 12px;
+    right: 12px;
   }
 }

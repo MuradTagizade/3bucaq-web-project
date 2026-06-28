@@ -15,7 +15,7 @@ export default function Header({ userName }) {
   return (
     <header className={styles.header}>
       <div className={styles.inner}>
-        <Logo size={32} showText={false} />
+        <Logo size={48} showText={false} />
         <div className={styles.greeting}>
           {t('hi', 'Hi')}: <span className={styles.name}>{userName || 'User'}</span>
         </div>
