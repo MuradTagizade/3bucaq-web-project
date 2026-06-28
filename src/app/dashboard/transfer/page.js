@@ -247,42 +247,76 @@ function TransferContent() {
 
       {/* Transfer Form */}
       {activeTab === 'transfer' && (
-        <div className={styles.formCard}>
-          <h2 className={styles.formTitle}>{t('internal_transfer', 'Köçürmə')}</h2>
-          <form onSubmit={handleTransferSubmit} className={styles.form}>
-            <Input
-              label={t('recipient_label', 'Kimə')}
-              placeholder={t('recipient_placeholder', 'Qəbul edənin logini')}
-              value={recipient}
-              onChange={handleRecipientChange}
-              error={errors.recipient}
-              success={recipientValid}
-              icon={<User size={18} />}
-            />
+        <>
+          <div className={styles.infoCard}>
+            <div className={styles.infoIcon} style={{ background: 'rgba(0, 240, 255, 0.1)' }}>
+              <ArrowUpRight size={20} color="var(--color-secondary)" />
+            </div>
+            <div>
+              <strong>{t('internal_transfer_title', 'Daxili Köçürmə')}</strong>
+              <p>{t('internal_transfer_desc', 'Digər istifadəçilərə daxili balans köçürməsi edin. Köçürmə anında (dərhal) baş tutur.')}</p>
+            </div>
+          </div>
 
-            <Input
-              label={t('amount', 'Məbləğ')}
-              type="number"
-              placeholder="0.00"
-              value={amount}
-              onChange={(e) => {
-                setAmount(e.target.value);
-                setErrors((prev) => ({ ...prev, amount: null }));
-              }}
-              error={errors.amount}
-              icon={<ArrowUpRight size={18} />}
-            />
+          <div className={styles.formCard}>
+            <h2 className={styles.formTitle}>{t('internal_transfer', 'Köçürmə')}</h2>
+            <form onSubmit={handleTransferSubmit} className={styles.form}>
+              <Input
+                label={t('recipient_label', 'Kimə')}
+                placeholder={t('recipient_placeholder', 'Qəbul edənin logini')}
+                value={recipient}
+                onChange={handleRecipientChange}
+                error={errors.recipient}
+                success={recipientValid}
+                icon={<User size={18} />}
+              />
 
-            <Button type="submit" fullWidth size="lg" loading={loading}>
-              {t('submit', 'Göndər')}
-            </Button>
-          </form>
-        </div>
+              <Input
+                label={t('amount', 'Məbləğ')}
+                type="number"
+                placeholder="0.00"
+                value={amount}
+                onChange={(e) => {
+                  setAmount(e.target.value);
+                  setErrors((prev) => ({ ...prev, amount: null }));
+                }}
+                error={errors.amount}
+                icon={<ArrowUpRight size={18} />}
+              />
+
+              <Button type="submit" fullWidth size="lg" loading={loading}>
+                {t('submit', 'Göndər')}
+              </Button>
+            </form>
+          </div>
+        </>
       )}
 
       {/* Withdrawal Form */}
       {activeTab === 'withdrawal' && (
         <>
+          {wdMethod === 'usdt' ? (
+            <div className={styles.infoCard}>
+              <div className={styles.infoIcon}>
+                <ArrowDownToLine size={20} />
+              </div>
+              <div>
+                <strong>{t('usdt_withdrawal_title', 'USDT Çıxarış')}</strong>
+                <p>{t('usdt_withdrawal_desc', 'USDT TRC20 şəbəkəsi vasitəsilə balansınızı çıxarın. Sorğunuz 24 saat ərzində icra olunacaq.')}</p>
+              </div>
+            </div>
+          ) : (
+            <div className={styles.infoCard}>
+              <div className={styles.infoIcon} style={{ background: 'rgba(0, 230, 118, 0.1)' }}>
+                <CreditCard size={20} color="var(--color-primary)" />
+              </div>
+              <div>
+                <strong>{t('card_withdrawal_title', 'Bank Kartına Çıxarış')}</strong>
+                <p>{t('card_withdrawal_desc', 'Bank kartınıza birbaşa çıxarış edin. Sorğunuz 24 saat ərzində icra olunacaq.')}</p>
+              </div>
+            </div>
+          )}
+
           <div className={styles.formCard}>
             <h2 className={styles.formTitle}>{t('withdrawal_request', 'Çıxarış Sorğusu')}</h2>
             

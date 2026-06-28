@@ -205,3 +205,40 @@
     padding: 24px 16px;
   }
 }
+
+.infoCard {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px;
+  background: rgba(0, 255, 163, 0.05);
+  border: 1px solid rgba(0, 255, 163, 0.2);
+  border-radius: var(--radius-md);
+  margin-bottom: 24px;
+}
+
+.infoIcon {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: rgba(0, 255, 163, 0.1);
+  color: var(--color-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 0 15px rgba(0, 255, 163, 0.2);
+}
+
+.infoCard strong {
+  display: block;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+}
+
+.infoCard p {
+  font-size: 13px;
+  color: var(--text-secondary);
+}
