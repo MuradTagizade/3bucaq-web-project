@@ -8,7 +8,7 @@ import Logo from '@/components/layout/Logo';
 import ThemeToggle from '@/components/ui/ThemeToggle';
 import LanguageToggle from '@/components/ui/LanguageToggle';
 import { useTranslation } from '@/lib/store/languageStore';
-import { LayoutDashboard, Users, ClipboardCheck, ScrollText, LogOut, Wallet, ArrowDownToLine, MoreVertical, ShieldCheck, Shield } from 'lucide-react';
+import { LayoutDashboard, Users, ClipboardCheck, ScrollText, LogOut, Wallet, ArrowDownToLine, MoreVertical, ShieldCheck, Shield, Coins } from 'lucide-react';
 import { useAuthStore } from '@/lib/store/authStore';
 import { logoutUser } from '@/lib/supabase/auth';
 
@@ -19,6 +19,7 @@ const NAV_ITEMS = [
   { href: '/admin/claims', label: 'Level Claims', icon: ClipboardCheck },
   { href: '/admin/deposits', label: 'Depozitlər', icon: Wallet },
   { href: '/admin/withdrawals', label: 'Çıxarışlar', icon: ArrowDownToLine },
+  { href: '/admin/wallets', label: 'Cüzdanlar', icon: Coins },
   { href: '/admin/logs', label: 'Loglar', icon: ScrollText },
   { href: '/admin/admins', label: 'Adminlər', icon: Shield },
 ];
@@ -31,7 +32,7 @@ function hasPermission(user, path) {
   if (path.startsWith('/admin/users')) return perms.users;
   if (path.startsWith('/admin/kyc')) return perms.kyc;
   if (path.startsWith('/admin/claims')) return perms.claims;
-  if (path.startsWith('/admin/deposits') || path.startsWith('/admin/withdrawals')) return perms.finance;
+  if (path.startsWith('/admin/deposits') || path.startsWith('/admin/withdrawals') || path.startsWith('/admin/wallets')) return perms.finance;
   if (path.startsWith('/admin/logs')) return perms.logs;
   if (path.startsWith('/admin/admins')) return perms.superadmin;
   if (path === '/admin') {

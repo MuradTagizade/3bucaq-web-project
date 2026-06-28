@@ -21,10 +21,19 @@ export default function DepositPage() {
   const [activeTab, setActiveTab] = useState('usdt'); // 'usdt' or 'card'
   const [isCardActive, setIsCardActive] = useState(false); // Enable/Disable card payment setting
   
-  // USDT form state
+  // Crypto form state
+  const [cryptoAsset, setCryptoAsset] = useState('usdt'); // 'usdt' or 'usdc'
   const [amount, setAmount] = useState('');
   const [txHash, setTxHash] = useState('');
   const [network, setNetwork] = useState('TRC20');
+  const [cryptoWallets, setCryptoWallets] = useState({
+    usdt_trc20: '',
+    usdt_erc20: '',
+    usdt_bep20: '',
+    usdc_trc20: '',
+    usdc_erc20: '',
+    usdc_bep20: '',
+  });
   
   // Card form state
   const [cardAmount, setCardAmount] = useState('');
@@ -44,10 +53,20 @@ export default function DepositPage() {
     async function loadData() {
       if (!authUser?.uid) return;
       try {
-        const [historyData, activeCard, cardActiveSetting] = await Promise.all([
+        const [
+          historyData, activeCard, cardActiveSetting,
+          usdtTRC, usdtERC, usdtBEP,
+          usdcTRC, usdcERC, usdcBEP
+        ] = await Promise.all([
           getDeposits(authUser.uid),
           getSystemSetting('admin_deposit_card'),
-          getSystemSetting('card_payment_active')
+          getSystemSetting('card_payment_active'),
+          getSystemSetting('wallet_usdt_trc20'),
+          getSystemSetting('wallet_usdt_erc20'),
+          getSystemSetting('wallet_usdt_bep20'),
+          getSystemSetting('wallet_usdc_trc20'),
+          getSystemSetting('wallet_usdc_erc20'),
+          getSystemSetting('wallet_usdc_bep20'),
         ]);
         setDeposits(historyData);
         if (activeCard) {
@@ -56,6 +75,14 @@ export default function DepositPage() {
           setAdminCardNumber(t('not_set', 'Təyin edilməyib'));
         }
         setIsCardActive(cardActiveSetting === 'true');
+        setCryptoWallets({
+          usdt_trc20: usdtTRC || '',
+          usdt_erc20: usdtERC || '',
+          usdt_bep20: usdtBEP || '',
+          usdc_trc20: usdcTRC || '',
+          usdc_erc20: usdcERC || '',
+          usdc_bep20: usdcBEP || '',
+        });
         // Force USDT if card system is disabled
         if (cardActiveSetting !== 'true') {
           setActiveTab('usdt');
@@ -74,14 +101,19 @@ export default function DepositPage() {
     setTimeout(() => setToast(null), 3000);
   };
 
-  const handleCopyCard = async () => {
+  const handleCopyText = async (text, successMsg) => {
     try {
-      await navigator.clipboard.writeText(adminCardNumber);
-      showToast(t('receipt_copied', 'Kart nömrəsi kopyalandı!'));
+      await navigator.clipboard.writeText(text);
+      showToast(successMsg);
     } catch (err) {
       showToast(t('receipt_copy_fail', 'Kopyalamaq alınmadı'));
     }
   };
+
+  const handleCopyCard = () => handleCopyText(adminCardNumber, t('receipt_copied', 'Kart nömrəsi kopyalandı!'));
+  
+  const activeWalletAddress = cryptoWallets[`${cryptoAsset}_${network.toLowerCase()}`] || t('not_set', 'Təyin edilməyib');
+  const handleCopyWallet = () => handleCopyText(activeWalletAddress, t('wallet_copied', 'Cüzdan ünvanı kopyalandı!'));
 
   // Upload file to Supabase storage bucket
   const uploadReceiptFile = async (file) => {
@@ -114,8 +146,8 @@ export default function DepositPage() {
 
       setLoading(true);
       try {
-        await createDeposit(authUser.uid, amount, txHash, network, 'usdt');
-        showToast(t('deposit_success', 'Depozit sorğusu göndərildi! Admin təsdiq edəcək.'));
+        await createDeposit(authUser.uid, amount, txHash, `${cryptoAsset.toUpperCase()} ${network}`, cryptoAsset);
+        showToast(t('deposit_success', 'Depozit sorğusu göndərildi! Sorğunuz 24 saat ərzində icra olunacaq.'));
         setAmount('');
         setTxHash('');
         const data = await getDeposits(authUser.uid);
@@ -226,7 +258,7 @@ export default function DepositPage() {
             onClick={() => setActiveTab('usdt')}
           >
             <Wallet size={16} />
-            <span>USDT TRC20</span>
+            <span>Kripto (USDT / USDC)</span>
           </button>
           <button
             type="button"
@@ -245,8 +277,8 @@ export default function DepositPage() {
             <ArrowDown size={20} />
           </div>
           <div>
-            <strong>USDT TRC20</strong>
-            <p>{t('usdt_deposit_desc', 'Kripto vasitəsilə balansınızı artırın. Transaction hash-i daxil edin, admin təsdiq edəcək.')}</p>
+            <strong>Kripto ilə Mədaxil</strong>
+            <p>{t('usdt_deposit_desc', 'Kripto vasitəsilə balansınızı artırın. Transaction hash-i daxil edin, sorğunuz 24 saat ərzində icra olunacaq.')}</p>
           </div>
         </div>
       ) : (
@@ -256,7 +288,7 @@ export default function DepositPage() {
           </div>
           <div>
             <strong>{t('bank_card_manual', 'Bank Kartı (Manuel)')}</strong>
-            <p>{t('card_deposit_desc', 'Aşağıda qeyd olunan bank kartına pulu göndərib, ödəniş qəbzi şəklini və kart nömrənizi daxil edin.')}</p>
+            <p>{t('card_deposit_desc', 'Aşağıda qeyd olunan bank kartına pulu göndərib, ödəniş qəbzi şəklini və kart nömrənizi daxil edin. Sorğunuz 24 saat ərzində icra olunacaq.')}</p>
           </div>
         </div>
       )}
@@ -264,6 +296,66 @@ export default function DepositPage() {
       <form onSubmit={handleSubmit} className={styles.form}>
         {activeTab === 'usdt' ? (
           <>
+            {/* Asset selection (USDT / USDC) */}
+            <div style={{ display: 'flex', gap: 8, marginBottom: 8 }}>
+              <button
+                type="button"
+                onClick={() => setCryptoAsset('usdt')}
+                style={{
+                  flex: 1, padding: '10px', borderRadius: 8, fontSize: 13, fontWeight: 600,
+                  background: cryptoAsset === 'usdt' ? 'var(--color-primary-subtle)' : 'var(--bg-secondary)',
+                  border: `1px solid ${cryptoAsset === 'usdt' ? 'var(--color-primary)' : 'var(--border-default)'}`,
+                  color: cryptoAsset === 'usdt' ? 'var(--color-primary)' : 'var(--text-secondary)', cursor: 'pointer',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6
+                }}
+              >
+                <span>USDT</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setCryptoAsset('usdc')}
+                style={{
+                  flex: 1, padding: '10px', borderRadius: 8, fontSize: 13, fontWeight: 600,
+                  background: cryptoAsset === 'usdc' ? 'var(--color-primary-subtle)' : 'var(--bg-secondary)',
+                  border: `1px solid ${cryptoAsset === 'usdc' ? 'var(--color-primary)' : 'var(--border-default)'}`,
+                  color: cryptoAsset === 'usdc' ? 'var(--color-primary)' : 'var(--text-secondary)', cursor: 'pointer',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6
+                }}
+              >
+                <span>USDC</span>
+              </button>
+            </div>
+
+            {/* Network selection */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 16 }}>
+              <label style={{ fontSize: 13, color: 'var(--text-muted)', fontWeight: 500 }}>{t('network', 'Şəbəkə')}</label>
+              <select
+                value={network}
+                onChange={(e) => setNetwork(e.target.value)}
+                className={styles.select}
+              >
+                <option value="TRC20">{cryptoAsset.toUpperCase()} TRC20</option>
+                <option value="ERC20">{cryptoAsset.toUpperCase()} ERC20</option>
+                <option value="BEP20">{cryptoAsset.toUpperCase()} BEP20</option>
+              </select>
+            </div>
+
+            {/* Wallet Address Display Box */}
+            <div className={styles.cardDisplay}>
+              <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>
+                {t('wallet_address_to_send', 'Göndəriləcək Cüzdan Ünvanı')} ({cryptoAsset.toUpperCase()} {network})
+              </span>
+              <div className={styles.cardNumRow}>
+                <span className={styles.cardNum} style={{ fontSize: 15, wordBreak: 'break-all' }}>
+                  {activeWalletAddress}
+                </span>
+                <button type="button" className={styles.copyBtn} onClick={handleCopyWallet}>
+                  <Copy size={12} />
+                  <span>{t('copy', 'Kopyala')}</span>
+                </button>
+              </div>
+            </div>
+
             <Input
               label={t('amount_usd', 'Məbləğ (USD)')}
               type="number"
@@ -279,19 +371,6 @@ export default function DepositPage() {
               value={txHash}
               onChange={(e) => setTxHash(e.target.value)}
             />
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-              <label style={{ fontSize: 13, color: 'var(--text-muted)', fontWeight: 500 }}>{t('network', 'Şəbəkə')}</label>
-              <select
-                value={network}
-                onChange={(e) => setNetwork(e.target.value)}
-                className={styles.select}
-              >
-                <option value="TRC20">USDT TRC20</option>
-                <option value="ERC20">USDT ERC20</option>
-                <option value="BEP20">USDT BEP20</option>
-              </select>
-            </div>
           </>
         ) : (
           <>

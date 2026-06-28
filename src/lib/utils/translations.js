@@ -232,6 +232,8 @@ export const translations = {
     card_withdrawal_desc: "Bank kartınıza birbaşa çıxarış edin. Sorğunuz 24 saat ərzində icra olunacaq.",
 
     // Deposit Page
+    crypto_wallet_management: "Kripto Cüzdan İdarəetməsi",
+    wallets_saved_success: "Cüzdan ünbanları uğurla yeniləndi!",
     deposit_success: "Depozit sorğusu göndərildi! Sorğunuz 24 saat ərzində icra olunacaq.",
     card_deposit_success: "Kart ilə depozit sorğusu göndərildi! Sorğunuz 24 saat ərzində icra olunacaq.",
     error_prefix: "Xəta: ",
@@ -778,6 +780,8 @@ export const translations = {
     card_withdrawal_desc: "Withdraw directly to your bank card. Your request will be processed within 24 hours.",
 
     // Deposit Page
+    crypto_wallet_management: "Crypto Wallet Management",
+    wallets_saved_success: "Wallet addresses successfully updated!",
     deposit_success: "Deposit request sent! Your request will be processed within 24 hours.",
     card_deposit_success: "Card deposit request sent! Your request will be processed within 24 hours.",
     error_prefix: "Error: ",
