@@ -198,6 +198,12 @@ export async function transferFunds(fromUid, toLogin, amount) {
     throw new Error('Məbləğ düzgün deyil');
   }
 
+  const sender = await getUserByUid(fromUid);
+  if (!sender) throw new Error('Göndərən istifadəçi tapılmadı');
+  if (sender.role !== 'admin' && sender.kyc_status !== 'approved') {
+    throw new Error('Köçürmə etmək üçün KYC doğrulaması tələb olunur.');
+  }
+
   const { data, error } = await supabase.rpc('transfer_funds', {
     to_login: toLogin,
     amount: parsedAmount,
@@ -487,6 +493,10 @@ export async function createDeposit(uid, amount, txHash, network = 'TRC20', paym
   const user = await getUserByUid(uid);
   if (!user) throw new Error('İstifadəçi tapılmadı');
 
+  if (user.role !== 'admin' && user.kyc_status !== 'approved') {
+    throw new Error('Depozit etmək üçün KYC doğrulaması tələb olunur.');
+  }
+
   const { error } = await supabase.from('deposits').insert({
     uid,
     login: user.display_login,
@@ -575,6 +585,12 @@ export async function createWithdrawal(uid, amount, cryptoAddress, network = 'TR
   const parsedAmount = Number(amount);
   if (isNaN(parsedAmount) || parsedAmount <= 0) {
     throw new Error('Məbləğ müsbət olmalıdır');
+  }
+
+  const user = await getUserByUid(uid);
+  if (!user) throw new Error('İstifadəçi tapılmadı');
+  if (user.role !== 'admin' && user.kyc_status !== 'approved') {
+    throw new Error('Çıxarış etmək üçün KYC doğrulaması tələb olunur.');
   }
 
   const { data, error } = await supabase.rpc('create_withdrawal', {

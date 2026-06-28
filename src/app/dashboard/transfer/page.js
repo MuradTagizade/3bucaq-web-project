@@ -10,7 +10,7 @@ import Badge from '@/components/ui/Badge';
 import Modal from '@/components/ui/Modal';
 import { formatCurrency, formatDateTime } from '@/lib/utils/formatters';
 import { validateAmount, validateUSDTAddress } from '@/lib/utils/validators';
-import { ArrowUpRight, CheckCircle2, User, Wallet, ArrowDownToLine, CreditCard, Image as ImageIcon, ArrowDown, ChevronDown } from 'lucide-react';
+import { ArrowUpRight, CheckCircle2, User, Wallet, ArrowDownToLine, CreditCard, Image as ImageIcon, ArrowDown, ChevronDown, AlertTriangle } from 'lucide-react';
 import { useAuthStore } from '@/lib/store/authStore';
 import { useTranslation } from '@/lib/store/languageStore';
 import { transferFunds, getUserByLogin, getUserByUid, createWithdrawal, getWithdrawals, getSystemSetting } from '@/lib/supabase/database';
@@ -214,6 +214,9 @@ function TransferContent() {
     setViewerReceiptUrl(data.publicUrl);
   };
 
+  const kycStatus = authUser?.kycStatus || 'none';
+  const isKycApproved = kycStatus === 'approved' || authUser?.role === 'admin';
+
   return (
     <div className={styles.transfer}>
       {/* Balance Display */}
@@ -222,6 +225,19 @@ function TransferContent() {
         <span className={styles.balanceValue}>{formatCurrency(balance, '')}</span>
         <span className={styles.balanceCurrency}>USD</span>
       </div>
+
+      {/* KYC Warning Banner */}
+      {!isKycApproved && (
+        <div className={styles.kycWarningBanner}>
+          <AlertTriangle size={18} className={styles.warningIcon} />
+          <div className={styles.warningText}>
+            <span>{t('kyc_required_desc', 'Maliyyə əməliyyatlarını (depozit, köçürmə və çıxarış) həyata keçirmək üçün şəxsiyyətinizi təsdiq etməlisiniz.')}</span>
+            <Link href="/dashboard/kyc" className={styles.warningLink}>
+              {t('go_to_kyc_short', 'Doğrulamaya Get →')}
+            </Link>
+          </div>
+        </div>
+      )}
 
       {/* Tabs */}
       <div className={styles.tabs}>
@@ -284,7 +300,7 @@ function TransferContent() {
                 icon={<ArrowUpRight size={18} />}
               />
 
-              <Button type="submit" fullWidth size="lg" loading={loading} disabled={!recipientValid}>
+              <Button type="submit" fullWidth size="lg" loading={loading} disabled={loading || !recipientValid || !isKycApproved}>
                 {t('submit', 'Göndər')}
               </Button>
             </form>
@@ -447,7 +463,7 @@ function TransferContent() {
                 />
               )}
 
-              <Button type="submit" fullWidth size="lg" loading={wdLoading}>
+              <Button type="submit" fullWidth size="lg" loading={wdLoading} disabled={wdLoading || !isKycApproved}>
                 {t('send_withdrawal_request', 'Çıxarış Sorğusu Göndər')}
               </Button>
             </form>

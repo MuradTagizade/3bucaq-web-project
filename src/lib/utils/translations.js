@@ -251,6 +251,13 @@ export const translations = {
     deposit_history: "Depozit Tarixçəsi",
     no_deposits_yet: "Hələ depozit yoxdur",
     bank_card_manual: "Bank Kartı (Manuel)",
+    crypto_tab_label: "Kripto (USDT / USDC)",
+    crypto_deposit: "Kripto ilə Mədaxil",
+    wallet_address_to_send: "Göndəriləcək Cüzdan Ünvanı",
+    wallet_copied: "Cüzdan ünvanı kopyalandı!",
+    enter_tx_hash: "Transaction Hash daxil edin",
+    send_deposit_request: "Depozit Sorğusu Göndər",
+    payment_receipt_photo: "Ödəniş Qəbzi (Foto)",
 
     // History Page
     all_transactions: "Bütün Əməliyyatlar",
@@ -316,6 +323,10 @@ export const translations = {
     enter_identity_placeholder: "Kimlik nömrəsini daxil edin",
     identity_already_exists: "Bu kimlik nömrəsi ilə artıq bir hesab mövcuddur!",
     enter_identity_error: "Zəhmət olmasa, kimlik nömrəsini daxil edin",
+    kyc_required_title: "KYC Doğrulaması Tələb Olunur",
+    kyc_required_desc: "Maliyyə əməliyyatlarını (depozit, köçürmə və çıxarış) həyata keçirmək üçün şəxsiyyətinizi təsdiq etməlisiniz.",
+    go_to_kyc: "KYC Doğrulamasına Get",
+    go_to_kyc_short: "Doğrulamaya Get →",
 
     // Auth & Layout
     password_required: "Parol tələb olunur",
@@ -799,6 +810,13 @@ export const translations = {
     deposit_history: "Deposit History",
     no_deposits_yet: "No deposits yet",
     bank_card_manual: "Bank Card (Manual)",
+    crypto_tab_label: "Crypto (USDT / USDC)",
+    crypto_deposit: "Deposit with Crypto",
+    wallet_address_to_send: "Wallet Address to Send",
+    wallet_copied: "Wallet address copied!",
+    enter_tx_hash: "Enter Transaction Hash",
+    send_deposit_request: "Send Deposit Request",
+    payment_receipt_photo: "Payment Receipt (Photo)",
 
     // History Page
     all_transactions: "All Transactions",
@@ -864,6 +882,10 @@ export const translations = {
     enter_identity_placeholder: "Enter identity number",
     identity_already_exists: "An account with this identity number already exists!",
     enter_identity_error: "Please enter your identity number",
+    kyc_required_title: "KYC Verification Required",
+    kyc_required_desc: "You must verify your identity to perform financial operations (deposits, transfers, and withdrawals).",
+    go_to_kyc: "Go to KYC Verification",
+    go_to_kyc_short: "Verify Now →",
 
     // Auth & Layout
     password_required: "Password is required",

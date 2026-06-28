@@ -211,3 +211,11 @@ Lokal yoxlamalar və test üçün istifadə olunan, `LEVEL UP` domenlərinə kö
   * Admin panelin mobil və desktop başlıqlarında Logo və "Admin Panel" sözlərinin üst-üstə minməsi düzəldildi.
   * Dashboard-da "Şəxsi Məlumat" kartı sola, "Balans" kartı sağa keçirildi, "Hesabı İdarə Et" mətninin ölçüsü və dizaynı səliqəli formaya gətirildi.
   * USDT Tarixçəsində "All Types" filter menyusunun mobil ekranlarda kənara qaçması sola hizalanmaqla aradan qaldırıldı.
+
+---
+
+## 10. Son Sessiyada Görülən Təkmilləşdirmələr (KYC Tələbi İnteqrasiyası və Depozit Tərcümələri)
+* **Depozit Səhifəsi İkidilli Dəstək Bərpası:** Depozit səhifəsindəki hardkod azərbaycanca olan hissələr (Kripto tab, Kripto ilə Mədaxil başlığı) və `translations.js` faylında açarları əskik olduğu üçün ingiliscə rejimdə də azərbaycanca görünən bütün sahələr (Göndəriləcək cüzdan ünvanı, depozit sorğusu düyməsi, qəbz başlığı və s.) tərcümə sisteminə qoşularaq tamamilə ingiliscəyə çevrilə bilən vəziyyətə gətirildi.
+* **Maliyyə Əməliyyatlarında KYC Doğrulaması Şərti:**
+    * **Baza/JS Helper Səviyyəsində Qoruma:** `createDeposit`, `transferFunds` və `createWithdrawal` funksiyalarında istifadəçinin KYC statusunun `approved` olub-olmaması yoxlanılır (admin rolundan başqa) və təsdiq olunmayıbsa əməliyyatın icrasına icazə verilmir.
+    * **İstifadəçi Arayüzü (UI) Səviyyəsində Bloklama:** Depozit və Köçürmə/Çıxarış səhifələrində kyc statusu approved olmayan istifadəçilərə yuxarıda sarı rəngli zərif bir **KYC Xəbərdarlıq Baneri** gösterilir. Eyni zamanda həmin səhifələrdəki əməliyyat göndərmə (submit) düymələri tamamilə deaktiv edilir. KYC təsdiqləndikdən sonra baner avtomatik olaraq itir və düymələr aktivləşir.
