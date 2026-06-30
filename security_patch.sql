@@ -26,6 +26,7 @@ set search_path = public
 as $$
 declare
   ref_code text;
+  ref_uid uuid;
   user_login text;
   p_exists boolean;
   curr_user auth.users%rowtype;
@@ -53,9 +54,17 @@ begin
     split_part(curr_user.email, '@', 1)
   );
 
+  -- Resolve referred_by from the referral code in user metadata
+  if curr_user.raw_user_meta_data->>'referral_code' is not null 
+     and curr_user.raw_user_meta_data->>'referral_code' != '' then
+    select id into ref_uid from public.profiles
+      where referral_code = curr_user.raw_user_meta_data->>'referral_code'
+      limit 1;
+  end if;
+
   insert into public.profiles (
     id, email, display_login, full_name, role, referral_code, 
-    country, city, phone
+    referred_by, country, city, phone
   ) values (
     curr_user.id, 
     curr_user.email, 
@@ -63,6 +72,7 @@ begin
     coalesce(curr_user.raw_user_meta_data->>'full_name', user_login), 
     'user', 
     ref_code,
+    ref_uid,
     curr_user.raw_user_meta_data->>'country',
     curr_user.raw_user_meta_data->>'city',
     curr_user.raw_user_meta_data->>'phone'

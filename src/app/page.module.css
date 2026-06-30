@@ -78,18 +78,7 @@
   align-items: center;
 }
 
-.topBarActions {
-  display: flex;
-  gap: var(--space-sm);
-  align-items: center;
-}
 
-.topBarDivider {
-  width: 1px;
-  height: 20px;
-  background: var(--border-default);
-  opacity: 0.5;
-}
 
 .topBarToggles {
   display: flex;
@@ -104,9 +93,7 @@
     right: 12px;
     gap: var(--space-xs);
   }
-  .topBarDivider {
-    height: 16px;
-  }
+
   .topBarLogo span {
     display: none;
   }
@@ -131,6 +118,7 @@
   align-items: center;
   gap: var(--space-lg);
   animation: scaleIn 800ms cubic-bezier(0.16, 1, 0.3, 1);
+  margin-top: 40px;
 }
 
 @keyframes scaleIn {
@@ -162,6 +150,12 @@
   display: flex;
   gap: var(--space-md);
   margin-top: var(--space-md);
+  justify-content: center;
+  align-items: center;
+}
+
+.heroActions a {
+  text-decoration: none;
 }
 
 /* === Floating Stats === */
@@ -323,6 +317,14 @@
     flex-direction: column;
     width: 100%;
     max-width: 300px;
+  }
+
+  .heroActions a {
+    width: 100%;
+  }
+
+  .heroActions button {
+    width: 100% !important;
   }
 
   .title {

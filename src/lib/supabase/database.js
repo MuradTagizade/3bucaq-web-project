@@ -782,44 +782,15 @@ export async function processPackageExpiry() {
     let updated = false;
     const updatedPkgs = { ...pkgs };
     const updatedActivatedAt = { ...activatedAt };
-    let balanceAdd = 0;
-
-    // Check if user has any referrals
-    const { count } = await supabase
-      .from('profiles')
-      .select('id', { count: 'exact', head: true })
-      .eq('referred_by', user.id);
-
-    const hasReferrals = (count || 0) > 0;
-
-    if (!hasReferrals) {
-      // Investment packages: 180-day refund
-      for (const pkgId of ['pkg19', 'pkg49', 'pkg99', 'pkg199']) {
-        if (pkgs[pkgId] && activatedAt[pkgId]) {
-          const activatedDate = new Date(activatedAt[pkgId]);
-          const daysPassed = (now - activatedDate) / (1000 * 60 * 60 * 24);
-          if (daysPassed >= 180) {
-            const pkg = PACKAGES.find((p) => p.id === pkgId);
-            if (pkg) {
-              balanceAdd += pkg.price;
-              updatedPkgs[pkgId] = false;
-              delete updatedActivatedAt[pkgId];
-              updated = true;
-            }
-          }
-        }
-      }
-
-      // Earning packages: 120-day deactivation
-      for (const pkgId of ['pkg399', 'pkg799']) {
-        if (pkgs[pkgId] && activatedAt[pkgId]) {
-          const activatedDate = new Date(activatedAt[pkgId]);
-          const daysPassed = (now - activatedDate) / (1000 * 60 * 60 * 24);
-          if (daysPassed >= 120) {
-            updatedPkgs[pkgId] = false;
-            delete updatedActivatedAt[pkgId];
-            updated = true;
-          }
+    // Earning packages: 120-day deactivation (always deactivates after 120 days, no refund, regardless of referrals)
+    for (const pkgId of ['pkg399', 'pkg799']) {
+      if (pkgs[pkgId] && activatedAt[pkgId]) {
+        const activatedDate = new Date(activatedAt[pkgId]);
+        const daysPassed = (now - activatedDate) / (1000 * 60 * 60 * 24);
+        if (daysPassed >= 120) {
+          updatedPkgs[pkgId] = false;
+          delete updatedActivatedAt[pkgId];
+          updated = true;
         }
       }
     }
@@ -829,9 +800,6 @@ export async function processPackageExpiry() {
         active_packages: updatedPkgs,
         package_activated_at: updatedActivatedAt,
       };
-      if (balanceAdd > 0) {
-        updateData.balance = Number(user.balance) + balanceAdd;
-      }
       await supabase.from('profiles').update(updateData).eq('id', user.id);
       processed++;
     }

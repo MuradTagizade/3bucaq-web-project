@@ -13,7 +13,7 @@ export const PACKAGES = [
     displayName: '#19',
     description: '0.6 point qazandırır',
     color: '#00E676',
-    expiryDays: 180,
+    expiryDays: null,
   },
   {
     id: 'pkg49',
@@ -24,7 +24,7 @@ export const PACKAGES = [
     displayName: '#49',
     description: '1.5 point qazandırır',
     color: '#00E5FF',
-    expiryDays: 180,
+    expiryDays: null,
   },
   {
     id: 'pkg99',
@@ -35,7 +35,7 @@ export const PACKAGES = [
     displayName: '#99',
     description: '3 point qazandırır',
     color: '#7C4DFF',
-    expiryDays: 180,
+    expiryDays: null,
   },
   {
     id: 'pkg199',
@@ -46,7 +46,7 @@ export const PACKAGES = [
     displayName: '#199',
     description: '6 point qazandırır',
     color: '#536DFE',
-    expiryDays: 180,
+    expiryDays: null,
   },
   {
     id: 'pkg399',

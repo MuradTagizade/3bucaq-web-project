@@ -19,6 +19,7 @@ import {
 } from '@/lib/utils/validators';
 import { registerUser } from '@/lib/supabase/auth';
 import { getUserByLogin, getUserByReferralCode } from '@/lib/supabase/database';
+import { supabase } from '@/lib/supabase/config';
 import { COUNTRIES, CITIES } from '@/lib/utils/countries';
 import { Suspense } from 'react';
 
@@ -125,6 +126,13 @@ function RegisterForm() {
     setLoading(true);
 
     try {
+      // Clear any existing session to prevent admin session hijacking
+      try {
+        await supabase.auth.signOut();
+      } catch (signOutErr) {
+        console.warn('Sign out before registration failed:', signOutErr);
+      }
+
       const combinedFullName = `${form.firstName.trim()} ${form.lastName.trim()}`;
       await registerUser(form.email, form.password, {
         fullName: combinedFullName,
