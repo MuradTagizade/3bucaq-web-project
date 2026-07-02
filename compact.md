@@ -236,3 +236,38 @@ Lokal yoxlamalar və test üçün istifadə olunan, `LEVEL UP` domenlərinə kö
 * **Info Modalı Dil Qarışıqlığının Həlli:** Hotbed səhifəsindəki paket təfərrüatları, müddətlər və ömürlük məlumatlarının tərcümə açarları (`lock_info_title`, `lock_info_desc_updated`, `lock_days`, `lifetime` və s.) `translations.js` lüğətinə (həm AZ, həm EN) əlavə olundu. Həmçinin köhnəlmiş "transfer balansı" ifadələri "balansınız" / "your balance" olaraq dəyişdirildi.
 * **Git Sinxronizasiyası:** Bütün bu yeniliklər stage edildi, commit olundu və uzaqdakı GitHub repozitoriyasına (`main` qoluna) push edildi.
 
+---
+
+## 12. Son Sessiya (2026-07-02/03): user_code Kimlik Sistemi + Hərtərəfli Təhlükəsizlik Auditı (KRİTİK)
+
+Bu sessiyada çox-agentli audit workflow'ları ilə dərin təhlükəsizlik denetimi aparıldı, **əvvəlki remediation'ın buraxdığı KRİTİK açıqlar** tapılıb düzəldildi və `user_code` kimlik sistemi əlavə olundu. **Dəyişikliklər `security-remediation` git qoluna commit olundu (push EDİLMƏDİ).**
+
+### 12.1 YENİ SQL Miqrasiya Faylları (Supabase-də SIRAYLA tətbiq olundu)
+`security_remediation.sql` → `security_remediation_2_rpcs.sql` → `security_remediation_3.sql`. **Üçü də canlı bazada UYĞULANDI.** (Köhnə `security_patch.sql`, `remove_transfer_balance.sql` və s. superseded — köhnə funksiya təriflərini yenidən tətbiq etməyin.)
+
+### 12.2 KRİTİK Təhlükəsizlik Düzəlişləri (audit + adversarial review tərəfindən təsdiqləndi)
+* **`check_profile_updates` trigger'i SECURITY DEFINER idi → tamamilə bypass olurdu:** Definer trigger içində `current_user=postgres` olduğu üçün `'postgres'` guard'ı hər zaman uyğun gəlib bütün qorumaları atlayırdı (istifadəçi birbaşa UPDATE ilə balance/points/role='admin'/superadmin yaza bilirdi). **DÜZƏLİŞ:** trigger-dən `SECURITY DEFINER` çıxarıldı (INVOKER). İndi birbaşa client UPDATE-də `current_user='authenticated'` → yoxlamalar işləyir; definer RPC-lərdə `postgres` → guard ilə bypass (məşru).
+* **Trigger indi WHITELIST modelindədir:** `balance, total_points, active_packages, current_level, claimed_levels, user_code, referred_by, referral_code, last_daily_earning_date` HEÇ BİR client (admin daxil) tərəfindən dəyişdirilə bilməz — yalnız definer RPC-lər. `role`/`admin_permissions` yalnız superadmin. Admin block/kyc/login əməliyyatları `has_admin_perm(...)` ilə granuler yoxlanılır.
+* **Granuler admin bypass bağlandı:** `security_patch.sql`-dəki "Admins can manage X" (for all) RLS siyasətləri (deposits/withdrawals/level_claims/transactions/points_history) DROP edildi. Admin oxuması "Users can view..." (or is_admin()) ilə davam edir; bütün mutasyonlar definer RPC-lərdən keçir. (Əvvəllər yalnız 'kyc' icazəli alt-admin belə birbaşa balans yaza və öz çıxarışını təsdiq edə bilirdi.)
+* **Self-referral/dövrə ilə pul basma bağlandı:** `referred_by` trigger-də kilidli + `buy_package`-a self/cycle detection (`visited uuid[]`) + `check(referred_by<>id)`.
+* **`admin_adjust_points` `'users'` → `'finance'` icazəsinə keçirildi** (xal level-claim ilə balansa çevrilir).
+* **Storage (`kyc-documents`):** bucket service_role ilə **PRIVATE** yaradıldı (əvvəllər yox idi — bu səbəbdən KYC/qəbz yükləmələri işləmirdi). `storage.objects` RLS siyasətləri əlavə olundu. Frontend `getPublicUrl` → `createSignedUrl`. Admin KYC ekranındakı sınıq şəkillər `createSignedUrls` ilə düzəldildi.
+* **Digər:** `resolve_login_email`/`check_login_exists`/`lookup_login` DROP (anon email sızması); `admin_reject_claim` value-based jsonb removal; `process_daily_earnings` date-guard + is_effectively_blocked; `admin_approve_deposit` KYC yoxlaması; `set_admin_log_actor` trigger (log forgery); `admin_logs.admin_uid` auth.uid()-dən zorlanır.
+
+### 12.3 YENİ ÖZƏLLİK: `user_code` (kimlik = 6 simvollu alfanumerik)
+* **`profiles.user_code`** əlavə olundu: 6 simvol (A-Z + 2-9, qarışdıran I/O/0/1 yox, məs. `K7M2QX`), unique, `handle_new_user`/`create_profile_if_missing` avtomatik yaradır, mövcud istifadəçilər backfill edildi. `referral_code` da artıq `'REF'||user_code` (çarpışma yox).
+* **Qeydiyyatda istifadəçi adı (username) TAMAMİLƏ QALDIRILDI.** Giriş yalnız **email** ilə (username→email həlli silindi).
+* **Kimlik hər yerdə user_code:** transfer alıcısı (`transfer_funds(to_code)` + `lookup_user_code`), admin axtarışı (users/kyc/admins/logs/page), subscribers siyahısı (`get_my_referral_tree` userCode qaytarır), dashboard-da **kopyalana bilən "Sizin ID Kodunuz"**, personal-info label.
+* **⚠️ Köhnə bölmələri əvəz edir:** artıq `display_login` kimlik/unique DEYİL (arxa planda qalır, yeni istifadəçilərdə = user_code); §3.2-dəki köhnə `handle_new_user` və §5.1-dəki "İstifadəçi adı ilə giriş" ARTIQ KEÇƏRLİ DEYİL.
+
+### 12.4 Digər
+* **Referal qazancı üçün ≥1 aktiv paket** şərti `buy_package`-da bərkidildi (upline-ın ən az 1 aktiv paketi olmalı).
+* **Qeydiyyat OTP:** sadə yol seçildi (birbaşa `/dashboard`, "Confirm email" OFF). Verify axını istənilsə geri açıla bilər (register-də tək sətir şərh var).
+* Kiçik düzəlişlər: admin təsdiq/rədd düymələrinə çift-klik qoruması, reset-password submit guard, personal-info buton kilidi, hardcoded `levelup.com` → `window.location.origin`, `.env.example` Firebase→Supabase.
+
+### 12.5 Növbəti addımlar (PENDING)
+1. Yeni frontend'i işə sal (`git checkout security-remediation` + `npm run dev`) — SQL Part 3 ilə birlikdə getməlidir.
+2. (Opsional) Gündəlik qazanc üçün `run_daily_maintenance()` RPC-sini pg_cron/Edge Function ilə gündəlik çağır.
+3. (Opsional) E-poçt doğrulaması (Confirm email + `{{ .Token }}` şablonu) + register verify yönləndirməsini geri aç.
+4. `security-remediation` qolunu push et / PR aç.
+
