@@ -526,10 +526,7 @@ grant execute on function public.process_daily_earnings() to service_role;
 grant execute on function public.process_package_expiry() to service_role;
 grant execute on function public.run_daily_maintenance() to service_role;
 
--- Anon lookup RPC'leri (Part 1'de tanimlandi)
-grant execute on function public.check_login_exists(text) to anon, authenticated;
-grant execute on function public.check_referral_code(text) to anon, authenticated;
-grant execute on function public.resolve_login_email(text) to anon, authenticated;
+-- Anon lookup RPC izinleri Part 1'e tasindi (dosya sirasi bagimsizligi icin).
 
 commit;
 

@@ -142,9 +142,11 @@ function RegisterForm() {
         phone: fullPhone,
         referralCode: form.referralCode || null,
       });
-      // E-posta təsdiqi (OTP). Supabase'də "Confirm email" AÇIQ və e-mail şablonu
-      // 6 rəqəmli {{ .Token }} göndərəcək şəkildə qurulmalıdır.
-      router.push(`/verify?email=${encodeURIComponent(form.email)}`);
+      // E-posta doğrulama şimdilik KAPALI (Supabase "Confirm email" OFF ile uyumlu).
+      // Açmak için: Supabase'de "Confirm email" ON + şablonu {{ .Token }} yap, sonra
+      // aşağıdaki /dashboard satırını silip şu satırı aç:
+      // router.push(`/verify?email=${encodeURIComponent(form.email)}`);
+      router.push('/dashboard');
     } catch (err) {
       setErrors({ general: err.message });
     } finally {

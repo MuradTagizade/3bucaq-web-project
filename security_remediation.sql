@@ -330,6 +330,14 @@ end;
 $$ language plpgsql;
 grant execute on function public.sync_my_email() to authenticated;
 
+-- Lookup RPC izinleri (fonksiyonlar yukarida tanimlandi — dosya sirasi bagimsizligi icin burada)
+grant execute on function public.check_login_exists(text) to anon, authenticated;
+grant execute on function public.check_referral_code(text) to anon, authenticated;
+grant execute on function public.resolve_login_email(text) to anon, authenticated;
+grant execute on function public.lookup_login(text) to authenticated;
+grant execute on function public.get_my_referral_tree(integer) to authenticated;
+grant execute on function public.check_identity_exists(text) to authenticated;
+
 -- --------------------------------------------------------------------
 -- 5. DIGER GEVSEK ESKI POLITIKALARI TEMIZLE (O1, O3, tekrarlar)
 --    security_patch.sql zaten esdeger/daha siki olanlari olusturdu.
