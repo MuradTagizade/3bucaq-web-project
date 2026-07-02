@@ -88,8 +88,8 @@ returns trigger security definer set search_path = public as $$
 declare
   ref_code text; ref_uid uuid; user_name text; new_code text;
 begin
-  ref_code := 'REF' || lpad(floor(random() * 100000)::text, 5, '0');
   new_code := public.generate_user_code();
+  ref_code := 'REF' || new_code;   -- user_code benzersiz oldugu icin ref_code de benzersiz (carpisma yok)
   user_name := coalesce(nullif(new.raw_user_meta_data->>'full_name', ''), split_part(new.email, '@', 1));
 
   if new.raw_user_meta_data->>'referral_code' is not null and new.raw_user_meta_data->>'referral_code' <> '' then
@@ -121,8 +121,8 @@ begin
   if p_exists then return json_build_object('success', true, 'message', 'exists'); end if;
 
   select * into curr_user from auth.users where id = auth.uid();
-  ref_code := 'REF' || lpad(floor(random() * 100000)::text, 5, '0');
   new_code := public.generate_user_code();
+  ref_code := 'REF' || new_code;
   user_name := coalesce(nullif(curr_user.raw_user_meta_data->>'full_name', ''), split_part(curr_user.email, '@', 1));
 
   if curr_user.raw_user_meta_data->>'referral_code' is not null and curr_user.raw_user_meta_data->>'referral_code' <> '' then
@@ -144,8 +144,13 @@ $$ language plpgsql;
 --    - admin block/kyc/login duzenlemeleri: has_admin_perm ile gate.
 --    - normal kullanici: yalniz full_name/country/city/phone + KYC-submit.
 -- ====================================================================
+-- ONEMLI: Bu trigger SECURITY DEFINER OLMAMALI. Definer olsaydi, trigger icinde
+-- current_user = fonksiyon sahibi (postgres) olur ve asagidaki 'postgres' guard'i HER
+-- cagrida eslesip tum korumalari atlardi (kritik bypass). INVOKER (varsayilan) olunca:
+-- dogrudan client UPDATE'te current_user='authenticated' -> kontroller calisir;
+-- definer para RPC'lerinden gelen UPDATE'te current_user='postgres' -> guard ile bypass (mesru).
 create or replace function public.check_profile_updates()
-returns trigger security definer set search_path = public as $$
+returns trigger set search_path = public as $$
 declare is_admin_user boolean;
 begin
   -- KYC onayinda identity_number otomatik set (admin yolu)
@@ -199,7 +204,10 @@ begin
     end if;
     if (NEW.kyc_status is distinct from OLD.kyc_status
         or NEW.identity_number is distinct from OLD.identity_number
+        or NEW.kyc_document_number is distinct from OLD.kyc_document_number
+        or NEW.kyc_document_type is distinct from OLD.kyc_document_type
         or NEW.kyc_document_url is distinct from OLD.kyc_document_url
+        or NEW.kyc_document_back_url is distinct from OLD.kyc_document_back_url
         or NEW.kyc_selfie_url is distinct from OLD.kyc_selfie_url)
        and not public.has_admin_perm('kyc') then
       raise exception 'Icaze yoxdur: KYC emeliyyati ucun kyc icazesi lazimdir';
@@ -538,6 +546,130 @@ begin
     cnt := cnt + 1;
   end loop;
   return json_build_object('success', true, 'processed', cnt);
+end;
+$$ language plpgsql;
+
+-- ====================================================================
+-- 13. admin_adjust_points -> 'finance' izni (puan level-claim ile bakiyeye donusur)
+-- ====================================================================
+create or replace function public.admin_adjust_points(p_uid uuid, p_points numeric)
+returns json security definer set search_path = public as $$
+declare rows_affected integer;
+begin
+  if not public.has_admin_perm('finance') then return json_build_object('success', false, 'error', 'Icaze yoxdur'); end if;
+  update public.profiles set total_points = total_points + p_points
+    where id = p_uid and total_points + p_points >= 0;
+  get diagnostics rows_affected = row_count;
+  if rows_affected = 0 then return json_build_object('success', false, 'error', 'Xal menfi ola bilmez ve ya istifadeci tapilmadi'); end if;
+  return json_build_object('success', true);
+end;
+$$ language plpgsql;
+
+-- ====================================================================
+-- 14. create_withdrawal + create_level_claim -> user_code snapshot (tutarlilik)
+-- ====================================================================
+create or replace function public.create_withdrawal(amount numeric, crypto_address text, network text, payment_method text, card_number text)
+returns json security definer set search_path = public as $$
+declare user_id uuid; user_profile record; parsed_amount numeric; rows_affected integer;
+begin
+  user_id := auth.uid();
+  if user_id is null then return json_build_object('success', false, 'error', 'Sessiya tapilmadi.'); end if;
+  parsed_amount := amount;
+  if parsed_amount is null or parsed_amount <= 0 then return json_build_object('success', false, 'error', 'Meblegi musbet olmalidir'); end if;
+
+  select * into user_profile from public.profiles where id = user_id;
+  if not found then return json_build_object('success', false, 'error', 'Istifadeci tapilmadi'); end if;
+  if user_profile.role <> 'admin' and user_profile.kyc_status <> 'approved' then
+    return json_build_object('success', false, 'error', 'Cixaris ucun KYC teleb olunur.'); end if;
+  if public.is_effectively_blocked(user_id) then return json_build_object('success', false, 'error', 'Hesabiniz bloklanib.'); end if;
+
+  update public.profiles set balance = balance - parsed_amount where id = user_id and balance >= parsed_amount;
+  get diagnostics rows_affected = row_count;
+  if rows_affected = 0 then return json_build_object('success', false, 'error', 'Balans kifayet etmir'); end if;
+
+  insert into public.withdrawals (uid, login, amount, crypto_address, network, payment_method, card_number, status)
+  values (user_id, user_profile.user_code, parsed_amount, crypto_address, network, payment_method, card_number, 'pending');
+  insert into public.transactions (type, from_uid, from_login, to_uid, to_login, amount, status)
+  values ('withdrawal', user_id, user_profile.user_code, null, coalesce(card_number, crypto_address), parsed_amount, 'completed');
+  return json_build_object('success', true);
+end;
+$$ language plpgsql;
+
+create or replace function public.create_level_claim(claim_level integer)
+returns json security definer set search_path = public as $$
+declare
+  user_id uuid; user_profile record; req_points numeric; bonus_amt numeric; has_pkgs boolean; rows_affected integer;
+begin
+  user_id := auth.uid();
+  if user_id is null then return json_build_object('success', false, 'error', 'Sessiya tapilmadi.'); end if;
+
+  if claim_level = 1 then req_points := 30; bonus_amt := 99;
+  elsif claim_level = 2 then req_points := 109; bonus_amt := 299;
+  elsif claim_level = 3 then req_points := 268; bonus_amt := 499;
+  elsif claim_level = 4 then req_points := 597; bonus_amt := 999;
+  elsif claim_level = 5 then req_points := 1266; bonus_amt := 1999;
+  elsif claim_level = 6 then req_points := 2615; bonus_amt := 4399;
+  elsif claim_level = 7 then req_points := 5314; bonus_amt := 8999;
+  elsif claim_level = 8 then req_points := 10723; bonus_amt := 18999;
+  elsif claim_level = 9 then req_points := 21552; bonus_amt := 39999;
+  elsif claim_level = 10 then req_points := 43321; bonus_amt := 72999;
+  else return json_build_object('success', false, 'error', 'Seviyye tapilmadi'); end if;
+
+  select * into user_profile from public.profiles where id = user_id;
+  if not found then return json_build_object('success', false, 'error', 'Istifadeci tapilmadi'); end if;
+  if public.is_effectively_blocked(user_id) then return json_build_object('success', false, 'error', 'Hesabiniz bloklanib.'); end if;
+
+  if exists (select 1 from public.level_claims where uid = user_id and level = claim_level and status in ('pending','done')) then
+    return json_build_object('success', false, 'error', 'Bu seviyye artiq istifade olunub');
+  end if;
+
+  has_pkgs := true;
+  if claim_level in (2,3,4) then
+    if not (coalesce((user_profile.active_packages->>'pkg19')::boolean,false)
+        and coalesce((user_profile.active_packages->>'pkg49')::boolean,false)) then has_pkgs := false; end if;
+  elsif claim_level in (5,6) then
+    if not (coalesce((user_profile.active_packages->>'pkg19')::boolean,false)
+        and coalesce((user_profile.active_packages->>'pkg49')::boolean,false)
+        and coalesce((user_profile.active_packages->>'pkg99')::boolean,false)) then has_pkgs := false; end if;
+  elsif claim_level = 7 then
+    if not (coalesce((user_profile.active_packages->>'pkg19')::boolean,false)
+        and coalesce((user_profile.active_packages->>'pkg49')::boolean,false)
+        and coalesce((user_profile.active_packages->>'pkg99')::boolean,false)
+        and coalesce((user_profile.active_packages->>'pkg199')::boolean,false)) then has_pkgs := false; end if;
+  elsif claim_level in (8,9,10) then
+    if not (coalesce((user_profile.active_packages->>'pkg19')::boolean,false)
+        and coalesce((user_profile.active_packages->>'pkg49')::boolean,false)
+        and coalesce((user_profile.active_packages->>'pkg99')::boolean,false)
+        and coalesce((user_profile.active_packages->>'pkg199')::boolean,false)
+        and coalesce((user_profile.active_packages->>'pkg399')::boolean,false)) then has_pkgs := false; end if;
+  end if;
+  if not has_pkgs then return json_build_object('success', false, 'error', 'Teleb olunan paketler aktiv deyil'); end if;
+
+  update public.profiles
+    set total_points = total_points - req_points,
+        claimed_levels = coalesce(claimed_levels,'[]'::jsonb) || to_jsonb(claim_level),
+        balance = balance + bonus_amt,
+        current_level = greatest(coalesce(current_level,0), claim_level)
+    where id = user_id and coalesce(total_points,0) >= req_points;
+  get diagnostics rows_affected = row_count;
+  if rows_affected = 0 then return json_build_object('success', false, 'error', 'Kifayet qeder xaliniz yoxdur'); end if;
+
+  begin
+    insert into public.level_claims (uid, login, level, bonus_amount, claim_type, status, approved_at)
+    values (user_id, user_profile.user_code, claim_level, bonus_amt, 'balance', 'done', now());
+  exception when unique_violation then
+    update public.profiles set total_points = total_points + req_points, balance = balance - bonus_amt where id = user_id;
+    return json_build_object('success', false, 'error', 'Bu seviyye artiq istifade olunub');
+  end;
+
+  if req_points > 0 then
+    insert into public.points_history (uid, points, from_uid, from_login, package_id, line_number)
+    values (user_id, -req_points, null, 'Level Claim', 'level_' || claim_level, 0);
+  end if;
+  insert into public.transactions (type, from_uid, from_login, to_uid, to_login, amount, status)
+  values ('level_bonus', null, 'System', user_id, user_profile.user_code, bonus_amt, 'completed');
+
+  return json_build_object('success', true);
 end;
 $$ language plpgsql;
 

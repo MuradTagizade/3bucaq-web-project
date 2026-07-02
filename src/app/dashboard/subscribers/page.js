@@ -375,7 +375,7 @@ export default function SubscribersPage() {
         {/* Desktop Table */}
         <div className={styles.tableDesktop}>
           <div className={styles.tableHead}>
-            <span>{t('username', 'LOGİN')}</span>
+            <span>{t('user_code_col', 'KOD')}</span>
             <span>{t('referral_line', 'REFERAL XƏTTİ')}</span>
             <span>{t('registration_date', 'QEYDİYYAT TARİXİ')}</span>
             <span>{t('packages', 'AKTİV PAKET')}</span>
@@ -397,9 +397,9 @@ export default function SubscribersPage() {
                 >
                   <span className={styles.cellLogin}>
                     <span className={styles.rowAvatar}>
-                      {sub.displayLogin.charAt(0).toUpperCase()}{sub.displayLogin.charAt(1)?.toUpperCase() || ''}
+                      {sub.userCode.charAt(0).toUpperCase()}{sub.userCode.charAt(1)?.toUpperCase() || ''}
                     </span>
-                    {sub.displayLogin}
+                    {sub.userCode}
                   </span>
                   <span className={styles.cellLevel}>{sub.line}</span>
                   <span className={styles.cellDate}>
@@ -447,10 +447,10 @@ export default function SubscribersPage() {
                 >
                   <div className={styles.mobileCardTop}>
                     <span className={styles.rowAvatar}>
-                      {sub.displayLogin.charAt(0).toUpperCase()}{sub.displayLogin.charAt(1)?.toUpperCase() || ''}
+                      {sub.userCode.charAt(0).toUpperCase()}{sub.userCode.charAt(1)?.toUpperCase() || ''}
                     </span>
                     <div className={styles.mobileCardInfo}>
-                      <span className={styles.mobileLogin}>{sub.displayLogin}</span>
+                      <span className={styles.mobileLogin}>{sub.userCode}</span>
                       <span className={styles.mobileDate}>
                         {new Date(sub.joinedAt).toLocaleDateString('az-AZ')}
                       </span>
@@ -494,11 +494,11 @@ export default function SubscribersPage() {
         {selectedUser && (
           <div className={styles.detail}>
             <div className={styles.detailAvatar}>
-              {(selectedUser.displayLogin || 'U').charAt(0).toUpperCase()}
+              {(selectedUser.userCode || 'U').charAt(0).toUpperCase()}
             </div>
             <div className={styles.detailRow}>
-              <span>{t('username', 'Login')}</span>
-              <span>@{selectedUser.displayLogin}</span>
+              <span>{t('user_code_col', 'Kod')}</span>
+              <span>{selectedUser.userCode}</span>
             </div>
             <div className={styles.detailRow}>
               <span>{t('fullname', 'Ad Soyad')}</span>
