@@ -14,7 +14,7 @@ import { useTranslation } from '@/lib/store/languageStore';
 import { Mail, Lock } from 'lucide-react';
 import { validateEmail } from '@/lib/utils/validators';
 import { loginUser } from '@/lib/supabase/auth';
-import { getUserByUid, getUserByLogin } from '@/lib/supabase/database';
+import { getUserByUid, resolveLoginEmail } from '@/lib/supabase/database';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -53,10 +53,10 @@ export default function LoginPage() {
     try {
       let loginEmail = inputVal;
       if (!inputVal.includes('@')) {
-        // Query email by username
-        const profile = await getUserByLogin(inputVal);
-        if (profile && profile.email) {
-          loginEmail = profile.email;
+        // Kullanıcı adından e-posta çöz (güvenli RPC)
+        const em = await resolveLoginEmail(inputVal);
+        if (em) {
+          loginEmail = em;
         } else {
           throw new Error(t('user_not_found', 'İstifadəçi tapılmadı'));
         }
@@ -124,7 +124,7 @@ export default function LoginPage() {
 
             {errors.general && (
               <div className={styles.errorBox}>
-                <span>WRONG</span> — {errors.general}
+                {errors.general}
               </div>
             )}
 

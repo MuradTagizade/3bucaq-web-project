@@ -210,10 +210,10 @@ export default function DepositPage() {
     return <Badge variant={s.variant} size="sm">{s.label}</Badge>;
   };
 
-  // Helper to resolve receipt public url
-  const handleViewReceipt = (receiptPath) => {
-    const { data } = supabase.storage.from('kyc-documents').getPublicUrl(receiptPath);
-    setViewerReceiptUrl(data.publicUrl);
+  // Kısa ömürlü imzalı URL (private bucket, K3)
+  const handleViewReceipt = async (receiptPath) => {
+    const { data, error } = await supabase.storage.from('kyc-documents').createSignedUrl(receiptPath, 3600);
+    if (!error && data) setViewerReceiptUrl(data.signedUrl);
   };
 
   const balance = authUser?.balance || 0;

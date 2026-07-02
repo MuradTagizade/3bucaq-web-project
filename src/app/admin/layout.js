@@ -47,6 +47,7 @@ export default function AdminLayout({ children }) {
   const { t } = useTranslation();
   const { user, loading: authLoading, setUser, setLoading } = useAuthStore();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [accessDenied, setAccessDenied] = useState(false);
   const menuRef = useRef(null);
 
   const handleLogout = async () => {
@@ -68,10 +69,14 @@ export default function AdminLayout({ children }) {
         // Redirect to the first route they have permission for
         const fallback = NAV_ITEMS.find((item) => hasPermission(user, item.href));
         if (fallback) {
+          setAccessDenied(false);
           router.push(fallback.href);
         } else {
-          router.push('/dashboard');
+          // Admin ama hiç yetkisi yok: /dashboard'a atma (sonsuz döngü olur), erişim yox ekranı göster (#6).
+          setAccessDenied(true);
         }
+      } else {
+        setAccessDenied(false);
       }
     }
   }, [user, authLoading, router, pathname]);
@@ -111,6 +116,25 @@ export default function AdminLayout({ children }) {
 
   if (!user || user.role !== 'admin') {
     return null;
+  }
+
+  if (accessDenied) {
+    return (
+      <div style={{
+        display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+        minHeight: '100vh', gap: 16, background: '#060a13', color: 'var(--text-secondary)',
+        textAlign: 'center', padding: 24,
+      }}>
+        <ShieldCheck size={40} />
+        <h2 style={{ color: 'var(--text-primary)', margin: 0 }}>
+          {t('no_admin_permission', 'Bu hesaba heç bir admin icazəsi təyin edilməyib')}
+        </h2>
+        <p style={{ margin: 0 }}>{t('contact_superadmin', 'Zəhmət olmasa superadmin ilə əlaqə saxlayın.')}</p>
+        <button onClick={handleLogout} className={styles.navItem} style={{ cursor: 'pointer', border: 'none', background: 'none' }}>
+          <LogOut size={18} /> <span>{t('logout', 'Çıxış')}</span>
+        </button>
+      </div>
+    );
   }
 
   const filteredNavItems = NAV_ITEMS.filter((item) => hasPermission(user, item.href));

@@ -11,7 +11,7 @@ import Pagination from '@/components/ui/Pagination';
 import { Search, Shield, Ban, Eye, DollarSign, Star, Package, UserCog, ShieldCheck } from 'lucide-react';
 import { useTranslation } from '@/lib/store/languageStore';
 import {
-  getUsers, blockUser, unblockUser, updateUserRole,
+  getUsers, blockUser, unblockUser, updateUserRole, updateAdminPermissions,
   updateUserBalance, updateUserPoints,
   updateUserProfile, updateKYCStatus, addAdminLog,
 } from '@/lib/supabase/database';
@@ -66,6 +66,12 @@ export default function AdminUsersPage() {
     const newRole = targetUser.role === 'admin' ? 'user' : 'admin';
     try {
       await updateUserRole(targetUser.id, newRole);
+      if (newRole === 'admin') {
+        // Yeni admin'e varsayılan izinler ata — aksi halde yetkisiz kalıp erişim döngüsüne girer (#6).
+        await updateAdminPermissions(targetUser.id, {
+          users: true, kyc: true, claims: true, finance: true, logs: true,
+        });
+      }
       await addAdminLog(adminUser?.uid, 'update_role', targetUser.id, `Role: ${newRole}`);
       await loadUsers();
       setSelectedUser(null);

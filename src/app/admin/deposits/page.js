@@ -64,9 +64,9 @@ export default function AdminDepositsPage() {
     }
   };
 
-  const handleViewReceipt = (receiptPath) => {
-    const { data } = supabase.storage.from('kyc-documents').getPublicUrl(receiptPath);
-    setViewerReceiptUrl(data.publicUrl);
+  const handleViewReceipt = async (receiptPath) => {
+    const { data, error } = await supabase.storage.from('kyc-documents').createSignedUrl(receiptPath, 3600);
+    if (!error && data) setViewerReceiptUrl(data.signedUrl);
   };
 
   if (loading) {

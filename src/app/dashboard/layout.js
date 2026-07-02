@@ -40,7 +40,7 @@ export default function DashboardLayout({ children }) {
   if (!user) return null;
 
   const userName = user?.fullName?.split(' ')[0] || '';
-  const referralLink = user?.referralCode ? `https://levelup.com/register?ref=${user.referralCode}` : '';
+  const referralLink = user?.referralCode ? `${typeof window !== 'undefined' ? window.location.origin : ''}/register?ref=${user.referralCode}` : '';
 
   const handleLogout = async () => {
     try {

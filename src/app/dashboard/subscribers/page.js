@@ -97,7 +97,7 @@ export default function SubscribersPage() {
 
   // Referral link
   const referralLink = authUser?.referralCode
-    ? `https://levelup.com/register?ref=${authUser.referralCode}`
+    ? `${typeof window !== 'undefined' ? window.location.origin : ''}/register?ref=${authUser.referralCode}`
     : '';
 
   useEffect(() => {

@@ -18,7 +18,7 @@ import {
   validateLogin, validatePhone, validateCountry, validateCity,
 } from '@/lib/utils/validators';
 import { registerUser } from '@/lib/supabase/auth';
-import { getUserByLogin, getUserByReferralCode } from '@/lib/supabase/database';
+import { checkLoginExists, verifyReferralCode } from '@/lib/supabase/database';
 import { supabase } from '@/lib/supabase/config';
 import { COUNTRIES, CITIES } from '@/lib/utils/countries';
 import { Suspense } from 'react';
@@ -62,8 +62,8 @@ function RegisterForm() {
   const checkLoginAvailability = async (login) => {
     if (login.length < 3) { setLoginAvailable(null); return; }
     try {
-      const existing = await getUserByLogin(login);
-      setLoginAvailable(!existing);
+      const exists = await checkLoginExists(login);
+      setLoginAvailable(!exists);
     } catch {
       setLoginAvailable(null);
     }
@@ -72,8 +72,8 @@ function RegisterForm() {
   const checkReferralCode = async (code) => {
     if (!code || code.length < 3) { setRefValid(undefined); return; }
     try {
-      const user = await getUserByReferralCode(code);
-      setRefValid(!!user);
+      const res = await verifyReferralCode(code);
+      setRefValid(!!res.valid);
     } catch {
       setRefValid(false);
     }
@@ -142,9 +142,9 @@ function RegisterForm() {
         phone: fullPhone,
         referralCode: form.referralCode || null,
       });
-      // Temporarily deactivated OTP verification. Will be re-enabled later.
-      // router.push(`/verify?email=${encodeURIComponent(form.email)}`);
-      router.push('/dashboard');
+      // E-posta təsdiqi (OTP). Supabase'də "Confirm email" AÇIQ və e-mail şablonu
+      // 6 rəqəmli {{ .Token }} göndərəcək şəkildə qurulmalıdır.
+      router.push(`/verify?email=${encodeURIComponent(form.email)}`);
     } catch (err) {
       setErrors({ general: err.message });
     } finally {

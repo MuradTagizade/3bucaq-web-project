@@ -154,9 +154,8 @@ export default function PersonalInfoPage() {
     } catch (err) {
       setStatusMsg({ type: 'error', text: t('error_occurred', 'Xəta baş verdi') + ': ' + err.message });
     } finally {
-      if (email === authUser.email) {
-        setSaving(false);
-      }
+      // OTP moduna geçildiyse zaten yukarıda false yapıldı; her durumda kilidi kaldır (#14).
+      setSaving(false);
     }
   };
 
@@ -178,12 +177,12 @@ export default function PersonalInfoPage() {
       });
       if (verifyErr) throw new Error(verifyErr.message);
 
-      // Verification success: update profiles table
+      // Doğrulama başarılı: auth e-postası değişti → profiles.email'i güvenli RPC ile eşitle
+      await supabase.rpc('sync_my_email');
       await updateUserProfile(authUser.uid, {
         full_name: fullName,
         country: country,
         city: city,
-        email: email,
       });
 
       setUser({

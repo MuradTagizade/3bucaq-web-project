@@ -121,7 +121,7 @@ export default function DashboardPage() {
       .join(', ');
   };
 
-  const referralLink = `https://levelup.com/register?ref=${user.referralCode}`;
+  const referralLink = `${typeof window !== 'undefined' ? window.location.origin : ''}/register?ref=${user.referralCode}`;
 
   const handleCopyRef = async () => {
     try {

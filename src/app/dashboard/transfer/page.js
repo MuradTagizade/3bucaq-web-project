@@ -13,7 +13,7 @@ import { validateAmount, validateUSDTAddress } from '@/lib/utils/validators';
 import { ArrowUpRight, CheckCircle2, User, Wallet, ArrowDownToLine, CreditCard, Image as ImageIcon, ArrowDown, ChevronDown, AlertTriangle } from 'lucide-react';
 import { useAuthStore } from '@/lib/store/authStore';
 import { useTranslation } from '@/lib/store/languageStore';
-import { transferFunds, getUserByLogin, getUserByUid, createWithdrawal, getWithdrawals, getSystemSetting } from '@/lib/supabase/database';
+import { transferFunds, lookupLogin, getUserByUid, createWithdrawal, getWithdrawals, getSystemSetting } from '@/lib/supabase/database';
 import { supabase } from '@/lib/supabase/config';
 
 function TransferContent() {
@@ -86,8 +86,8 @@ function TransferContent() {
 
     if (val.length >= 3) {
       try {
-        const userFound = await getUserByLogin(val);
-        setRecipientValid(!!userFound && userFound.id !== authUser.uid);
+        const res = await lookupLogin(val);
+        setRecipientValid(!!res.exists && res.display_login !== authUser.displayLogin);
       } catch {
         setRecipientValid(false);
       }
@@ -209,9 +209,9 @@ function TransferContent() {
     return <Badge variant={s.variant} size="sm">{s.label}</Badge>;
   };
 
-  const handleViewReceipt = (receiptPath) => {
-    const { data } = supabase.storage.from('kyc-documents').getPublicUrl(receiptPath);
-    setViewerReceiptUrl(data.publicUrl);
+  const handleViewReceipt = async (receiptPath) => {
+    const { data, error } = await supabase.storage.from('kyc-documents').createSignedUrl(receiptPath, 3600);
+    if (!error && data) setViewerReceiptUrl(data.signedUrl);
   };
 
   const kycStatus = authUser?.kycStatus || 'none';
