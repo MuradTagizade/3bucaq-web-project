@@ -15,10 +15,10 @@ import { useTranslation } from '@/lib/store/languageStore';
 import { Mail, Lock, User, Globe, MapPin, Phone, Link2 } from 'lucide-react';
 import {
   validateEmail, validatePassword, validateFirstName, validateLastName,
-  validateLogin, validatePhone, validateCountry, validateCity,
+  validatePhone, validateCountry, validateCity,
 } from '@/lib/utils/validators';
 import { registerUser } from '@/lib/supabase/auth';
-import { checkLoginExists, verifyReferralCode } from '@/lib/supabase/database';
+import { verifyReferralCode } from '@/lib/supabase/database';
 import { supabase } from '@/lib/supabase/config';
 import { COUNTRIES, CITIES } from '@/lib/utils/countries';
 import { Suspense } from 'react';
@@ -38,7 +38,6 @@ function RegisterForm() {
   const [form, setForm] = useState({
     firstName: '',
     lastName: '',
-    login: '',
     email: '',
     password: '',
     confirmPassword: '',
@@ -51,22 +50,11 @@ function RegisterForm() {
   const [phoneBody, setPhoneBody] = useState('');
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
-  const [loginAvailable, setLoginAvailable] = useState(null);
   const [refValid, setRefValid] = useState(refCode ? null : undefined);
 
   const updateField = (field, value) => {
     setForm((prev) => ({ ...prev, [field]: value }));
     if (errors[field]) setErrors((prev) => ({ ...prev, [field]: null }));
-  };
-
-  const checkLoginAvailability = async (login) => {
-    if (login.length < 3) { setLoginAvailable(null); return; }
-    try {
-      const exists = await checkLoginExists(login);
-      setLoginAvailable(!exists);
-    } catch {
-      setLoginAvailable(null);
-    }
   };
 
   const checkReferralCode = async (code) => {
@@ -88,10 +76,6 @@ function RegisterForm() {
 
     const lastNameErr = validateLastName(form.lastName);
     if (lastNameErr) newErrors.lastName = lastNameErr;
-
-    const loginErr = validateLogin(form.login);
-    if (loginErr) newErrors.login = loginErr;
-    else if (loginAvailable === false) newErrors.login = t('login_available', 'Bu login artıq istifadə olunur');
 
     const emailErr = validateEmail(form.email);
     if (emailErr) newErrors.email = emailErr;
@@ -136,7 +120,6 @@ function RegisterForm() {
       const combinedFullName = `${form.firstName.trim()} ${form.lastName.trim()}`;
       await registerUser(form.email, form.password, {
         fullName: combinedFullName,
-        login: form.login,
         country: form.country,
         city: form.city,
         phone: fullPhone,
@@ -201,19 +184,6 @@ function RegisterForm() {
             </div>
 
             <div className={styles.formRow}>
-              <Input
-                label={t('username', 'İstifadəçi adı')}
-                placeholder="istifadeci_adi"
-                value={form.login}
-                onChange={(e) => {
-                  updateField('login', e.target.value);
-                  checkLoginAvailability(e.target.value);
-                }}
-                error={errors.login}
-                success={loginAvailable === true}
-                icon={<User size={18} />}
-              />
-
               <Input
                 label={t('email', 'Email')}
                 type="email"

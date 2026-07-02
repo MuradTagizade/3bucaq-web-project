@@ -19,7 +19,8 @@ export default function AdminDepositsPage() {
   const [deposits, setDeposits] = useState([]);
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState('pending');
-  
+  const [processingId, setProcessingId] = useState(null);
+
   // Removed admin deposit card config states (moved to /admin/wallets)
 
   // Receipt Modal viewer
@@ -43,6 +44,7 @@ export default function AdminDepositsPage() {
   // Removed card config handlers (moved to /admin/wallets)
 
   const handleApprove = async (deposit) => {
+    setProcessingId(deposit.id);
     try {
       await approveDeposit(deposit.id, adminUser?.uid);
       await addAdminLog(adminUser?.uid, 'approve_deposit', deposit.uid,
@@ -50,10 +52,13 @@ export default function AdminDepositsPage() {
       await load();
     } catch (err) {
       alert(t('error_prefix', 'Xəta: ') + err.message);
+    } finally {
+      setProcessingId(null);
     }
   };
 
   const handleReject = async (deposit) => {
+    setProcessingId(deposit.id);
     try {
       await rejectDeposit(deposit.id);
       await addAdminLog(adminUser?.uid, 'reject_deposit', deposit.uid,
@@ -61,6 +66,8 @@ export default function AdminDepositsPage() {
       await load();
     } catch (err) {
       alert(t('error_prefix', 'Xəta: ') + err.message);
+    } finally {
+      setProcessingId(null);
     }
   };
 
@@ -151,12 +158,14 @@ export default function AdminDepositsPage() {
               {d.status === 'pending' && (
                 <>
                   <button onClick={() => handleApprove(d)}
-                    style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-success)' }}
+                    disabled={processingId === d.id}
+                    style={{ background: 'none', border: 'none', cursor: processingId === d.id ? 'not-allowed' : 'pointer', color: 'var(--color-success)', opacity: processingId === d.id ? 0.5 : 1 }}
                     title={t('approve_btn_title', 'Təsdiqlə')}>
                     <CheckCircle2 size={20} />
                   </button>
                   <button onClick={() => handleReject(d)}
-                    style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-error)' }}
+                    disabled={processingId === d.id}
+                    style={{ background: 'none', border: 'none', cursor: processingId === d.id ? 'not-allowed' : 'pointer', color: 'var(--color-error)', opacity: processingId === d.id ? 0.5 : 1 }}
                     title={t('reject_btn_title', 'Rədd et')}>
                     <XCircle size={20} />
                   </button>

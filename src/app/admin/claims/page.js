@@ -20,6 +20,7 @@ export default function AdminClaimsPage() {
   const [approveModal, setApproveModal] = useState({ open: false, claim: null });
   const [txHash, setTxHash] = useState('');
   const [tab, setTab] = useState('pending');
+  const [processingId, setProcessingId] = useState(null);
 
   async function loadClaims() {
     try {
@@ -57,6 +58,7 @@ export default function AdminClaimsPage() {
   };
 
   const handleReject = async (claim) => {
+    setProcessingId(claim.id);
     try {
       await rejectClaim(claim.id);
       await addAdminLog(
@@ -68,6 +70,8 @@ export default function AdminClaimsPage() {
       await loadClaims();
     } catch (err) {
       alert(t('error_prefix', 'Xəta: ') + err.message);
+    } finally {
+      setProcessingId(null);
     }
   };
 
@@ -122,10 +126,10 @@ export default function AdminClaimsPage() {
             <div className={cStyles.actions}>
               {c.status === 'pending' && (
                 <>
-                  <button className={cStyles.approveBtn} onClick={() => setApproveModal({ open: true, claim: c })}>
+                  <button className={cStyles.approveBtn} onClick={() => setApproveModal({ open: true, claim: c })} disabled={processingId === c.id}>
                     <CheckCircle2 size={18} />
                   </button>
-                  <button className={cStyles.rejectBtn} onClick={() => handleReject(c)}>
+                  <button className={cStyles.rejectBtn} onClick={() => handleReject(c)} disabled={processingId === c.id}>
                     <XCircle size={18} />
                   </button>
                 </>

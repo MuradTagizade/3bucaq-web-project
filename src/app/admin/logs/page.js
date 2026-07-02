@@ -72,7 +72,7 @@ export default function AdminLogsPage() {
 
   // Compute unique admins and actions from data for filtering
   const uniqueAdmins = Array.from(
-    new Set(logs.map((log) => log.admin?.display_login).filter(Boolean))
+    new Set(logs.map((log) => log.admin?.user_code).filter(Boolean))
   ).sort();
 
   const uniqueActions = Array.from(
@@ -96,9 +96,9 @@ export default function AdminLogsPage() {
     if (search) {
       const query = search.toLowerCase();
       const detailsMatch = log.details?.toLowerCase().includes(query);
-      const adminLoginMatch = log.admin?.display_login?.toLowerCase().includes(query);
+      const adminLoginMatch = log.admin?.user_code?.toLowerCase().includes(query);
       const adminEmailMatch = log.admin?.email?.toLowerCase().includes(query);
-      const targetLoginMatch = log.target?.display_login?.toLowerCase().includes(query);
+      const targetLoginMatch = log.target?.user_code?.toLowerCase().includes(query);
       const targetEmailMatch = log.target?.email?.toLowerCase().includes(query);
       const actionLabelMatch = getActionLabel(log.action)
         ?.toLowerCase()
@@ -120,7 +120,7 @@ export default function AdminLogsPage() {
       return false;
     }
 
-    if (selectedAdmin && log.admin?.display_login !== selectedAdmin) {
+    if (selectedAdmin && log.admin?.user_code !== selectedAdmin) {
       return false;
     }
 
@@ -332,7 +332,7 @@ export default function AdminLogsPage() {
                           </div>
                           <div className={lStyles.userInfo}>
                             <span className={lStyles.userLogin}>
-                              {log.admin?.display_login || t('system', 'Sistem')}
+                              {log.admin?.user_code || t('system', 'Sistem')}
                             </span>
                             {log.admin?.email && (
                               <span className={lStyles.userEmail}>
@@ -355,7 +355,7 @@ export default function AdminLogsPage() {
                             </div>
                             <div className={lStyles.userInfo}>
                               <span className={lStyles.userLogin}>
-                                {log.target.display_login}
+                                {log.target?.user_code}
                               </span>
                               {log.target.email && (
                                 <span className={lStyles.userEmail}>
@@ -421,7 +421,7 @@ export default function AdminLogsPage() {
               <div className={lStyles.modalItem}>
                 <span className={lStyles.modalLabel}>{t('performed_by', 'Həyata keçirən:')}</span>
                 <span className={lStyles.modalValue}>
-                  {selectedLog.admin?.display_login || t('system', 'Sistem')}{' '}
+                  {selectedLog.admin?.user_code || t('system', 'Sistem')}{' '}
                   {selectedLog.admin?.email ? `(${selectedLog.admin.email})` : ''}
                 </span>
               </div>
@@ -442,7 +442,7 @@ export default function AdminLogsPage() {
                 <span className={lStyles.modalLabel}>{(logsTableHeader.target || 'Hədəf istifadəçi')}:</span>
                 <span className={lStyles.modalValue}>
                   {selectedLog.target
-                    ? `${selectedLog.target.display_login} (${selectedLog.target.email})`
+                    ? `${selectedLog.target?.user_code} (${selectedLog.target.email})`
                     : selectedLog.target_uid
                     ? selectedLog.target_uid
                     : '-'}

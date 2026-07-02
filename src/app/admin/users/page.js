@@ -197,6 +197,7 @@ export default function AdminUsersPage() {
   // Filtering & pagination
   const filtered = users.filter(
     (u) =>
+      (u.user_code || '').toLowerCase().includes(search.toLowerCase()) ||
       (u.display_login || '').toLowerCase().includes(search.toLowerCase()) ||
       (u.email || '').toLowerCase().includes(search.toLowerCase())
   );
@@ -217,7 +218,7 @@ export default function AdminUsersPage() {
 
       <div className={uStyles.searchBar}>
         <Input
-          placeholder={t('search_users_placeholder', 'Login və ya email ilə axtar...')}
+          placeholder={t('search_users_placeholder', 'Kod və ya email ilə axtar...')}
           value={search}
           onChange={(e) => { setSearch(e.target.value); setCurrentPage(1); }}
           icon={<Search size={18} />}
@@ -226,7 +227,7 @@ export default function AdminUsersPage() {
 
       <div className={styles.table}>
         <div className={uStyles.userHeader}>
-          <span>{t('login', 'Login')}</span>
+          <span>{t('user_code_col', 'Kod')}</span>
           <span>{t('balance', 'Balans')}</span>
           <span>{t('level', 'Level')}</span>
           <span>{t('status', 'Status')}</span>
@@ -235,8 +236,8 @@ export default function AdminUsersPage() {
         {pageData.map((u) => (
           <div key={u.id} className={uStyles.userRow}>
             <div>
-              <span className={styles.bold}>{u.display_login}</span>
-              <span className={uStyles.email}>{u.email}</span>
+              <span className={styles.bold}>{u.user_code}</span>
+              <span className={uStyles.email}>{u.full_name || u.email}</span>
             </div>
             <span>${Number(u.balance).toFixed(2)}</span>
             <span>LVL {u.current_level}</span>
@@ -264,11 +265,10 @@ export default function AdminUsersPage() {
         {selectedUser && (
           <div className={uStyles.detail}>
             <div className={uStyles.detailGrid}>
-              <div className={uStyles.detailItem}><span>{t('login', 'Login')}</span><strong>{selectedUser.display_login}</strong></div>
+              <div className={uStyles.detailItem}><span>{t('user_code_col', 'Kod')}</span><strong>{selectedUser.user_code}</strong></div>
               <div className={uStyles.detailItem}><span>{t('fullname', 'Ad Soyad')}</span><strong>{selectedUser.full_name}</strong></div>
               <div className={uStyles.detailItem}><span>{t('email', 'Email')}</span><strong>{selectedUser.email}</strong></div>
               <div className={uStyles.detailItem}><span>{t('balance', 'Balans')}</span><strong>{formatCurrency(selectedUser.balance)}</strong></div>
-              <div className={uStyles.detailItem}><span>{t('transfer', 'Transfer')}</span><strong>{formatCurrency(selectedUser.transfer_balance)}</strong></div>
               <div className={uStyles.detailItem}><span>{t('points', 'Points')}</span><strong>{Number(selectedUser.total_points).toFixed(1)}</strong></div>
               <div className={uStyles.detailItem}><span>{t('country', 'Ölkə')}</span><strong>{selectedUser.country || '—'}</strong></div>
               <div className={uStyles.detailItem}><span>{t('city', 'Şəhər')}</span><strong>{selectedUser.city || '—'}</strong></div>
@@ -391,8 +391,6 @@ export default function AdminUsersPage() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
           <Input label={t('fullname', 'Ad Soyad')} value={editForm.full_name || ''}
             onChange={(e) => setEditForm({ ...editForm, full_name: e.target.value })} />
-          <Input label={t('login', 'Login')} value={editForm.display_login || ''}
-            onChange={(e) => setEditForm({ ...editForm, display_login: e.target.value })} />
           <Input label={t('country', 'Ölkə')} value={editForm.country || ''}
             onChange={(e) => setEditForm({ ...editForm, country: e.target.value })} />
           <Input label={t('city', 'Şəhər')} value={editForm.city || ''}

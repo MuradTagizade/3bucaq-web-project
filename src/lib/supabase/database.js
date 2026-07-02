@@ -29,21 +29,7 @@ export async function getUserByUid(uid) {
   return data;
 }
 
-// Güvenli lookup RPC'leri — profiles artık cross-user okunamaz (K2).
-export async function checkLoginExists(login) {
-  if (!login) return false;
-  const { data, error } = await supabase.rpc('check_login_exists', { p_login: login });
-  if (error) throw new Error(error.message);
-  return !!data;
-}
-
-export async function resolveLoginEmail(login) {
-  if (!login) return null;
-  const { data, error } = await supabase.rpc('resolve_login_email', { p_login: login });
-  if (error) throw new Error(error.message);
-  return data || null;
-}
-
+// Güvenli lookup RPC'leri — profiles cross-user okunamaz (K2); kimlik artık user_code.
 export async function verifyReferralCode(code) {
   if (!code) return { valid: false };
   const { data, error } = await supabase.rpc('check_referral_code', { p_code: code });
@@ -51,9 +37,10 @@ export async function verifyReferralCode(code) {
   return data || { valid: false };
 }
 
-export async function lookupLogin(login) {
-  if (!login) return { exists: false };
-  const { data, error } = await supabase.rpc('lookup_login', { p_login: login });
+// Transfer alıcısını 6 karakterlik user_code ile doğrula (büyük/küçük harf duyarsız).
+export async function lookupUserCode(code) {
+  if (!code) return { exists: false };
+  const { data, error } = await supabase.rpc('lookup_user_code', { p_code: code });
   if (error) throw new Error(error.message);
   return data || { exists: false };
 }
@@ -178,7 +165,7 @@ export async function getTransactions(uid) {
   return data || [];
 }
 
-export async function transferFunds(fromUid, toLogin, amount) {
+export async function transferFunds(fromUid, toCode, amount) {
   const parsedAmount = Number(amount);
   if (isNaN(parsedAmount) || parsedAmount <= 0) {
     throw new Error('Məbləğ düzgün deyil');
@@ -191,7 +178,7 @@ export async function transferFunds(fromUid, toLogin, amount) {
   }
 
   const { data, error } = await supabase.rpc('transfer_funds', {
-    to_login: toLogin,
+    to_code: toCode,
     amount: parsedAmount,
   });
 
@@ -366,7 +353,7 @@ export async function createDeposit(uid, amount, txHash, network = 'TRC20', paym
 
   const { error } = await supabase.from('deposits').insert({
     uid,
-    login: user.display_login,
+    login: user.user_code,
     amount: Number(amount),
     tx_hash: txHash || null,
     network: network || null,
@@ -615,8 +602,8 @@ export async function getAdminLogs() {
     .from('admin_logs')
     .select(`
       *,
-      admin:profiles!admin_uid(display_login, email),
-      target:profiles!target_uid(display_login, email)
+      admin:profiles!admin_uid(display_login, user_code, email),
+      target:profiles!target_uid(display_login, user_code, email)
     `)
     .order('created_at', { ascending: false });
 

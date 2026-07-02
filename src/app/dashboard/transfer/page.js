@@ -13,7 +13,7 @@ import { validateAmount, validateUSDTAddress } from '@/lib/utils/validators';
 import { ArrowUpRight, CheckCircle2, User, Wallet, ArrowDownToLine, CreditCard, Image as ImageIcon, ArrowDown, ChevronDown, AlertTriangle } from 'lucide-react';
 import { useAuthStore } from '@/lib/store/authStore';
 import { useTranslation } from '@/lib/store/languageStore';
-import { transferFunds, lookupLogin, getUserByUid, createWithdrawal, getWithdrawals, getSystemSetting } from '@/lib/supabase/database';
+import { transferFunds, lookupUserCode, getUserByUid, createWithdrawal, getWithdrawals, getSystemSetting } from '@/lib/supabase/database';
 import { supabase } from '@/lib/supabase/config';
 
 function TransferContent() {
@@ -84,10 +84,10 @@ function TransferContent() {
     const val = e.target.value;
     setRecipient(val);
 
-    if (val.length >= 3) {
+    if (val.trim().length >= 6) {
       try {
-        const res = await lookupLogin(val);
-        setRecipientValid(!!res.exists && res.display_login !== authUser.displayLogin);
+        const res = await lookupUserCode(val);
+        setRecipientValid(!!res.exists && res.user_code !== authUser.userCode);
       } catch {
         setRecipientValid(false);
       }
@@ -279,10 +279,10 @@ function TransferContent() {
             <form onSubmit={handleTransferSubmit} className={styles.form}>
               <Input
                 label={t('recipient_label', 'Kimə')}
-                placeholder={t('recipient_placeholder', 'Qəbul edənin logini')}
+                placeholder={t('recipient_code_placeholder', 'Qəbul edənin kodu (məs. K7M2QX)')}
                 value={recipient}
                 onChange={handleRecipientChange}
-                error={recipient.length >= 3 && recipientValid === false ? t('recipient_not_found', 'Qəbul edən tapılmadı') : errors.recipient}
+                error={recipient.trim().length >= 6 && recipientValid === false ? t('recipient_not_found', 'Qəbul edən tapılmadı') : errors.recipient}
                 success={recipientValid}
                 icon={<User size={18} />}
               />

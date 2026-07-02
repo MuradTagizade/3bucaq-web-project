@@ -88,6 +88,7 @@ export async function POST(req) {
       .update({
         role: 'admin',
         admin_permissions: permissions || {},
+        display_login: login,
       })
       .eq('id', authData.user.id);
 

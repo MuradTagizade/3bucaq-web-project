@@ -23,6 +23,7 @@ export default function AdminKYCRequestsPage() {
   const [previewImage, setPreviewImage] = useState(null);
   const [rejectReasons, setRejectReasons] = useState({});
   const [stats, setStats] = useState({ pending: 0, approved: 0, rejected: 0 });
+  const [signedUrls, setSignedUrls] = useState({});
 
   function timeAgo(dateString) {
     if (!dateString) return '';
@@ -47,6 +48,22 @@ export default function AdminKYCRequestsPage() {
     try {
       const data = await getUsers();
       setUsers(data);
+
+      // KYC belgeleri private bucket'ta — imzalı URL üret (aksi halde <img> kırık gelir)
+      const docPaths = [];
+      data.forEach((u) => {
+        if (u.kyc_status === 'pending' || u.kyc_status === 'rejected') {
+          [u.kyc_document_url, u.kyc_document_back_url, u.kyc_selfie_url].forEach((p) => { if (p) docPaths.push(p); });
+        }
+      });
+      if (docPaths.length > 0) {
+        const { data: signed } = await supabase.storage.from('kyc-documents').createSignedUrls(docPaths, 3600);
+        if (signed) {
+          const map = {};
+          signed.forEach((s) => { if (s.signedUrl) map[s.path] = s.signedUrl; });
+          setSignedUrls(map);
+        }
+      }
 
       // Calculate stats
       let pendingCount = 0;
@@ -127,9 +144,8 @@ export default function AdminKYCRequestsPage() {
       if (!search.trim()) return true;
       const query = search.toLowerCase();
       const nameMatch = u.full_name?.toLowerCase().includes(query);
-      const loginMatch = u.display_login?.toLowerCase().includes(query);
-      const idMatch = `hb-${u.id.slice(0, 4).toLowerCase()}-az`.includes(query);
-      return nameMatch || loginMatch || idMatch;
+      const codeMatch = u.user_code?.toLowerCase().includes(query);
+      return nameMatch || codeMatch;
     });
 
   const sortedUsers = [...filteredUsers].sort((a, b) => {
@@ -177,7 +193,6 @@ export default function AdminKYCRequestsPage() {
           </div>
           <div className={styles.metricValueBlock}>
             <span className={styles.metricValue}>{stats.pending}</span>
-            {stats.pending > 0 && <span className={styles.metricBadge}>{t('pending_count_today', '+5 bu gün')}</span>}
           </div>
         </div>
 
@@ -241,7 +256,7 @@ export default function AdminKYCRequestsPage() {
         <div className={styles.requestsGrid}>
           {sortedUsers.map((user) => {
             const isPending = user.kyc_status === 'pending';
-            const initials = (user.display_login || 'U').slice(0, 2).toUpperCase();
+            const initials = (user.full_name || user.user_code || 'U').slice(0, 2).toUpperCase();
             const rejectReasonText = rejectReasons[user.id] || t('kyc_rejected_default', 'Sənəd məlumatları oxunmur.');
 
             return (
@@ -254,8 +269,8 @@ export default function AdminKYCRequestsPage() {
                   </div>
 
                   <div className={styles.userInfo}>
-                    <h4 className={styles.userFullName}>{user.full_name || user.display_login}</h4>
-                    <span className={styles.userId}>ID: HB-{user.id.slice(0, 4).toUpperCase()}-AZ</span>
+                    <h4 className={styles.userFullName}>{user.full_name || user.user_code}</h4>
+                    <span className={styles.userId}>ID: {user.user_code || '—'}</span>
                   </div>
 
                   <div className={styles.headerRight}>
@@ -282,11 +297,11 @@ export default function AdminKYCRequestsPage() {
                     {/* Front side */}
                     <div 
                       className={styles.documentBox}
-                      onClick={() => setPreviewImage(user.kyc_document_url)}
+                      onClick={() => setPreviewImage(signedUrls[user.kyc_document_url])}
                       title="Sənəd Ön Üzünü böyüt"
                     >
-                      {user.kyc_document_url ? (
-                        <img src={user.kyc_document_url} alt="Sənəd Ön" className={styles.docImage} />
+                      {signedUrls[user.kyc_document_url] ? (
+                        <img src={signedUrls[user.kyc_document_url]} alt="Sənəd Ön" className={styles.docImage} />
                       ) : (
                         <div className={styles.docPlaceholder}>Sənəd Ön Şəkli Yoxdur</div>
                       )}
@@ -296,11 +311,11 @@ export default function AdminKYCRequestsPage() {
                     {/* Back side */}
                     <div 
                       className={styles.documentBox}
-                      onClick={() => setPreviewImage(user.kyc_document_back_url)}
+                      onClick={() => setPreviewImage(signedUrls[user.kyc_document_back_url])}
                       title="Sənəd Arxa Üzünü böyüt"
                     >
-                      {user.kyc_document_back_url ? (
-                        <img src={user.kyc_document_back_url} alt="Sənəd Arxa" className={styles.docImage} />
+                      {signedUrls[user.kyc_document_back_url] ? (
+                        <img src={signedUrls[user.kyc_document_back_url]} alt="Sənəd Arxa" className={styles.docImage} />
                       ) : (
                         <div className={styles.docPlaceholder}>Sənəd Arxa Şəkli Yoxdur</div>
                       )}
@@ -310,11 +325,11 @@ export default function AdminKYCRequestsPage() {
                     {/* Selfie side */}
                     <div 
                       className={styles.documentBox}
-                      onClick={() => setPreviewImage(user.kyc_selfie_url)}
+                      onClick={() => setPreviewImage(signedUrls[user.kyc_selfie_url])}
                       title="Selfini böyüt"
                     >
-                      {user.kyc_selfie_url ? (
-                        <img src={user.kyc_selfie_url} alt="Selfi" className={styles.docImage} />
+                      {signedUrls[user.kyc_selfie_url] ? (
+                        <img src={signedUrls[user.kyc_selfie_url]} alt="Selfi" className={styles.docImage} />
                       ) : (
                         <div className={styles.docPlaceholder}>Selfi Şəkli Yoxdur</div>
                       )}

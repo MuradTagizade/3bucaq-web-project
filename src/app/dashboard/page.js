@@ -25,7 +25,8 @@ export default function DashboardPage() {
   
   // Resolve authUser from store
   const user = {
-    login: authUser?.displayLogin || 'User',
+    login: authUser?.fullName || authUser?.userCode || 'User',
+    userCode: authUser?.userCode || '',
     balance: authUser?.balance || 0,
     totalPoints: authUser?.totalPoints || 0,
     currentLevel: authUser?.currentLevel || 0,
@@ -162,6 +163,12 @@ export default function DashboardPage() {
         <div className={styles.refRow}>
           <span className={styles.refLabel}>{t('referral_code', 'Referal Kodu')}: {user.referralCode}</span>
           <button className={styles.refCopyBtn} onClick={handleCopyRef}>
+            <Copy size={14} /> {t('copy', 'Kopyala')}
+          </button>
+        </div>
+        <div className={styles.refRow}>
+          <span className={styles.refLabel}>{t('your_id_code', 'Sizin ID Kodunuz')}: <strong>{user.userCode}</strong></span>
+          <button className={styles.refCopyBtn} onClick={() => navigator.clipboard?.writeText(user.userCode)}>
             <Copy size={14} /> {t('copy', 'Kopyala')}
           </button>
         </div>

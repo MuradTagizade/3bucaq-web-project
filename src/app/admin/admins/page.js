@@ -319,14 +319,16 @@ export default function AdminsPage() {
   const filteredAdmins = admins.filter(
     (a) =>
       (a.display_login || '').toLowerCase().includes(search.toLowerCase()) ||
-      (a.email || '').toLowerCase().includes(search.toLowerCase())
+      (a.email || '').toLowerCase().includes(search.toLowerCase()) ||
+      (a.user_code || '').toLowerCase().includes(search.toLowerCase())
   );
 
   const searchableUsers = allUsers.filter(
     (u) =>
       u.role !== 'admin' &&
       ((u.display_login || '').toLowerCase().includes(userSearch.toLowerCase()) ||
-        (u.email || '').toLowerCase().includes(userSearch.toLowerCase()))
+        (u.email || '').toLowerCase().includes(userSearch.toLowerCase()) ||
+        (u.user_code || '').toLowerCase().includes(userSearch.toLowerCase()))
   );
 
   const getPermissionLabel = (key) => {
@@ -384,7 +386,7 @@ export default function AdminsPage() {
             return (
               <div key={admin.id} className={styles.tableRow}>
                 <div>
-                  <span className={styles.bold}>{admin.display_login}</span>
+                  <span className={styles.bold}>{admin.user_code}</span>
                   <span className={styles.subtext}>{admin.full_name || admin.email}</span>
                 </div>
                 <div className={styles.permsList}>
@@ -535,7 +537,7 @@ export default function AdminsPage() {
                             onClick={() => setSelectedUser(u)}
                             className={styles.userSearchItem}
                           >
-                            <span className={styles.bold}>{u.display_login}</span>
+                            <span className={styles.bold}>{u.user_code}</span>
                             <span className={styles.subtext}>{u.email}</span>
                           </button>
                         ))
@@ -550,7 +552,7 @@ export default function AdminsPage() {
                   <div className={styles.selectedUserInfo}>
                     <ShieldCheck size={20} color="var(--color-primary)" />
                     <div>
-                      <span className={styles.bold}>{selectedUser.display_login}</span>
+                      <span className={styles.bold}>{selectedUser.user_code}</span>
                       <span className={styles.subtext}>{selectedUser.email}</span>
                     </div>
                   </div>
@@ -600,7 +602,7 @@ export default function AdminsPage() {
               <div className={styles.selectedUserInfo}>
                 <Shield size={20} color="var(--color-warning)" />
                 <div>
-                  <span className={styles.bold}>{selectedAdmin.display_login}</span>
+                  <span className={styles.bold}>{selectedAdmin.user_code}</span>
                   <span className={styles.subtext}>{selectedAdmin.email}</span>
                 </div>
               </div>

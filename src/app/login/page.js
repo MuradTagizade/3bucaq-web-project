@@ -14,7 +14,7 @@ import { useTranslation } from '@/lib/store/languageStore';
 import { Mail, Lock } from 'lucide-react';
 import { validateEmail } from '@/lib/utils/validators';
 import { loginUser } from '@/lib/supabase/auth';
-import { getUserByUid, resolveLoginEmail } from '@/lib/supabase/database';
+import { getUserByUid } from '@/lib/supabase/database';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -31,7 +31,7 @@ export default function LoginPage() {
 
     if (!inputVal) {
       newErrors.email = t('required_field', 'Bu sahə doldurulmalıdır');
-    } else if (inputVal.includes('@')) {
+    } else {
       const emailErr = validateEmail(inputVal);
       if (emailErr) {
         newErrors.email = emailErr;
@@ -51,18 +51,8 @@ export default function LoginPage() {
     setErrors({});
 
     try {
-      let loginEmail = inputVal;
-      if (!inputVal.includes('@')) {
-        // Kullanıcı adından e-posta çöz (güvenli RPC)
-        const em = await resolveLoginEmail(inputVal);
-        if (em) {
-          loginEmail = em;
-        } else {
-          throw new Error(t('user_not_found', 'İstifadəçi tapılmadı'));
-        }
-      }
-
-      const user = await loginUser(loginEmail, password);
+      // Giriş yalnızca e-posta ile (kullanıcı adı kaldırıldı).
+      const user = await loginUser(inputVal, password);
       const dbUser = await getUserByUid(user.id);
       if (dbUser && dbUser.role === 'admin') {
         router.push('/admin');
@@ -103,9 +93,9 @@ export default function LoginPage() {
 
           <form onSubmit={handleSubmit} className={styles.form}>
             <Input
-              label={t('email_or_username', 'Email və ya İstifadəçi adı')}
-              type="text"
-              placeholder={t('email_or_username_placeholder', 'email@example.com və ya istifadəçi adı')}
+              label={t('email', 'Email')}
+              type="email"
+              placeholder="email@example.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               error={errors.email}

@@ -232,11 +232,11 @@ export default function PersonalInfoPage() {
               </div>
 
               <div className={styles.inputWrapper}>
-                <label className={styles.inputLabel}>{t('login_label', 'İSTİFADƏÇİ ADI (LOGİN)')}</label>
+                <label className={styles.inputLabel}>{t('user_code_label', 'İSTİFADƏÇİ KODU')}</label>
                 <div className={styles.disabledInputContainer}>
                   <input
                     type="text"
-                    value={authUser?.displayLogin || ''}
+                    value={authUser?.userCode || ''}
                     disabled
                     className={styles.disabledInput}
                   />

@@ -131,7 +131,7 @@ export default function ResetPasswordPage() {
               icon={<Lock size={18} />}
             />
 
-            <Button type="submit" fullWidth size="lg" loading={loading}>
+            <Button type="submit" fullWidth size="lg" loading={loading} disabled={!ready || loading}>
               {t('save', 'Yadda saxla')}
             </Button>
           </form>

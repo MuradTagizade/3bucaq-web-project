@@ -25,6 +25,7 @@ export default function AdminWithdrawalsPage() {
   const [txHash, setTxHash] = useState('');
   const [receiptFile, setReceiptFile] = useState(null);
   const [submitting, setSubmitting] = useState(false);
+  const [processingId, setProcessingId] = useState(null);
 
   // Receipt Modal viewer
   const [viewerReceiptUrl, setViewerReceiptUrl] = useState(null);
@@ -103,6 +104,7 @@ export default function AdminWithdrawalsPage() {
   };
 
   const handleReject = async (withdrawal) => {
+    setProcessingId(withdrawal.id);
     try {
       await rejectWithdrawal(withdrawal.id);
       await addAdminLog(adminUser?.uid, 'reject_withdrawal', withdrawal.uid,
@@ -110,6 +112,8 @@ export default function AdminWithdrawalsPage() {
       await load();
     } catch (err) {
       alert(t('error_prefix', 'Xəta: ') + err.message);
+    } finally {
+      setProcessingId(null);
     }
   };
 
@@ -202,12 +206,14 @@ export default function AdminWithdrawalsPage() {
               {w.status === 'pending' && (
                 <>
                   <button onClick={() => { setApproveModal({ open: true, withdrawal: w }); setTxHash(''); setReceiptFile(null); }}
-                    style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-success)' }}
+                    disabled={processingId === w.id}
+                    style={{ background: 'none', border: 'none', cursor: processingId === w.id ? 'not-allowed' : 'pointer', color: 'var(--color-success)', opacity: processingId === w.id ? 0.5 : 1 }}
                     title={t('approve_btn_title', 'Təsdiqlə')}>
                     <CheckCircle2 size={20} />
                   </button>
                   <button onClick={() => handleReject(w)}
-                    style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-error)' }}
+                    disabled={processingId === w.id}
+                    style={{ background: 'none', border: 'none', cursor: processingId === w.id ? 'not-allowed' : 'pointer', color: 'var(--color-error)', opacity: processingId === w.id ? 0.5 : 1 }}
                     title={t('reject_btn_title', 'Rədd et')}>
                     <XCircle size={20} />
                   </button>

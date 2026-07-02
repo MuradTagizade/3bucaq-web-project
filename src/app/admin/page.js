@@ -82,7 +82,7 @@ export default function AdminDashboardPage() {
       <h2 className={styles.sectionTitle}>{t('recent_signups', 'Son Qeydiyyatlar')}</h2>
       <div className={styles.table}>
         <div className={styles.tableHeader}>
-          <span>{t('login', 'Login')}</span>
+          <span>{t('code', 'Kod')}</span>
           <span>{t('email', 'Email')}</span>
           <span>{t('date', 'Tarix')}</span>
           <span>{t('package', 'Paket')}</span>
@@ -92,7 +92,7 @@ export default function AdminDashboardPage() {
         ) : (
           stats?.recentUsers.map((u) => (
             <div key={u.id} className={styles.tableRow}>
-              <span className={styles.bold}>{u.display_login}</span>
+              <span className={styles.bold}>{u.user_code}</span>
               <span>{u.email}</span>
               <span>{formatDate(u.created_at)}</span>
               <span className={styles.badge}>{getActivePkgString(u.active_packages)}</span>
