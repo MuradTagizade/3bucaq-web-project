@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import styles from './subscribers.module.css';
 import Pagination from '@/components/ui/Pagination';
 import Modal from '@/components/ui/Modal';
@@ -96,6 +97,8 @@ export default function SubscribersPage() {
   const pageData = filteredList.slice(start, start + PER_PAGE);
 
   // Referral link
+  // Referral yalnızca ≥1 aktif hotbed paketi olduqda aktivdir
+  const hasActivePackage = Object.values(authUser?.activePackages || {}).some(Boolean);
   const referralLink = authUser?.referralCode
     ? `${typeof window !== 'undefined' ? window.location.origin : ''}/register?ref=${authUser.referralCode}`
     : '';
@@ -294,7 +297,18 @@ export default function SubscribersPage() {
           </div>
         </div>
 
-        {/* Referral Link Card */}
+        {/* Referral Link Card — yalnızca ≥1 aktiv paket olduqda aktivdir */}
+        {!hasActivePackage ? (
+          <div className={styles.refCard} style={{ textAlign: 'center' }}>
+            <h3 className={styles.sectionTitle}>{t('referral_link', 'Referal Linkiniz')}</h3>
+            <p className={styles.refDesc} style={{ opacity: 0.85 }}>
+              🔒 {t('referral_locked', 'Referal sistemini aktiv etmək üçün ən azı 1 hotbed paketi alın')}
+            </p>
+            <Link href="/dashboard/hotbed" className={styles.shareBtn} style={{ display: 'inline-flex', textDecoration: 'none', justifyContent: 'center' }}>
+              {t('go_to_packages', 'Paketlərə Get')} →
+            </Link>
+          </div>
+        ) : (
         <div className={styles.refCard}>
           <h3 className={styles.sectionTitle}>{t('referral_link', 'Referal Linkiniz')}</h3>
           <p className={styles.refDesc}>
@@ -333,6 +347,7 @@ export default function SubscribersPage() {
             {t('share', 'Paylaş')}
           </button>
         </div>
+        )}
       </div>
 
       {/* Referral List Table */}

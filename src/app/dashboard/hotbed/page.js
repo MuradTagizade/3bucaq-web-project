@@ -2,13 +2,14 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import styles from './hotbed.module.css';
 import Modal from '@/components/ui/Modal';
 import Button from '@/components/ui/Button';
 import Badge from '@/components/ui/Badge';
 import { PACKAGES } from '@/lib/utils/constants';
 import { formatCurrency } from '@/lib/utils/formatters';
-import { Info, Flame, Zap, Clock } from 'lucide-react';
+import { Info, Flame, Zap, Clock, AlertTriangle } from 'lucide-react';
 import { useAuthStore } from '@/lib/store/authStore';
 import { useTranslation } from '@/lib/store/languageStore';
 import { buyPackage, getUserByUid } from '@/lib/supabase/database';
@@ -32,6 +33,7 @@ export default function HotBedPage() {
   };
 
   const activatedAt = authUser?.packageActivatedAt || {};
+  const isKycApproved = authUser?.kycStatus === 'approved' || authUser?.role === 'admin';
 
   const getDaysRemaining = (pkgId) => {
     const activationDate = activatedAt[pkgId];
@@ -50,6 +52,7 @@ export default function HotBedPage() {
 
   const handleToggle = (pkg) => {
     if (packages[pkg.id]) return; // Cannot buy active packages
+    if (!isKycApproved) { router.push('/dashboard/kyc'); return; } // KYC olmadan paket alınamaz
     setConfirmModal({ open: true, pkg });
   };
 
@@ -116,6 +119,16 @@ export default function HotBedPage() {
           <Info size={20} />
         </button>
       </div>
+
+      {!isKycApproved && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '12px 16px', marginBottom: 16, borderRadius: 12, background: 'rgba(255,193,7,0.08)', border: '1px solid rgba(255,193,7,0.3)', color: 'var(--text-secondary)', fontSize: 13 }}>
+          <AlertTriangle size={18} color="var(--color-warning)" style={{ flexShrink: 0 }} />
+          <span>
+            {t('kyc_required_hotbed', 'Paket almaq üçün əvvəlcə KYC (şəxsiyyət) təsdiqindən keçməlisiniz.')}{' '}
+            <Link href="/dashboard/kyc" style={{ color: 'var(--color-primary)', fontWeight: 600 }}>{t('go_to_kyc_short', 'Doğrulamaya Get →')}</Link>
+          </span>
+        </div>
+      )}
 
       <div className={styles.packageList}>
         {PACKAGES.map((pkg) => {

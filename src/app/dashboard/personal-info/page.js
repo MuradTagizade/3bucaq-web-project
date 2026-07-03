@@ -17,6 +17,7 @@ export default function PersonalInfoPage() {
   const [country, setCountry] = useState('');
   const [city, setCity] = useState('');
   const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
   const [saving, setSaving] = useState(false);
   const [statusMsg, setStatusMsg] = useState({ type: '', text: '' });
 
@@ -81,6 +82,7 @@ export default function PersonalInfoPage() {
       setCountry(authUser.country || '');
       setCity(authUser.city || '');
       setEmail(authUser.email || '');
+      setPhone(authUser.phone || '');
     }
   }, [authUser]);
 
@@ -140,6 +142,7 @@ export default function PersonalInfoPage() {
         full_name: fullName,
         country: country,
         city: city,
+        phone: phone,
       });
 
       setUser({
@@ -147,6 +150,7 @@ export default function PersonalInfoPage() {
         fullName: fullName,
         country: country,
         city: city,
+        phone: phone,
       });
 
       setStatusMsg({ type: 'success', text: t('update_success', 'Məlumatlar uğurla yeniləndi!') });
@@ -183,6 +187,7 @@ export default function PersonalInfoPage() {
         full_name: fullName,
         country: country,
         city: city,
+        phone: phone,
       });
 
       setUser({
@@ -190,6 +195,7 @@ export default function PersonalInfoPage() {
         fullName: fullName,
         country: country,
         city: city,
+        phone: phone,
         email: email,
       });
 
@@ -257,15 +263,13 @@ export default function PersonalInfoPage() {
 
               <div className={styles.inputWrapper}>
                 <label className={styles.inputLabel}>{t('phone_label', 'TELEFON NÖMRƏSİ')}</label>
-                <div className={styles.disabledInputContainer}>
-                  <input
-                    type="text"
-                    value={maskPhone(authUser?.phone)}
-                    disabled
-                    className={styles.disabledInput}
-                  />
-                  <Lock size={14} className={styles.lockIcon} />
-                </div>
+                <input
+                  type="text"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  className={styles.textInput}
+                  placeholder={t('enter_phone_placeholder', 'Telefon nömrəsi daxil edin')}
+                />
               </div>
 
               {isKycApproved && (
