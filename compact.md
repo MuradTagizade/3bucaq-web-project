@@ -266,8 +266,25 @@ Bu sessiyada çox-agentli audit workflow'ları ilə dərin təhlükəsizlik dene
 * Kiçik düzəlişlər: admin təsdiq/rədd düymələrinə çift-klik qoruması, reset-password submit guard, personal-info buton kilidi, hardcoded `levelup.com` → `window.location.origin`, `.env.example` Firebase→Supabase.
 
 ### 12.5 Növbəti addımlar (PENDING)
-1. Yeni frontend'i işə sal (`git checkout security-remediation` + `npm run dev`) — SQL Part 3 ilə birlikdə getməlidir.
+1. Yeni frontend'i işə sal (`git checkout security-remediation` + `npm run dev`) — SQL Part 3 ilə birlikdə getməlidir. **[TAMAMLANDI — main'ə merge + push, Vercel deploy edir]**
 2. (Opsional) Gündəlik qazanc üçün `run_daily_maintenance()` RPC-sini pg_cron/Edge Function ilə gündəlik çağır.
 3. (Opsional) E-poçt doğrulaması (Confirm email + `{{ .Token }}` şablonu) + register verify yönləndirməsini geri aç.
-4. `security-remediation` qolunu push et / PR aç.
+4. `security-remediation` qolunu push et / PR aç. **[TAMAMLANDI — main'ə merge + push edildi]**
+
+---
+
+## 13. Son Sessiya (2026-07-03): Hotbed KYC Şərti, Referal Paket-Şərti, Telefon Redaktəsi + Deploy
+
+**Git/Deploy statusu (§12-ni əvəz edir):** Bütün §12 və §13 dəyişiklikləri `main` qoluna **merge + push EDİLDİ**. Vercel `main`-dən **production deploy edir** (auto). `.env` gitignore-dadır, Vercel öz env dəyişənlərini işlədir.
+
+### 13.1 Yeni İş Qaydaları / Özəlliklər
+* **Hotbed paketi almaq üçün KYC 'approved' şərti:** `buy_package` RPC-də KYC yoxlaması (admin xaric); hotbed səhifəsində KYC yoxdursa sarı **xəbərdarlıq banneri** + "Satın Al" düyməsi KYC səhifəsinə yönləndirir.
+* **Referal linki/kodu yalnız ≥1 aktiv hotbed paketi olduqda AKTİV:** ("əvvəl paket al, sonra referal")
+    * `check_referral_code`: referrer'in aktiv paketi yoxdursa `valid=false` (`reason:'inactive'`).
+    * `handle_new_user` + `create_profile_if_missing`: `referred_by` yalnız aktiv-paketli referrer üçün set edilir (aks halda referal baglanmir).
+    * Frontend: dashboard referal kodu sətri + subscribers referal link/QR kartı, aktiv paket yoxdursa **"🔒 kilidli"** göstərilir + Paketlərə yönləndirmə.
+* **Profildə telefon nömrəsi redaktə oluna bilər:** `personal-info` səhifəsində telefon artıq disabled deyil, redaktə edilən input; `updateUserProfile` `phone`-u whitelist-də saxlayır (trigger normal user üçün phone dəyişməsinə icazə verir).
+
+### 13.2 YENİ SQL Faylı — TƏTBİQ EDİLMƏLİ
+**`security_remediation_4.sql`** yaradıldı, **Supabase-də HƏLƏ ÇALIŞDIRILMADI.** Part 1/2/3-dən sonra çalıştırılmalıdır. İçindəkilər: `buy_package` (KYC şərti), `check_referral_code` (paket şərti), `handle_new_user` + `create_profile_if_missing` (referral paket-gate). **Qeyd:** Part 1/2/3 canlı bazada tətbiq olunub; **yalnız Part 4 pending.** Frontend Part 4 olmadan da qırılmır (client gating işləyir), Part 4 server-side zorlamanı aktiv edir.
 
