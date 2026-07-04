@@ -268,6 +268,7 @@ export const translations = {
     enter_tx_hash: "Transaction Hash daxil edin",
     send_deposit_request: "Depozit Sorğusu Göndər",
     payment_receipt_photo: "Ödəniş Qəbzi (Foto)",
+    crypto_receipt_hint: "Göndərdiyiniz ödənişin qəbzi/ekran görüntüsü (maks. 5MB, yalnız şəkil).",
 
     // History Page
     all_transactions: "Bütün Əməliyyatlar",
@@ -929,6 +930,7 @@ export const translations = {
     enter_tx_hash: "Enter Transaction Hash",
     send_deposit_request: "Send Deposit Request",
     payment_receipt_photo: "Payment Receipt (Photo)",
+    crypto_receipt_hint: "Receipt/screenshot of your payment (max 5MB, images only).",
 
     // History Page
     all_transactions: "All Transactions",

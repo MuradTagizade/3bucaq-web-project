@@ -39,6 +39,7 @@ export default function DepositPage() {
   const [cardAmount, setCardAmount] = useState('');
   const [userCardNumber, setUserCardNumber] = useState('');
   const [receiptFile, setReceiptFile] = useState(null);
+  const [cryptoReceiptFile, setCryptoReceiptFile] = useState(null);
   const [adminCardNumber, setAdminCardNumber] = useState('Yüklənir...');
   
   const [loading, setLoading] = useState(false);
@@ -108,16 +109,25 @@ export default function DepositPage() {
   const activeWalletAddress = cryptoWallets[`${cryptoAsset}_${network.toLowerCase()}`] || t('not_set', 'Təyin edilməyib');
   const handleCopyWallet = () => handleCopyText(activeWalletAddress, t('wallet_copied', 'Cüzdan ünvanı kopyalandı!'));
 
-  // Upload file to Supabase storage bucket
+  // Client tərəfdə qəbz yoxlaması (bucket server tərəfdə də 5MB/image tətbiq edir)
+  const checkReceiptImage = (file) => {
+    if (!file) return t('upload_receipt', 'Ödəniş qəbzi şəklini yükləyin');
+    if (!file.type?.startsWith('image/')) return t('file_must_be_image', 'Yalnız şəkil faylı yükləmək olar.');
+    if (file.size > 5 * 1024 * 1024) return t('file_too_large', 'Şəkil faylı maksimum 5MB ola bilər.');
+    return null;
+  };
+
+  // Upload file to Supabase storage bucket (private; uzantı mime-dən təyin olunur)
   const uploadReceiptFile = async (file) => {
-    const fileExt = file.name.split('.').pop();
-    const fileName = `deposit_${Date.now()}.${fileExt}`;
+    const extByMime = { 'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp', 'image/heic': 'heic', 'image/heif': 'heif', 'image/gif': 'gif' };
+    const fileExt = extByMime[file.type] || 'jpg';
+    const fileName = `deposit_${Date.now()}_${Math.random().toString(36).slice(2, 8)}.${fileExt}`;
     const filePath = `receipts/${authUser.uid}/${fileName}`;
-    
+
     const { data, error } = await supabase.storage
       .from('kyc-documents')
-      .upload(filePath, file, { upsert: true });
-      
+      .upload(filePath, file, { upsert: false, contentType: file.type });
+
     if (error) throw new Error(error.message);
     return data.path;
   };
@@ -137,12 +147,20 @@ export default function DepositPage() {
         return;
       }
 
+      const receiptErr = checkReceiptImage(cryptoReceiptFile);
+      if (receiptErr) {
+        showToast(receiptErr);
+        return;
+      }
+
       setLoading(true);
       try {
-        await createDeposit(authUser.uid, amount, txHash, `${cryptoAsset.toUpperCase()} ${network}`, cryptoAsset);
+        const receiptPath = await uploadReceiptFile(cryptoReceiptFile);
+        await createDeposit(authUser.uid, amount, txHash, `${cryptoAsset.toUpperCase()} ${network}`, cryptoAsset, null, receiptPath);
         showToast(t('deposit_success', 'Depozit sorğusu göndərildi! Sorğunuz 24 saat ərzində icra olunacaq.'));
         setAmount('');
         setTxHash('');
+        setCryptoReceiptFile(null);
         const data = await getDeposits(authUser.uid);
         setDeposits(data);
       } catch (err) {
@@ -170,18 +188,9 @@ export default function DepositPage() {
         return;
       }
 
-      if (!receiptFile) {
-        showToast(t('upload_receipt', 'Ödəniş qəbzi şəklini yükləyin'));
-        return;
-      }
-
-      // Client tərəfdə fayl yoxlaması (bucket server tərəfdə də 5MB/şəkil tətbiq edir)
-      if (!receiptFile.type?.startsWith('image/')) {
-        showToast(t('file_must_be_image', 'Yalnız şəkil faylı yükləmək olar.'));
-        return;
-      }
-      if (receiptFile.size > 5 * 1024 * 1024) {
-        showToast(t('file_too_large', 'Şəkil faylı maksimum 5MB ola bilər.'));
+      const cardReceiptErr = checkReceiptImage(receiptFile);
+      if (cardReceiptErr) {
+        showToast(cardReceiptErr);
         return;
       }
 
@@ -374,6 +383,21 @@ export default function DepositPage() {
               value={txHash}
               onChange={(e) => setTxHash(e.target.value)}
             />
+
+            <div className={styles.fileUploadGroup}>
+              <span className={styles.fileUploadLabel}>{t('payment_receipt_photo', 'Ödəniş Qəbzi (Foto)')}</span>
+              <label className={styles.fileUploader}>
+                <Upload size={18} color="var(--color-primary)" />
+                <span>{cryptoReceiptFile ? cryptoReceiptFile.name : t('select_receipt_file', 'Qəbzin şəklini seçin...')}</span>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => setCryptoReceiptFile(e.target.files[0])}
+                  hidden
+                />
+              </label>
+              <span className={styles.fileUploadHint}>{t('crypto_receipt_hint', 'Göndərdiyiniz ödənişin qəbzi/ekran görüntüsü (maks. 5MB, yalnız şəkil).')}</span>
+            </div>
           </>
         ) : (
           <>

@@ -407,3 +407,5 @@
   opacity: 0.8;
   text-decoration: underline;
 }
+
+.fileUploadHint { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
