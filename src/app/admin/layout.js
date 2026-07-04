@@ -16,7 +16,7 @@ const NAV_ITEMS = [
   { href: '/admin', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/admin/users', label: 'İstifadəçilər', icon: Users },
   { href: '/admin/kyc', label: 'KYC Sorğuları', icon: ShieldCheck },
-  { href: '/admin/claims', label: 'Level Claims', icon: ClipboardCheck },
+  { href: '/admin/claims', label: 'Bonus Tarixçəsi', icon: ClipboardCheck },
   { href: '/admin/deposits', label: 'Depozitlər', icon: Wallet },
   { href: '/admin/withdrawals', label: 'Çıxarışlar', icon: ArrowDownToLine },
   { href: '/admin/wallets', label: 'Cüzdanlar', icon: Coins },

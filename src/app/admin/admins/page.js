@@ -34,7 +34,7 @@ const PERMISSION_LABELS = {
   superadmin: 'Super Admin (Bütün səlahiyyətlər + Admin idarəetməsi)',
   users: 'İstifadəçiləri İdarə Et (Bloklama, Balans/Points dəyişmə)',
   kyc: 'KYC Sorğularını İdarə Et (Təsdiq/Rədd)',
-  claims: 'Level Claims İdarə Et (Təsdiq/Rədd)',
+  claims: 'Bonus Tarixçəsinə Baxış',
   finance: 'Maliyyə İdarə Et (Depozit/Çıxarış Təsdiq/Rədd)',
   logs: 'Sistem Loglarını İzlə',
 };

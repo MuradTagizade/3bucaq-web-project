@@ -268,25 +268,6 @@ export async function createLevelClaim(uid, level, bonusAmount, claimType, usdtA
   return { success: true };
 }
 
-export async function approveClaim(claimId, txHash, adminUid) {
-  const { data, error } = await supabase.rpc('admin_approve_claim', {
-    p_claim_id: claimId,
-    p_tx_hash: txHash || null,
-  });
-  if (error) throw new Error(friendlyError(error));
-  if (data && data.success === false) throw new Error(data.error || 'Təsdiq baş tutmadı');
-  return { success: true };
-}
-
-export async function rejectClaim(claimId) {
-  const { data, error } = await supabase.rpc('admin_reject_claim', {
-    p_claim_id: claimId,
-  });
-  if (error) throw new Error(friendlyError(error));
-  if (data && data.success === false) throw new Error(data.error || 'Rədd baş tutmadı');
-  return { success: true };
-}
-
 // ============================================
 // POINTS HISTORY
 // ============================================
