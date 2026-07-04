@@ -395,3 +395,4 @@ Bu ve paralel sekmelerdeki tüm SQL işleri artık iki yoldan yapılabiliyor; ik
     * `transfer/page.js`: dəyişməz qaldı — banner + hər iki submit (köçürmə/çıxarış) KYC ilə kilidli.
     * `translations.js` `kyc_required_desc` (AZ+EN): "depozit" mətndən çıxarıldı (yalnız köçürmə/çıxarış).
 * Aktiv SQL zənciri artıq `_8.sql`-ə qədərdir (CLAUDE.md yeniləndi). `npm run build` ✅.
+* **Kök qovluq təmizliyi:** bütün SQL miqrasiya faylları (`schema.sql` + `security_remediation*.sql`, 9 fayl) kökdən **`sql/` qovluğuna** daşındı (git mv — tarixçə qorunur). Köhnə bölmələrdəki kök-yollu istinadlar tarixi qeyddir; aktiv yol `sql/...`-dir. Kodda bu fayllara heç bir istinad yoxdur (yalnız sənədlərdə).
