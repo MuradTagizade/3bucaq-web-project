@@ -333,7 +333,7 @@ export const translations = {
     identity_already_exists: "Bu kimlik nömrəsi ilə artıq bir hesab mövcuddur!",
     enter_identity_error: "Zəhmət olmasa, kimlik nömrəsini daxil edin",
     kyc_required_title: "KYC Doğrulaması Tələb Olunur",
-    kyc_required_desc: "Maliyyə əməliyyatlarını (depozit, köçürmə və çıxarış) həyata keçirmək üçün şəxsiyyətinizi təsdiq etməlisiniz.",
+    kyc_required_desc: "Köçürmə və çıxarış əməliyyatlarını həyata keçirmək üçün şəxsiyyətinizi təsdiq etməlisiniz.",
     go_to_kyc: "KYC Doğrulamasına Get",
     go_to_kyc_short: "Doğrulamaya Get →",
 
@@ -900,7 +900,7 @@ export const translations = {
     identity_already_exists: "An account with this identity number already exists!",
     enter_identity_error: "Please enter your identity number",
     kyc_required_title: "KYC Verification Required",
-    kyc_required_desc: "You must verify your identity to perform financial operations (deposits, transfers, and withdrawals).",
+    kyc_required_desc: "You must verify your identity to perform transfers and withdrawals.",
     go_to_kyc: "Go to KYC Verification",
     go_to_kyc_short: "Verify Now →",
 

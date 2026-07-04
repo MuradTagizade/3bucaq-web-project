@@ -328,10 +328,6 @@ export async function createDeposit(uid, amount, txHash, network = 'TRC20', paym
   const user = await getUserByUid(uid);
   if (!user) throw new Error('İstifadəçi tapılmadı');
 
-  if (user.role !== 'admin' && user.kyc_status !== 'approved') {
-    throw new Error('Depozit etmək üçün KYC doğrulaması tələb olunur.');
-  }
-
   const { error } = await supabase.from('deposits').insert({
     uid,
     login: user.user_code,

@@ -376,3 +376,22 @@ Bu ve paralel sekmelerdeki tüm SQL işleri artık iki yoldan yapılabiliyor; ik
     * `password_hibp_enabled` (leaked password protection): sınandı → **Pro plan tələb edir** (layihə FREE plandadır — doğrulandı). §15.5-dəki 1-ci manual iş bu səbəbdən blokludur.
 * **⚠️ TƏHLÜKƏSİZLİK:** İstifadəçi PAT-ı (sbp_...) söhbətə yapışdırmışdı → https://supabase.com/dashboard/account/tokens ünvanından **SİLİNMƏLİDİR**.
 * **Domain durumu:** Hələ yoxdur; canlı ünvan https://3bucaq-web-project.vercel.app. Domain alınınca: `site_url`/`uri_allow_list` yenilə + Resend SMTP qur + Vercel-ə bağla.
+
+---
+
+## 18. Son Sessiya (2026-07-04, davamı): KYC yalnız pul ÇIXIŞI üçün (§10 və §13.1-i əvəz edir)
+
+**Yeni iş qaydası (istifadəçi istəyi):** KYC doğrulaması artıq YALNIZ **daxili köçürmə (`transfer_funds`)** və **çıxarış (`create_withdrawal`)** üçün tələb olunur. Paket almaq və depozit KYC-siz mümkündür ("pul KYC-siz girə bilər, amma KYC-siz çıxa bilməz").
+
+* **`security_remediation_8.sql` — TƏTBİQ EDİLDİ ✅** (MCP `apply_migration: security_remediation_8_kyc_only_for_outflow`):
+    * `buy_package`: Part 4-dəki KYC şərti çıxarıldı (qalan hər şey eynidir: balans, aktiv-paket təkrarı, self/cycle qoruması, upline min-1-paket, 5 xətt bonus).
+    * `admin_approve_deposit`: istifadəçinin KYC yoxlaması çıxarıldı (`has_admin_perm('finance')` qalır).
+    * Hər ikisində Part 6 whitelist grant modeli açıqca yenidən yazıldı (revoke public/anon + grant authenticated).
+    * Doğrulama: `kyc_status` istinadı buy_package/admin_approve_deposit-də YOX, transfer_funds/create_withdrawal-da VAR; anon `buy_package` → 42501 DENIED ✅.
+* **Frontend:**
+    * `hotbed/page.js`: KYC banneri + "Satın Al"dakı KYC yönləndirməsi silindi.
+    * `deposit/page.js`: KYC banneri + submit düyməsindəki KYC kilidi silindi.
+    * `database.js` `createDeposit`: KYC yoxlaması silindi (`transferFunds` və `createWithdrawal`-da QALIR).
+    * `transfer/page.js`: dəyişməz qaldı — banner + hər iki submit (köçürmə/çıxarış) KYC ilə kilidli.
+    * `translations.js` `kyc_required_desc` (AZ+EN): "depozit" mətndən çıxarıldı (yalnız köçürmə/çıxarış).
+* Aktiv SQL zənciri artıq `_8.sql`-ə qədərdir (CLAUDE.md yeniləndi). `npm run build` ✅.

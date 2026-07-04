@@ -250,7 +250,7 @@ function TransferContent() {
         <div className={styles.kycWarningBanner}>
           <AlertTriangle size={18} className={styles.warningIcon} />
           <div className={styles.warningText}>
-            <span>{t('kyc_required_desc', 'Maliyyə əməliyyatlarını (depozit, köçürmə və çıxarış) həyata keçirmək üçün şəxsiyyətinizi təsdiq etməlisiniz.')}</span>
+            <span>{t('kyc_required_desc', 'Köçürmə və çıxarış əməliyyatlarını həyata keçirmək üçün şəxsiyyətinizi təsdiq etməlisiniz.')}</span>
             <Link href="/dashboard/kyc" className={styles.warningLink}>
               {t('go_to_kyc_short', 'Doğrulamaya Get →')}
             </Link>

@@ -7,7 +7,7 @@ import Input from '@/components/ui/Input';
 import Button from '@/components/ui/Button';
 import Badge from '@/components/ui/Badge';
 import Modal from '@/components/ui/Modal';
-import { Wallet, ArrowDown, Clock, CheckCircle2, XCircle, Copy, Upload, CreditCard, Image as ImageIcon, ArrowUpRight, ArrowDownToLine, AlertTriangle } from 'lucide-react';
+import { Wallet, ArrowDown, Clock, CheckCircle2, XCircle, Copy, Upload, CreditCard, Image as ImageIcon, ArrowUpRight, ArrowDownToLine } from 'lucide-react';
 import { formatCurrency, formatDateTime } from '@/lib/utils/formatters';
 import { validateAmount } from '@/lib/utils/validators';
 import { useAuthStore } from '@/lib/store/authStore';
@@ -220,8 +220,6 @@ export default function DepositPage() {
   };
 
   const balance = authUser?.balance || 0;
-  const kycStatus = authUser?.kycStatus || 'none';
-  const isKycApproved = kycStatus === 'approved' || authUser?.role === 'admin';
 
   return (
     <div className={styles.page}>
@@ -231,19 +229,6 @@ export default function DepositPage() {
         <span className={styles.balanceValue}>{formatCurrency(balance, '')}</span>
         <span className={styles.balanceCurrency}>USD</span>
       </div>
-
-      {/* KYC Warning Banner */}
-      {!isKycApproved && (
-        <div className={styles.kycWarningBanner}>
-          <AlertTriangle size={18} className={styles.warningIcon} />
-          <div className={styles.warningText}>
-            <span>{t('kyc_required_desc', 'Maliyyə əməliyyatlarını (depozit, köçürmə və çıxarış) həyata keçirmək üçün şəxsiyyətinizi təsdiq etməlisiniz.')}</span>
-            <Link href="/dashboard/kyc" className={styles.warningLink}>
-              {t('go_to_kyc_short', 'Doğrulamaya Get →')}
-            </Link>
-          </div>
-        </div>
-      )}
 
       {/* Operation Tabs */}
       <div className={styles.tabs}>
@@ -441,7 +426,7 @@ export default function DepositPage() {
           </>
         )}
 
-        <Button type="submit" fullWidth size="lg" loading={loading} disabled={loading || !isKycApproved}>
+        <Button type="submit" fullWidth size="lg" loading={loading} disabled={loading}>
           {t('send_deposit_request', 'Depozit Sorğusu Göndər')}
         </Button>
       </form>
