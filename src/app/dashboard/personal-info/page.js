@@ -403,12 +403,6 @@ export default function PersonalInfoPage() {
                 <span>{t('approval_date', 'Təsdiq Tarixi')}</span>
                 <span>{isKycApproved && authUser?.createdAt ? formatDate(authUser?.createdAt) : '—'}</span>
               </div>
-              <div className={styles.kycDetailRow}>
-                <span>{t('risk_level', 'Risk Səviyyəsi')}</span>
-                <span className={isKycApproved ? styles.riskLow : styles.riskDefault}>
-                  {isKycApproved ? t('low', 'Aşağı') : '—'}
-                </span>
-              </div>
             </div>
 
             <button
