@@ -45,16 +45,17 @@ export default function AdminWithdrawalsPage() {
 
   const filtered = withdrawals.filter((w) => w.status === tab);
 
-  // Upload admin bank receipt to storage bucket
-  const uploadAdminReceipt = async (file, withdrawalId) => {
+  // Upload admin bank receipt to storage bucket.
+  // Qəbz çıxarış SAHİBİNİN uid qovluğuna yüklənir — storage RLS istifadəçiyə
+  // yalnız receipts/<öz-uid>/... yolunu oxumağa icazə verir.
+  const uploadAdminReceipt = async (file, withdrawalId, ownerUid) => {
     const fileExt = file.name.split('.').pop();
-    const fileName = `admin_receipt_${withdrawalId}_${Date.now()}.${fileExt}`;
-    const filePath = `receipts/admin/${fileName}`;
-    
+    const filePath = `receipts/${ownerUid}/receipt_${withdrawalId}_${Date.now()}.${fileExt}`;
+
     const { data, error } = await supabase.storage
       .from('kyc-documents')
       .upload(filePath, file, { upsert: true });
-      
+
     if (error) throw new Error(error.message);
     return data.path;
   };
@@ -73,11 +74,23 @@ export default function AdminWithdrawalsPage() {
       return;
     }
 
+    // Client tərəfdə fayl yoxlaması (bucket server tərəfdə də 5MB/şəkil tətbiq edir)
+    if (receiptFile) {
+      if (!receiptFile.type?.startsWith('image/')) {
+        alert(t('file_must_be_image', 'Yalnız şəkil faylı yükləmək olar.'));
+        return;
+      }
+      if (receiptFile.size > 5 * 1024 * 1024) {
+        alert(t('file_too_large', 'Şəkil faylı maksimum 5MB ola bilər.'));
+        return;
+      }
+    }
+
     setSubmitting(true);
     try {
       let receiptPath = null;
       if (receiptFile) {
-        receiptPath = await uploadAdminReceipt(receiptFile, w.id);
+        receiptPath = await uploadAdminReceipt(receiptFile, w.id, w.uid);
       }
 
       await approveWithdrawal(w.id, txHash || null, adminUser?.uid, receiptPath);
@@ -86,12 +99,8 @@ export default function AdminWithdrawalsPage() {
       await addAdminLog(adminUser?.uid, 'approve_withdrawal', w.uid,
         `Approved withdrawal $${w.amount} to ${w.login} (${w.payment_method})`);
       
-      // Mock notification & Email log
-      console.log(`[Notification Engine] Bildiriş göndərildi: @${w.login} adlı istifadəçinin ${formatCurrency(w.amount)} çıxarışı tamamlandı.`);
-      console.log(`[Email Engine] E-poçt göndərildi: ${w.login}@levelup.com ünvanına qəbz (${receiptPath || txHash}) göndərildi.`);
-      
-      alert(t('approved_sent_msg', 'Çıxarış sorğusu uğurla təsdiqləndi! Müştəriyə bildiriş və e-poçt (mock) göndərildi.'));
-      
+      alert(t('withdrawal_approved_success', 'Çıxarış sorğusu uğurla təsdiqləndi!'));
+
       await load();
       setApproveModal({ open: false, withdrawal: null });
       setTxHash('');

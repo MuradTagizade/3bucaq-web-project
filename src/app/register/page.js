@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import styles from '../login/login.module.css';
@@ -57,14 +57,34 @@ function RegisterForm() {
     if (errors[field]) setErrors((prev) => ({ ...prev, [field]: null }));
   };
 
-  const checkReferralCode = async (code) => {
+  // Referal kodu yoxlaması debounce edilir (400ms) — hər düymə basışında RPC atma;
+  // seq ilə bayat (stale) cavablar atılır.
+  const refTimerRef = useRef(null);
+  const refSeqRef = useRef(0);
+
+  useEffect(() => {
+    return () => {
+      if (refTimerRef.current) clearTimeout(refTimerRef.current);
+    };
+  }, []);
+
+  const checkReferralCode = (code) => {
+    if (refTimerRef.current) clearTimeout(refTimerRef.current);
+    const seq = ++refSeqRef.current;
+
     if (!code || code.length < 3) { setRefValid(undefined); return; }
-    try {
-      const res = await verifyReferralCode(code);
-      setRefValid(!!res.valid);
-    } catch {
-      setRefValid(false);
-    }
+
+    setRefValid(null);
+    refTimerRef.current = setTimeout(async () => {
+      try {
+        const res = await verifyReferralCode(code);
+        if (seq !== refSeqRef.current) return; // bayat cavab — görməzdən gəl
+        setRefValid(!!res.valid);
+      } catch {
+        if (seq !== refSeqRef.current) return;
+        setRefValid(false);
+      }
+    }, 400);
   };
 
   const handleSubmit = async (e) => {

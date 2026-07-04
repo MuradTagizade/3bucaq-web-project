@@ -41,10 +41,15 @@ export function validateLogin(login) {
   return null;
 }
 
-export function validateAmount(amount, balance) {
+// Ağlabatan üst limit — '1e300', 'Infinity' kimi dəyərləri rədd edir
+const MAX_AMOUNT = 1000000;
+
+export function validateAmount(amount, balance, maxAmount = MAX_AMOUNT) {
   if (!amount || isNaN(amount)) return 'Məbləğ daxil edin';
   const num = parseFloat(amount);
+  if (!Number.isFinite(num)) return 'Düzgün məbləğ daxil edin';
   if (num <= 0) return 'Məbləğ müsbət olmalıdır';
+  if (num > maxAmount) return `Məbləğ maksimum ${maxAmount} ola bilər`;
   if (balance !== undefined && num > balance) return 'Balans kifayət etmir';
   return null;
 }

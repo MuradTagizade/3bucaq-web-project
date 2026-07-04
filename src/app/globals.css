@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap');
+/* Fontlar next/font ile self-host edilir (layout.js) — render-blocking @import yok */
 
 /* ============================================
    ULTRA PROTOCOL DESIGN SYSTEM
@@ -106,8 +106,8 @@
   --radius-full: 9999px;
 
   /* Typography */
-  --font-primary: -apple-system, BlinkMacSystemFont, 'Inter', 'SF Pro Display', sans-serif;
-  --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+  --font-primary: var(--font-inter), -apple-system, BlinkMacSystemFont, 'Inter', 'SF Pro Display', sans-serif;
+  --font-mono: var(--font-jbmono), 'JetBrains Mono', 'Fira Code', monospace;
 
   /* Font Sizes */
   --text-xs: 0.75rem;

@@ -25,13 +25,15 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# local env files
+# local env files — bütün variantlar (şablon xaric)
 .env
 .env.local
 .env.development.local
 .env.test.local
 .env.production.local
 .env*.local
+.env.*
+!.env.example
 
 # agent / IDE / tool files
 .agents/
@@ -43,3 +45,17 @@ skills-lock.json
 
 # firebase
 functions/node_modules
+
+# security: açar / sertifikat faylları
+*.key
+*.p12
+*.pfx
+*.crt
+
+# lokal gizli qeydlər (test hesabları və s.)
+*.local.md
+
+# Claude Code şəxsi ayarları (paylaşılan .claude/settings.json commit OLUNUR)
+.claude/settings.local.json
+# skills CLI symlinkləri (.agents/ gitignore-lu olduğu üçün)
+.claude/skills/

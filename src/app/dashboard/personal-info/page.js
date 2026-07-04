@@ -182,7 +182,8 @@ export default function PersonalInfoPage() {
       if (verifyErr) throw new Error(verifyErr.message);
 
       // Doğrulama başarılı: auth e-postası değişti → profiles.email'i güvenli RPC ile eşitle
-      await supabase.rpc('sync_my_email');
+      const { error: syncErr } = await supabase.rpc('sync_my_email');
+      if (syncErr) throw new Error(t('email_sync_err', 'E-poçt sinxronizasiya edilərkən xəta: ') + syncErr.message);
       await updateUserProfile(authUser.uid, {
         full_name: fullName,
         country: country,

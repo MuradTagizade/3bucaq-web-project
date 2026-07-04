@@ -148,6 +148,10 @@ export default function HistoryPage() {
           });
         });
 
+        // Metod etiketi payment_method-dan törədilir (USDC depoziti "USDT" kimi görünməsin)
+        const cryptoAssetLabel = (item) =>
+          `${item.payment_method === 'usdc' ? 'USDC' : 'USDT'} ${(item.network || 'TRC20').replace(/^(USDT|USDC)\s+/i, '')}`;
+
         // Add deposits
         deps.forEach((d) => {
           unifiedList.push({
@@ -156,7 +160,11 @@ export default function HistoryPage() {
             amount: Number(d.amount),
             status: d.status === 'approved' ? 'completed' : d.status,
             created_at: d.created_at,
-            detail: d.tx_hash ? `${t('external_wallet', 'Xarici Pulqabı')} (${d.tx_hash.slice(0, 6)}...${d.tx_hash.slice(-4)})` : `${t('external_wallet', 'Xarici Pulqabı')} (TRC20)`,
+            detail: d.payment_method === 'card'
+              ? `${t('bank_card_manual', 'Bank Kartı')}${d.card_number ? ` (**** ${String(d.card_number).slice(-4)})` : ''}`
+              : d.tx_hash
+                ? `${t('external_wallet', 'Xarici Pulqabı')} (${d.tx_hash.slice(0, 6)}...${d.tx_hash.slice(-4)})`
+                : `${t('external_wallet', 'Xarici Pulqabı')} (${cryptoAssetLabel(d)})`,
             network: d.network,
           });
         });
@@ -169,7 +177,11 @@ export default function HistoryPage() {
             amount: -Number(w.amount),
             status: (w.status === 'done' || w.status === 'approved') ? 'completed' : w.status,
             created_at: w.created_at,
-            detail: w.crypto_address ? `${t('external_wallet', 'Xarici Pulqabı')} (${w.crypto_address.slice(0, 6)}...${w.crypto_address.slice(-4)})` : t('external_wallet', 'Xarici Pulqabı'),
+            detail: w.payment_method === 'card'
+              ? `${t('bank_card_manual', 'Bank Kartı')}${w.card_number ? ` (**** ${String(w.card_number).slice(-4)})` : ''}`
+              : w.crypto_address
+                ? `${t('external_wallet', 'Xarici Pulqabı')} (${w.crypto_address.slice(0, 6)}...${w.crypto_address.slice(-4)})`
+                : t('external_wallet', 'Xarici Pulqabı'),
             network: w.network,
           });
         });

@@ -12,7 +12,7 @@ import { formatCurrency, formatDateTime } from '@/lib/utils/formatters';
 import { validateAmount } from '@/lib/utils/validators';
 import { useAuthStore } from '@/lib/store/authStore';
 import { useTranslation } from '@/lib/store/languageStore';
-import { createDeposit, getDeposits, getSystemSetting } from '@/lib/supabase/database';
+import { createDeposit, getDeposits, getSystemSettings } from '@/lib/supabase/database';
 import { supabase } from '@/lib/supabase/config';
 
 export default function DepositPage() {
@@ -53,38 +53,31 @@ export default function DepositPage() {
     async function loadData() {
       if (!authUser?.uid) return;
       try {
-        const [
-          historyData, activeCard, cardActiveSetting,
-          usdtTRC, usdtERC, usdtBEP,
-          usdcTRC, usdcERC, usdcBEP
-        ] = await Promise.all([
+        const [historyData, settings] = await Promise.all([
           getDeposits(authUser.uid),
-          getSystemSetting('admin_deposit_card'),
-          getSystemSetting('card_payment_active'),
-          getSystemSetting('wallet_usdt_trc20'),
-          getSystemSetting('wallet_usdt_erc20'),
-          getSystemSetting('wallet_usdt_bep20'),
-          getSystemSetting('wallet_usdc_trc20'),
-          getSystemSetting('wallet_usdc_erc20'),
-          getSystemSetting('wallet_usdc_bep20'),
+          getSystemSettings([
+            'admin_deposit_card', 'card_payment_active',
+            'wallet_usdt_trc20', 'wallet_usdt_erc20', 'wallet_usdt_bep20',
+            'wallet_usdc_trc20', 'wallet_usdc_erc20', 'wallet_usdc_bep20',
+          ]),
         ]);
         setDeposits(historyData);
-        if (activeCard) {
-          setAdminCardNumber(activeCard);
+        if (settings.admin_deposit_card) {
+          setAdminCardNumber(settings.admin_deposit_card);
         } else {
           setAdminCardNumber(t('not_set', 'Təyin edilməyib'));
         }
-        setIsCardActive(cardActiveSetting === 'true');
+        setIsCardActive(settings.card_payment_active === 'true');
         setCryptoWallets({
-          usdt_trc20: usdtTRC || '',
-          usdt_erc20: usdtERC || '',
-          usdt_bep20: usdtBEP || '',
-          usdc_trc20: usdcTRC || '',
-          usdc_erc20: usdcERC || '',
-          usdc_bep20: usdcBEP || '',
+          usdt_trc20: settings.wallet_usdt_trc20 || '',
+          usdt_erc20: settings.wallet_usdt_erc20 || '',
+          usdt_bep20: settings.wallet_usdt_bep20 || '',
+          usdc_trc20: settings.wallet_usdc_trc20 || '',
+          usdc_erc20: settings.wallet_usdc_erc20 || '',
+          usdc_bep20: settings.wallet_usdc_bep20 || '',
         });
         // Force USDT if card system is disabled
-        if (cardActiveSetting !== 'true') {
+        if (settings.card_payment_active !== 'true') {
           setActiveTab('usdt');
         }
       } catch (err) {
@@ -179,6 +172,16 @@ export default function DepositPage() {
 
       if (!receiptFile) {
         showToast(t('upload_receipt', 'Ödəniş qəbzi şəklini yükləyin'));
+        return;
+      }
+
+      // Client tərəfdə fayl yoxlaması (bucket server tərəfdə də 5MB/şəkil tətbiq edir)
+      if (!receiptFile.type?.startsWith('image/')) {
+        showToast(t('file_must_be_image', 'Yalnız şəkil faylı yükləmək olar.'));
+        return;
+      }
+      if (receiptFile.size > 5 * 1024 * 1024) {
+        showToast(t('file_too_large', 'Şəkil faylı maksimum 5MB ola bilər.'));
         return;
       }
 
@@ -472,7 +475,9 @@ export default function DepositPage() {
                     )}
                   </div>
                 ) : (
-                  <span className={styles.historyMethod}>USDT ({d.network || 'TRC20'})</span>
+                  <span className={styles.historyMethod}>
+                    {d.payment_method === 'usdc' ? 'USDC' : 'USDT'} ({(d.network || 'TRC20').replace(/^(USDT|USDC)\s+/i, '')})
+                  </span>
                 )}
               </div>
               {getStatusBadge(d.status)}

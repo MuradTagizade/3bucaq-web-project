@@ -7,7 +7,7 @@ import Button from '@/components/ui/Button';
 import Spinner from '@/components/ui/Spinner';
 import { useAuthStore } from '@/lib/store/authStore';
 import { useTranslation } from '@/lib/store/languageStore';
-import { getSystemSetting, updateSystemSetting, addAdminLog } from '@/lib/supabase/database';
+import { getSystemSettings, updateSystemSetting, addAdminLog } from '@/lib/supabase/database';
 import { Coins, Save, CreditCard } from 'lucide-react';
 
 export default function AdminWalletsPage() {
@@ -39,34 +39,25 @@ export default function AdminWalletsPage() {
   useEffect(() => {
     async function loadWallets() {
       try {
-        const [
-          usdtTRC, usdtERC, usdtBEP,
-          usdcTRC, usdcERC, usdcBEP,
-          activeCard, cardActiveSetting
-        ] = await Promise.all([
-          getSystemSetting('wallet_usdt_trc20'),
-          getSystemSetting('wallet_usdt_erc20'),
-          getSystemSetting('wallet_usdt_bep20'),
-          getSystemSetting('wallet_usdc_trc20'),
-          getSystemSetting('wallet_usdc_erc20'),
-          getSystemSetting('wallet_usdc_bep20'),
-          getSystemSetting('admin_deposit_card'),
-          getSystemSetting('card_payment_active'),
+        const settings = await getSystemSettings([
+          'wallet_usdt_trc20', 'wallet_usdt_erc20', 'wallet_usdt_bep20',
+          'wallet_usdc_trc20', 'wallet_usdc_erc20', 'wallet_usdc_bep20',
+          'admin_deposit_card', 'card_payment_active',
         ]);
 
         setWallets({
-          wallet_usdt_trc20: usdtTRC || '',
-          wallet_usdt_erc20: usdtERC || '',
-          wallet_usdt_bep20: usdtBEP || '',
-          wallet_usdc_trc20: usdcTRC || '',
-          wallet_usdc_erc20: usdcERC || '',
-          wallet_usdc_bep20: usdcBEP || '',
+          wallet_usdt_trc20: settings.wallet_usdt_trc20 || '',
+          wallet_usdt_erc20: settings.wallet_usdt_erc20 || '',
+          wallet_usdt_bep20: settings.wallet_usdt_bep20 || '',
+          wallet_usdc_trc20: settings.wallet_usdc_trc20 || '',
+          wallet_usdc_erc20: settings.wallet_usdc_erc20 || '',
+          wallet_usdc_bep20: settings.wallet_usdc_bep20 || '',
         });
 
-        if (activeCard) {
-          setDepositCard(activeCard);
+        if (settings.admin_deposit_card) {
+          setDepositCard(settings.admin_deposit_card);
         }
-        setIsCardActive(cardActiveSetting === 'true');
+        setIsCardActive(settings.card_payment_active === 'true');
       } catch (err) {
         console.error('Failed to load wallet settings:', err);
       } finally {

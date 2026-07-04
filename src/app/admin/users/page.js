@@ -173,7 +173,9 @@ export default function AdminUsersPage() {
   const handleResetPassword = async () => {
     if (!selectedUser?.email) return;
     try {
-      const { error } = await supabase.auth.resetPasswordForEmail(selectedUser.email);
+      const { error } = await supabase.auth.resetPasswordForEmail(selectedUser.email, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
       if (error) throw error;
       await addAdminLog(adminUser?.uid, 'reset_password', selectedUser.id, 'Password reset email sent');
       showToast(t('pwd_reset_sent', 'Şifrə sıfırlama emaili göndərildi'));
@@ -314,10 +316,14 @@ export default function AdminUsersPage() {
               <Button variant="ghost" size="sm" onClick={handleResetPassword}>
                 {t('reset_pwd_btn', 'Şifrə Sıfırla')}
               </Button>
-              <Button variant="ghost" size="sm" onClick={() => handleToggleAdmin(selectedUser)}>
-                <Shield size={14} /> {selectedUser.role === 'admin' ? t('demote_admin', 'Admin sil') : t('promote_admin', 'Admin et')}
-              </Button>
-              {selectedUser.kyc_status === 'pending' && (
+              {/* Rol dəyişikliyinə DB trigger yalnız superadmin üçün icazə verir */}
+              {adminUser?.permissions?.superadmin && (
+                <Button variant="ghost" size="sm" onClick={() => handleToggleAdmin(selectedUser)}>
+                  <Shield size={14} /> {selectedUser.role === 'admin' ? t('demote_admin', 'Admin sil') : t('promote_admin', 'Admin et')}
+                </Button>
+              )}
+              {/* KYC dəyişikliyi DB tərəfdə 'kyc' icazəsi tələb edir */}
+              {selectedUser.kyc_status === 'pending' && (adminUser?.permissions?.kyc || adminUser?.permissions?.superadmin) && (
                 <>
                   <Button variant="ghost" size="sm" onClick={() => handleKYCAction('approved')}>
                     <ShieldCheck size={14} /> {t('kyc_approve', 'KYC Təsdiq')}

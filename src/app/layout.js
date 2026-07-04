@@ -1,7 +1,20 @@
 import './globals.css';
 import Script from 'next/script';
+import { Inter, JetBrains_Mono } from 'next/font/google';
 import AuthProvider from '@/components/providers/AuthProvider';
 import ThemeProvider from '@/components/providers/ThemeProvider';
+
+const inter = Inter({
+  subsets: ['latin', 'latin-ext'],
+  variable: '--font-inter',
+  display: 'swap',
+});
+
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ['latin'],
+  variable: '--font-jbmono',
+  display: 'swap',
+});
 
 export const metadata = {
   title: 'LEVEL UP — Make World Green Again',
@@ -9,8 +22,8 @@ export const metadata = {
   keywords: 'LEVEL UP, investisiya, MLM, USDT, qazanc, referal',
   manifest: '/manifest.json',
   icons: {
-    icon: '/3bucaq-logo.png',
-    apple: '/3bucaq-logo.png',
+    icon: '/favicon.ico',
+    apple: '/icons/apple-touch-icon.png',
   },
   openGraph: {
     title: 'LEVEL UP — Make World Green Again',
@@ -24,23 +37,13 @@ export const metadata = {
 export const viewport = {
   width: 'device-width',
   initialScale: 1,
-  maximumScale: 1,
   themeColor: '#060a13',
 };
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="az" data-scroll-behavior="smooth" suppressHydrationWarning>
+    <html lang="az" data-scroll-behavior="smooth" suppressHydrationWarning className={`${inter.variable} ${jetbrainsMono.variable}`}>
       <head>
-        <link rel="icon" href="/3bucaq-logo.png" />
-        <link rel="apple-touch-icon" href="/3bucaq-logo.png" />
-        <link rel="manifest" href="/manifest.json" />
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap"
-          rel="stylesheet"
-        />
         <Script
           id="theme-initializer"
           strategy="beforeInteractive"

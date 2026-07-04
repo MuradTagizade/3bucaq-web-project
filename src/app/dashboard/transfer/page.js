@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, Suspense } from 'react';
+import { useState, useEffect, useRef, Suspense } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import styles from './transfer.module.css';
@@ -80,28 +80,47 @@ function TransferContent() {
   }, [authUser?.uid]);
 
   // --- Transfer handlers ---
-  const handleRecipientChange = async (e) => {
+  // Alıcı sorgusu debounce edilir (400ms) — her tuş vuruşunda RPC atma;
+  // seq ile bayat (stale) cavablar atılır.
+  const lookupTimerRef = useRef(null);
+  const lookupSeqRef = useRef(0);
+
+  useEffect(() => {
+    return () => {
+      if (lookupTimerRef.current) clearTimeout(lookupTimerRef.current);
+    };
+  }, []);
+
+  const handleRecipientChange = (e) => {
     const val = e.target.value;
     setRecipient(val);
+    setErrors((prev) => ({ ...prev, recipient: null }));
+
+    if (lookupTimerRef.current) clearTimeout(lookupTimerRef.current);
+    const seq = ++lookupSeqRef.current;
 
     if (val.trim().length >= 6) {
-      try {
-        const res = await lookupUserCode(val);
-        setRecipientValid(!!res.exists && res.user_code !== authUser.userCode);
-      } catch {
-        setRecipientValid(false);
-      }
+      setRecipientValid(null);
+      lookupTimerRef.current = setTimeout(async () => {
+        try {
+          const res = await lookupUserCode(val);
+          if (seq !== lookupSeqRef.current) return; // bayat cavab — görməzdən gəl
+          setRecipientValid(!!res.exists && res.user_code !== authUser.userCode);
+        } catch {
+          if (seq !== lookupSeqRef.current) return;
+          setRecipientValid(false);
+        }
+      }, 400);
     } else {
       setRecipientValid(null);
     }
-    setErrors((prev) => ({ ...prev, recipient: null }));
   };
 
   const handleTransferSubmit = async (e) => {
     e.preventDefault();
     const newErrors = {};
 
-    if (!recipient.trim()) newErrors.recipient = t('enter_login', 'Login yazın');
+    if (!recipient.trim()) newErrors.recipient = t('enter_code', 'Kod yazın');
     else if (!recipientValid) newErrors.recipient = t('recipient_not_found', 'Qəbul edən tapılmadı');
 
     const amountErr = validateAmount(amount, balance);

@@ -21,6 +21,14 @@ function VerifyForm() {
   const [status, setStatus] = useState('idle');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [cooldown, setCooldown] = useState(0);
+
+  // "Yenidən göndər" üçün 60 saniyəlik geri sayım
+  useEffect(() => {
+    if (cooldown <= 0) return;
+    const timer = setTimeout(() => setCooldown((c) => c - 1), 1000);
+    return () => clearTimeout(timer);
+  }, [cooldown]);
 
   const handleSubmit = async () => {
     if (code.length !== 6) {
@@ -86,6 +94,7 @@ function VerifyForm() {
       setError('Email ünvanı tapılmadı.');
       return;
     }
+    if (cooldown > 0) return;
     setError('');
     try {
       const { error: resendErr } = await supabase.auth.resend({
@@ -93,6 +102,7 @@ function VerifyForm() {
         email,
       });
       if (resendErr) throw new Error(resendErr.message);
+      setCooldown(60);
       alert('Təsdiq emaili yenidən göndərildi!');
     } catch (err) {
       setError(err.message);
@@ -146,8 +156,8 @@ function VerifyForm() {
             İrəli
           </Button>
 
-          <button className={styles.resend} onClick={handleResend} disabled={!email || loading}>
-            Kodu yenidən göndər
+          <button className={styles.resend} onClick={handleResend} disabled={!email || loading || cooldown > 0}>
+            {cooldown > 0 ? `Kodu yenidən göndər (${cooldown}s)` : 'Kodu yenidən göndər'}
           </button>
         </div>
       </div>

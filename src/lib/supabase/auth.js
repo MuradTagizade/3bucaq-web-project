@@ -61,8 +61,10 @@ export async function logoutUser() {
 }
 
 export function onAuthStateChange(callback) {
+  // Event adı da iletilir (TOKEN_REFRESHED, SIGNED_IN...) — AuthProvider
+  // gereksiz profil refetch'ini bununla atlar.
   const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-    callback(session?.user || null);
+    callback(session?.user || null, event);
   });
   return () => {
     subscription.unsubscribe();

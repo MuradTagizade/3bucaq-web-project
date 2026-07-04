@@ -93,23 +93,10 @@ create or replace trigger on_auth_user_created
 2.  **Serveri başlatmaq:** `npm run dev` (bu skript Webpack rejimi ilə `next dev --webpack` icra edir).
 
 ### 5.1 Test Hesabları (Supabase Auth)
-Lokal yoxlamalar və test üçün istifadə olunan, `LEVEL UP` domenlərinə köçürülmüş və təsdiqlənmiş test giriş məlumatları:
-*   **Yönetici Hesabı (Admin):**
-    *   **Email:** `admin@levelup.com` (və ya İstifadəçi adı: `admin`)
-    *   **Şifrə:** `Admin123!`
-    *   **Rol:** `ADMIN`
-*   **Zəngin Mock Yönetici Hesabı (Super Admin):**
-    *   **Email:** `mockadmin@levelup.com` (və ya İstifadəçi adı: `mockadmin`)
-    *   **Şifrə:** `Mockadmin123!`
-    *   **Rol:** `ADMIN`
-*   **Normal İstifadəçi Hesabı:**
-    *   **Email:** `user@levelup.com` (və ya İstifadəçi adı: `user`)
-    *   **Şifrə:** `User123!`
-    *   **Rol:** `USER`
-*   **Zəngin Mock İstifadəçi Hesabı:**
-    *   **Email:** `testmock@levelup.com` (və ya İstifadəçi adı: `testmock`)
-    *   **Şifrə:** `Testmock123!`
-    *   **Rol:** `USER`
+Test hesablarının giriş məlumatları TƏHLÜKƏSİZLİK səbəbi ilə artıq repo-da saxlanılmır:
+*   Hesab siyahısı və şifrələr lokal, git-ə düşməyən **`TEST_HESABLAR.local.md`** faylındadır (`.gitignore` → `*.local.md`).
+*   ⚠️ **KRİTİK:** köhnə şifrələr bu faylın git TARİXÇƏSİNDƏ qalıb və GitHub-a push edilib — `admin@levelup.com`, `mockadmin@levelup.com`, `user@levelup.com`, `testmock@levelup.com` hesablarının şifrələri production Supabase-də MÜTLƏQ dəyişdirilməlidir.
+*   Qeyd: §12.3-ə əsasən giriş artıq YALNIZ email ilədir (username ilə giriş ləğv edilib).
 
 ---
 
@@ -285,6 +272,107 @@ Bu sessiyada çox-agentli audit workflow'ları ilə dərin təhlükəsizlik dene
     * Frontend: dashboard referal kodu sətri + subscribers referal link/QR kartı, aktiv paket yoxdursa **"🔒 kilidli"** göstərilir + Paketlərə yönləndirmə.
 * **Profildə telefon nömrəsi redaktə oluna bilər:** `personal-info` səhifəsində telefon artıq disabled deyil, redaktə edilən input; `updateUserProfile` `phone`-u whitelist-də saxlayır (trigger normal user üçün phone dəyişməsinə icazə verir).
 
-### 13.2 YENİ SQL Faylı — TƏTBİQ EDİLMƏLİ
-**`security_remediation_4.sql`** yaradıldı, **Supabase-də HƏLƏ ÇALIŞDIRILMADI.** Part 1/2/3-dən sonra çalıştırılmalıdır. İçindəkilər: `buy_package` (KYC şərti), `check_referral_code` (paket şərti), `handle_new_user` + `create_profile_if_missing` (referral paket-gate). **Qeyd:** Part 1/2/3 canlı bazada tətbiq olunub; **yalnız Part 4 pending.** Frontend Part 4 olmadan da qırılmır (client gating işləyir), Part 4 server-side zorlamanı aktiv edir.
+### 13.2 SQL Faylı — TƏTBİQ EDİLDİ ✅ (2026-07-03)
+**`security_remediation_4.sql`** 2026-07-03-də canlı Supabase bazasına psql ilə **TƏTBİQ OLUNDU və doğrulandı**: `buy_package` (KYC şərti), `check_referral_code` (paket şərti → `reason:'inactive'`), `handle_new_user` + `create_profile_if_missing` (referral paket-gate). Beləliklə bütün 4 migration canlıdadır; Part 1-3 vəziyyəti də eyni gün canlı bazada yoxlanılıb təsdiqləndi (trigger INVOKER, RLS 8 cədvəldə aktiv, köhnə sızma funksiyaları silinib, bucket private).
 
+### 13.3 (2026-07-03, davamı): İgnore/Token Nizamı, Sərtləşdirmə və Birbaşa Supabase Girişi
+* **Claude ignore mexanizmi:** `.claude/settings.json`-a `permissions.deny` Read qaydaları əlavə olundu (node_modules, .next, .git, package-lock.json, .env*, *.pem, *.key və s.) — token qənaəti + secret hijyeni. `.cloudeignore` yalnız istinaddır (Claude Code onu oxumur).
+* **Şifrə sızması aradan qaldırıldı:** test hesab şifrələri compact.md-dən çıxarıldı → gitignore-lu `TEST_HESABLAR.local.md`. Köhnə şifrələr git tarixçəsində qaldığı üçün 4 hesabın şifrəsi Auth Admin API ilə **ROTATE EDİLDİ** (yeni şifrələr yalnız lokal faylda, sohbetə/git-ə düşməyib).
+* **next.config.mjs:** security header-ləri (X-Frame-Options DENY, nosniff, HSTS, Referrer-Policy, Permissions-Policy) + `poweredByHeader:false`. `npm audit fix` → next@16.2.10 (high açıqlar bağlandı; qalan 2 moderate = next-in pin etdiyi postcss, canary tələb edir — gözlədilir).
+* **Birbaşa DB girişi:** `.env`-də `SUPABASE_DB_URL` (Session pooler). SQL miqrasiyaları artıq Claude tərəfindən psql ilə birbaşa tətbiq olunur. Rəsmi **Supabase MCP** serveri `.mcp.json`-a əlavə olundu (ilk istifadədə sessiyada `/mcp` ilə OAuth təsdiqi lazımdır). `npx skills` ilə `supabase/agent-skills` quruldu.
+* **pg_cron QURULDU ✅:** `daily-maintenance` job-u (jobid 1) hər gün **00:05 UTC** (Bakı 04:05) `public.run_daily_maintenance()` çağırır → gündəlik qazanclar (#399/#799) və paket müddət bitişi artıq tam avtomatikdir. Fonksiya tarix-qorumalıdır (eyni gün iki dəfə ödəmir).
+
+
+---
+
+## 14. Son Sessiya (2026-07-03, gecə): SQL Fayl Təmizliyi + KRİTİK Eksik Policy Aşkarlandı (Part 5)
+
+### 14.1 KRİTİK Tapıntı: 7 cədvəldə RLS policy YOX idi
+Supabase MCP ilə canlı baza yoxlanarkən aşkarlandı: `security_patch.sql` production layihəsinə **heç vaxt tətbiq olunmayıbmış**. Part 1/3 onun policy-lərinin mövcudluğunu fərz edib yalnız köhnə/boş olanları DROP etmişdi. Nəticə: `transactions`, `points_history`, `level_claims`, `deposits`, `withdrawals`, `system_settings`, `admin_logs` cədvəllərində RLS aktiv amma **sıfır policy** → client heç nə oxuya/yaza bilmirdi (əməliyyat tarixçəsi boş, depozit yaradıla bilmirdi, admin panel siyahıları boş).
+
+### 14.2 `security_remediation_5.sql` — TƏTBİQ EDİLDİ ✅ (MCP apply_migration: `security_remediation_5_policies_cleanup`)
+* **Eksik RLS policy-ləri yaradıldı** (Part 3 dizaynı qorunub — para cədvəllərinə client-side WRITE yox, hər mutasiya DEFINER RPC ilə):
+  * `transactions/points_history/level_claims/deposits/withdrawals` → SELECT (öz sətirləri və ya admin)
+  * `deposits` → INSERT (öz, yalnız `status='pending'`)
+  * `system_settings` → SELECT (authenticated), WRITE yalnız `has_admin_perm('finance')` (depozit kartı nömrəsi burada!)
+  * `admin_logs` → SELECT/INSERT yalnız admin (actor-u `tr_set_admin_log_actor` zorlayır)
+* **`deactivate_package` stub-u Part 5-ə köçürüldü** (bilərəkdən deaktiv — "paketlər manuel deaktiv edilə bilməz"; client hələ çağırır, canlı tanımın mənbəyi artıq bu fayl).
+* **`profiles.transfer_balance` kolonu DROP edildi** (dual-balance dizaynı ləğv olunmuşdu; kod istifadə etmir, bütün dəyərlər 0 idi — yoxlanıldı).
+* Doğrulama: pg_policies-də 12 policy (6 cədvəl + profiles 2 + storage 4 ayrıca), kolon silinib, funksiya yerində.
+
+### 14.3 Köhnəlmiş SQL faylları SİLİNDİ (git rm — tarixçədə qalır)
+`security_patch.sql`, `dual_balance_migration.sql`, `remove_transfer_balance.sql`, `fix_referral_and_packages.sql`.
+**Aktiv zəncir:** `schema.sql` (yalnız cədvəllər) → `security_remediation.sql` → `_2_rpcs.sql` → `_3.sql` → `_4.sql` → `_5.sql`. CLAUDE.md §Güvenlik-3 yeniləndi.
+
+### 14.4 Kök qovluq təmizliyi
+`.cloudeignore` (funksiyasız istinad — real deny qaydaları `.claude/settings.json`-dadır, git rm), `.DS_Store` (macOS zibili) və `graphify-out/` (gitignore-lu, regenerasiya oluna bilən vizuallaşdırma çıxışı) silindi.
+
+---
+
+## 15. Son Sessiya (2026-07-03, gecə 2): TAM LANSMAN DENETİMİ + Part 6-7 + Frontend Sərtləşdirmə
+
+Kullanıcı istəyi: "backend+frontend tara, güvenlik/bozukluk/ölçeklenme sorunlarını bul, düzelt". 3 paralel denetim ajanı + Supabase advisor taraması + canlı smoke testlər.
+
+### 15.1 `security_remediation_6.sql` — TƏTBİQ EDİLDİ ✅ (`security_remediation_6_launch_hardening`)
+* **[KRİTİK] RPC EXECUTE kilidi:** TÜM fonksiyonlar (run_daily_maintenance dahil!) anon tərəfindən çağrıla bilirdi — Part 2 revoke'u sonrakı CREATE OR REPLACE'lərdə itmişdi. İndi whitelist grant modeli: `revoke all from public/anon/authenticated` + yalnız lazım olanlara grant. `check_referral_code` → anon+auth; istifadəçi/admin RPC-ləri → authenticated; cron → service_role; `is_admin/has_admin_perm/is_superadmin` → authenticated (RLS policy-lər + INVOKER trigger çağırdığı üçün MÜTLƏQ lazımdır). `alter default privileges ... revoke execute from public` → gələcək fonksiyonlar da avtomatik PUBLIC almır (yeni fonksiyonda grant YAZMAĞI UNUTMA).
+* **RLS initplan:** bütün policy-lər `(select auth.uid())` / `(select public.is_admin())` sarmalamasına keçirildi (satır-başına → sorğu-başına). Storage kyc policy-ləri daxil.
+* Köməkçi fonksiyonlar STABLE işarələndi; **16 index** yaradıldı (bütün FK-lər + pending partial indexlər + referral_code + created_at).
+* Performans advisor: **tamamilə təmiz** (yalnız "unused index" INFO — yeni yaradıldıqları üçün normal).
+
+### 15.2 `security_remediation_7.sql` — TƏTBİQ EDİLDİ ✅ (`security_remediation_7_stats_receipts_backfill`)
+* `get_admin_stats()` RPC (admin dashboard 8 sorğu + bütün profiles endirmə → tək RPC; recentUsers-də active_packages VAR).
+* **Dekont düzəlişi:** admin çıxarış dekontu artıq `receipts/<user-uid>/...` yoluna yüklənir + `receipts_select_own` storage policy → istifadəçi öz dekontunu AÇA BİLİR (əvvəl owner=admin olduğu üçün heç görə bilmirdi).
+* Bucket sərtləşdirmə: kyc-documents **5MB + yalnız image/*** (server-side).
+* Legacy backfill: transactions/points_history/deposits/withdrawals/level_claims-dəki köhnə display_login snapshot-ları user_code-a çevrildi (from_uid=NULL yetim test sətirləri qaldı — heç kimə görünmür).
+
+### 15.3 Frontend düzəlişləri (2 paralel agent + orkestrator)
+* **Data layer:** bütün list sorğularına limit (200/300/500); `getSystemSettings(keys)` batched (deposit səhifəsi 9→2 sorğu); `friendlyError()` — raw PostgREST/İngilis xətaları UI-a çıxmır; ölü exportlar silindi (updateProfileLogin, deactivatePackage, getSignedUrl).
+* **AuthProvider:** TOKEN_REFRESHED-də profil yenidən yüklənmir (saatlıq lazımsız yük); keçici fetch xətası artıq istifadəçini logout ETMİR (retry + mövcud profili saxla).
+* **Admin UI:** "Admin et" düyməsi yalnız superadmin-ə; KYC düymələri yalnız kyc icazəlilərə; admin şifrə-sıfırlama artıq redirectTo ilə; mock notification console.log-ları silindi.
+* **Fayl yükləmə:** image/* + ≤5MB client yoxlaması (KYC 3 fayl, depozit dekontu, admin dekontu).
+* **Debounce:** transfer kod lookup + register referral yoxlaması 400ms + stale-guard.
+* **validateAmount:** Number.isFinite + 1M cap ('Infinity', '1e300' keçmir).
+* **Referal kilidi UI tutarlılığı:** Sidebar/SlideUpMenu artıq paketi olmayana linki göstərmir.
+* **create-subadmin route:** 0-satır update bug-ı düzəldildi (retry loop + uğursuzsa auth user silinir); server-side validasiya; permissions whitelist; generic xəta mesajları.
+* **layout.js:** fontlar next/font-a keçdi (self-host, render-blocking link yox; Outfit istifadə olunmurdu — çıxarıldı, Inter+JetBrains Mono qaldı); favicon.ico + kiçik apple-touch-icon; maximumScale:1 silindi (accessibility).
+* **Assetlər:** logo 505KB→70KB, icon-192 505KB→13KB, icon-512 505KB→71KB (pad-lənmiş kvadrat).
+* **Yeni səhifələr:** error.js, global-error.js, not-found.js (AZ, dark tema).
+* **Partikül fonu:** prefers-reduced-motion hörməti + mobildə 150 partikl.
+* AuthGuard.js (ölü kod) silindi; sonner/clsx/tailwind-merge çıxarıldı (**motion QALIR** — verify OTP inputu istifadə edir!).
+
+### 15.4 Doğrulama
+`npm run build` ✅; prod server curl: bütün route-lar 200, 404 işləyir ✅. Canlı smoke: normal user login→öz profili/tarixçəsi ✅, anon transfer_funds/run_daily_maintenance → 42501 DENIED ✅, anon check_referral_code ✅, admin get_admin_stats + 20 profil görür ✅.
+
+### 15.5 QALAN MANUAL İŞLƏR (Dashboard-dan, kod yox)
+1. **Auth → Leaked password protection AÇ** (advisor xəbərdarlığı).
+2. **Custom SMTP qur** (Resend/Postmark və s.) — Supabase default SMTP saatda ~2-4 email, lansmanda şifrə-sıfırlama/təsdiq emailları çatmayacaq. KRİTİK lansman şərti.
+3. Email confirmation strategiyasına qərar (hazırda bağlı görünür; 6 unconfirmed user var).
+4. Supabase planı: Pro + kompüt yüksəltmə + PITR backup (minlərlə istifadəçi üçün Nano/Free yetməz).
+5. Sentry (@sentry/nextjs) + Vercel Analytics — heç bir observability yoxdur.
+6. Repo private yoxlaması (köhnədən qalan).
+7. (Toxunulmadı, qərar istəyir:) admin/claims səhifəsi vestigial (claims avto-done olur, pending həmişə boş); kök superadmin-in başqa superadmin tərəfindən demote edilməsinə DB-səviyyə qadağa yoxdur.
+
+---
+
+## 16. Operasyonel Erişim: Doğrudan DB (psql) + Supabase MCP
+
+Bu ve paralel sekmelerdeki tüm SQL işleri artık iki yoldan yapılabiliyor; ikisi de kuruldu:
+
+* **Doğrudan DB (psql):** `.env` içinde `SUPABASE_DB_URL` var (Session pooler: `aws-1-eu-central-2.pooler.supabase.com:5432`, user `postgres.kqggnpqidlqassxorvtq`). Claude SQL migration'ları bununla psql üzerinden uygular (`.env` Read-deny'li; Bash script `set -a && . ./.env` ile source edip değeri ekrana basmadan kullanır). psql v18.3 kurulu.
+  * ⚠️ **DB şifresi sohbete yapıştırıldı → transcript'te duruyor.** Uygun bir zamanda Supabase Dashboard → Database → **Reset database password** yapıp yeni URI'yi `.env`'e işle (uygulamayı etkilemez; app anon key ile bağlanıyor, bu şifreyi kullanmıyor).
+* **Supabase MCP** (`.mcp.json`, project scope, `mcp.supabase.com/mcp?project_ref=kqggnpqidlqassxorvtq`) artık **authenticate edilmiş ve çalışıyor** — §14/§15'teki `apply_migration` ve advisor taramaları bununla yapıldı. Sağladığı ekstra: canlı log okuma, güvenlik/performans advisor raporları, migration listeleme.
+  * **MCP mekaniği (ileride sorun çıkarsa):** `.mcp.json`'daki HTTP MCP server yalnızca **oturum açılışında** yüklenir → oturum ortasında `claude mcp add` ile eklenen server o oturumda görünmez, **yeniden başlatmak** gerekir. Açılıştaki "Use this MCP server" istemi sadece *güven onayı*; araçların gelmesi için ayrıca `/mcp` → supabase → **Authenticate** (tarayıcıda Supabase OAuth) gerekir. Bağlanınca araçlar `mcp__supabase__*` olarak gelir.
+  * `npx skills` ile `supabase/agent-skills` kuruldu (`.agents/skills/`, `.claude/skills/` symlink — ikisi de gitignore'lu).
+
+---
+
+## 17. Son Sessiya (2026-07-04): Email Rate Limit Həlli + Auth Config Düzəlişləri (Management API)
+
+* **Email rate limit sorunu ÇÖZÜLDÜ:** Səbəb: "Confirm email" açıq idi + Supabase daxili SMTP saatda ~2 mail → qeydiyyatda `email rate limit exceeded`. İstifadəçi Dashboard-dan **"Confirm email"i BAĞLADI** (yeni UI-da Email provider panelində deyil, Sign In/Providers səhifəsinin üst bölməsindədir). 7 ilişib qalmış unconfirmed hesab admin API ilə təsdiqləndi (0 qaldı); probe qeydiyyat testi ilə doğrulandı, probe user silindi.
+* **Management API ilə auth config dəyişiklikləri** (istifadəçinin PAT-ı ilə):
+    * `password_min_length`: 6 → **8**. (Frontend `constants.js` `PASSWORD_RULES.minLength=10` — serverdən sərt, uyğundur; create-subadmin route-da da min 8 var.)
+    * `site_url`: localhost:3000 → **https://3bucaq-web-project.vercel.app** (şifrə sıfırlama linkləri artıq canlıya gedir).
+    * `uri_allow_list`: prod + localhost:3001/3000 əlavə edildi (boş idi).
+    * `password_hibp_enabled` (leaked password protection): sınandı → **Pro plan tələb edir** (layihə FREE plandadır — doğrulandı). §15.5-dəki 1-ci manual iş bu səbəbdən blokludur.
+* **⚠️ TƏHLÜKƏSİZLİK:** İstifadəçi PAT-ı (sbp_...) söhbətə yapışdırmışdı → https://supabase.com/dashboard/account/tokens ünvanından **SİLİNMƏLİDİR**.
+* **Domain durumu:** Hələ yoxdur; canlı ünvan https://3bucaq-web-project.vercel.app. Domain alınınca: `site_url`/`uri_allow_list` yenilə + Resend SMTP qur + Vercel-ə bağla.

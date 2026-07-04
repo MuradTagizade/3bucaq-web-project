@@ -35,6 +35,17 @@ export default function KYCPage() {
     return data.path;
   };
 
+  // Client tərəfdə fayl yoxlaması (bucket server tərəfdə də 5MB/şəkil tətbiq edir)
+  const validateImageFile = (file) => {
+    if (!file.type?.startsWith('image/')) {
+      return t('file_must_be_image', 'Yalnız şəkil faylı yükləmək olar.');
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      return t('file_too_large', 'Şəkil faylı maksimum 5MB ola bilər.');
+    }
+    return null;
+  };
+
   const handleIdentityNumberBlur = async () => {
     if (!identityNumber.trim()) return;
     try {
@@ -58,6 +69,13 @@ export default function KYCPage() {
 
     if (!docFile || !docBackFile || !selfieFile) {
       setToast(t('upload_all_docs', 'Sənədin ön, arxa və selfie şəkillərini yükləyin'));
+      setTimeout(() => setToast(null), 3000);
+      return;
+    }
+
+    const fileErr = validateImageFile(docFile) || validateImageFile(docBackFile) || validateImageFile(selfieFile);
+    if (fileErr) {
+      setToast(fileErr);
       setTimeout(() => setToast(null), 3000);
       return;
     }

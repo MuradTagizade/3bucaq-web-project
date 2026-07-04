@@ -1,0 +1,24 @@
+{
+  "permissions": {
+    "deny": [
+      "Read(node_modules/**)",
+      "Read(.next/**)",
+      "Read(.git/**)",
+      "Read(package-lock.json)",
+      "Read(graphify-out/**)",
+      "Read(skills-lock.json)",
+      "Read(coverage/**)",
+      "Read(out/**)",
+      "Read(build/**)",
+      "Read(.vercel/**)",
+      "Read(**/.DS_Store)",
+      "Read(.env)",
+      "Read(.env.local)",
+      "Read(.env.*.local)",
+      "Read(.env.production)",
+      "Read(.env.development)",
+      "Read(**/*.pem)",
+      "Read(**/*.key)"
+    ]
+  }
+}

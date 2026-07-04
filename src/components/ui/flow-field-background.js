@@ -20,6 +20,11 @@ export default function NeuralBackground({
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
+    // Hərəkət azaldılması istəyən istifadəçilərdə animasiya çalışmır (batareya + accessibility)
+    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      return;
+    }
+
     let width = window.innerWidth;
     let height = window.innerHeight;
     let particles = [];
@@ -103,8 +108,10 @@ export default function NeuralBackground({
 
       updateResolvedColor();
 
+      // Mobil CPU/batareya üçün partikl sayı ekran eninə görə azaldılır
+      const effectiveCount = width < 768 ? Math.min(particleCount, 150) : particleCount;
       particles = [];
-      for (let i = 0; i < particleCount; i++) {
+      for (let i = 0; i < effectiveCount; i++) {
         particles.push(new Particle());
       }
     };
