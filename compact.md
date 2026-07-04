@@ -396,3 +396,22 @@ Bu ve paralel sekmelerdeki tüm SQL işleri artık iki yoldan yapılabiliyor; ik
     * `translations.js` `kyc_required_desc` (AZ+EN): "depozit" mətndən çıxarıldı (yalnız köçürmə/çıxarış).
 * Aktiv SQL zənciri artıq `_8.sql`-ə qədərdir (CLAUDE.md yeniləndi). `npm run build` ✅.
 * **Kök qovluq təmizliyi:** bütün SQL miqrasiya faylları (`schema.sql` + `security_remediation*.sql`, 9 fayl) kökdən **`sql/` qovluğuna** daşındı (git mv — tarixçə qorunur). Köhnə bölmələrdəki kök-yollu istinadlar tarixi qeyddir; aktiv yol `sql/...`-dir. Kodda bu fayllara heç bir istinad yoxdur (yalnız sənədlərdə).
+
+---
+
+## 19. Son Sessiya (2026-07-04, davamı 2): Admin Panel Qrafikləri + İstifadəçi Logları (Part 9)
+
+Bu sessiyada admin panel əhəmiyyətli genişləndirildi. Digər UI işləri: dashboard-dakı ID kodu sətri şəxsi məlumatlara köçürüldü (kopyalanabilir), AZ telefon 9-rəqəm qaydası (validator+register+personal-info), admin claims səhifəsi salt-oxunur "Bonus Tarixçəsi" oldu, admin users cədvəlinə sıralama (balans/level/xal) + Paket/KYC/Xal sütunları əlavə edildi.
+
+### 19.1 `sql/security_remediation_9.sql` — TƏTBİQ EDİLDİ ✅ (MCP `security_remediation_9_user_logs_charts`)
+* **`user_logs` cədvəli:** istifadəçi hadisələri (uid, action, details jsonb, created_at). RLS: SELECT yalnız admin; yazma YALNIZ definer trigger (insert policy yoxdur). 3 index.
+* **`log_user_profile_events()` trigger-i** (profiles INSERT+UPDATE, AFTER, DEFINER): `registered`, `kyc_submitted/approved/rejected/reset`, `blocked/unblocked`, `profile_updated` (dəyişən sahə siyahısı ilə). Mövcud istifadəçilər üçün `registered` backfill edildi. INVOKER `check_profile_updates` qorumasına toxunulmur.
+* **`get_user_activity(p_limit, p_search, p_action)` RPC** (`has_admin_perm('logs')`): transactions (transfer 2 tərəf), deposits, withdrawals, points_history, level_claims, user_logs — hamısını vahid lentə UNION edir; user_code-a görə axtarış, action filtri, limit≤500.
+* **`get_admin_chart_data()` RPC** (`is_admin()`): 30 günlük sıfır-dolgulu seriyalar (qeydiyyat, depozit/çıxarış həcmi+sayı, əməliyyat aktivliyi), KYC paylanması, paket paylanması, əməliyyat növləri üzrə həcm/say, ümumi yekunlar (deposits_sum, withdrawals_sum, balance_sum, points_sum, users, active_pkg_users).
+* Hər ikisi whitelist grant (authenticated); anon → 42501. Admin JWT simulyasiyası ilə canlıda doğrulandı.
+
+### 19.2 Frontend
+* **Chart komponentləri** ([Charts.js](src/components/charts/Charts.js), asılılıqsız SVG): `LineChart` (sahə+xətt, hover tooltip, cədvəl görünüşü toggle), `DualBarChart` (2 seriyalı sütun, legend+tooltip+cədvəl), `HBarChart` (üfüqi, dəyər uclarda), `StatusStackedBar` (KYC, 2px surface gap + legend saylı). dataviz skill proseduru ilə: palet `validate_palette.js`-də təsdiqləndi — dark `#1098ad`/`#e8590c` (#0a0c13 səthi), light `#0987b3`/`#d9480f` (#fff). Tokenlər `globals.css`-də `--chart-*` (dark+light).
+* **Admin dashboard:** 10 stat kartı (ümumi depozit/çıxarış/xal/paketli istifadəçi əlavə olundu) + 7 qrafik: qeydiyyatlar (30g), depozit-çıxarış həcmi, əməliyyat aktivliyi, paket paylanması, KYC statusu, növ üzrə həcm/say.
+* **Yeni `/admin/user-logs` səhifəsi:** bütün istifadəçi hərəkətləri lenti (tarix, kod, hərəkət badge-i, məbləğ, detallar), kod axtarışı (debounce), hərəkət növü filtri, yenilə düyməsi, üstdə 14 günlük aktivlik qrafiki. Nav: "İstifadəçi Logları" (`perms.logs` icazəsi). Tərcümələr AZ+EN tam.
+* Qeyd: brauzer aləti olmadığı üçün qrafiklərin vizual yoxlaması istifadəçiyə buraxıldı (build ✅).

@@ -59,6 +59,17 @@
   --color-pending: #447090;
   --color-info: #60a5c2;
 
+  /* Chart tokens — dataviz validator ilə #0a0c13 səthində təsdiqlənib */
+  --chart-1: #1098ad;
+  --chart-2: #e8590c;
+  --chart-good: #0ca30c;
+  --chart-warn: #c98500;
+  --chart-bad: #d03b3b;
+  --chart-neutral: #898781;
+  --chart-grid: #1d2733;
+  --chart-axis: #2e3a48;
+  --chart-surface: #0a0c13;
+
   /* Borders */
   --border-subtle: rgba(17, 42, 55, 0.5);
   --border-default: #112a37;
@@ -168,6 +179,17 @@
   --color-warning: hsl(48, 96%, 53%);
   --color-pending: hsl(48, 96%, 53%);
   --color-info: hsl(199, 89%, 48%);
+
+  /* Chart tokens — dataviz validator ilə #ffffff səthində təsdiqlənib */
+  --chart-1: #0987b3;
+  --chart-2: #d9480f;
+  --chart-good: #0ca30c;
+  --chart-warn: #c98500;
+  --chart-bad: #d03b3b;
+  --chart-neutral: #898781;
+  --chart-grid: #e8eaee;
+  --chart-axis: #cfd4db;
+  --chart-surface: #ffffff;
 
   --bg-primary: linear-gradient(180deg, #ffffff 0%, #e8faf4 50%, #c4f2e3 100%);
   --bg-secondary: #e8faf4;

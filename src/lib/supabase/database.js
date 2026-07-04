@@ -501,6 +501,24 @@ export async function getAdminStats() {
   };
 }
 
+export async function getAdminChartData() {
+  const { data, error } = await supabase.rpc('get_admin_chart_data');
+  if (error) throw new Error(friendlyError(error));
+  if (!data || data.error) throw new Error(data?.error || 'Qrafik dataları yüklənmədi');
+  return data;
+}
+
+export async function getUserActivity(limit = 300, search = null, action = null) {
+  const { data, error } = await supabase.rpc('get_user_activity', {
+    p_limit: limit,
+    p_search: search || null,
+    p_action: action || null,
+  });
+  if (error) throw new Error(friendlyError(error));
+  if (data && !Array.isArray(data) && data.error) throw new Error(data.error);
+  return Array.isArray(data) ? data : [];
+}
+
 // ============================================
 // ADMIN LOGS
 // ============================================

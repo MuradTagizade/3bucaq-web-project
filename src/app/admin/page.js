@@ -2,28 +2,34 @@
 
 import { useState, useEffect } from 'react';
 import styles from './admin-dashboard.module.css';
-import { Users, DollarSign, TrendingUp, ClipboardCheck, Wallet, ArrowDownToLine, ShieldCheck } from 'lucide-react';
-import { getAdminStats } from '@/lib/supabase/database';
+import { Users, DollarSign, TrendingUp, ClipboardCheck, Wallet, ArrowDownToLine, ShieldCheck, Package, Star, Activity } from 'lucide-react';
+import { getAdminStats, getAdminChartData } from '@/lib/supabase/database';
 import { useTranslation } from '@/lib/store/languageStore';
 import { formatCurrency, formatDate } from '@/lib/utils/formatters';
+import { LineChart, DualBarChart, HBarChart, StatusStackedBar } from '@/components/charts/Charts';
 
 export default function AdminDashboardPage() {
   const [stats, setStats] = useState(null);
+  const [charts, setCharts] = useState(null);
   const [loading, setLoading] = useState(true);
   const { t } = useTranslation();
 
   useEffect(() => {
-    async function loadStats() {
+    async function loadAll() {
       try {
-        const data = await getAdminStats();
-        setStats(data);
+        const [statsData, chartData] = await Promise.all([
+          getAdminStats(),
+          getAdminChartData().catch((err) => { console.error('Chart data:', err.message); return null; }),
+        ]);
+        setStats(statsData);
+        setCharts(chartData);
       } catch (err) {
         console.error('Failed to load admin stats:', err.message);
       } finally {
         setLoading(false);
       }
     }
-    loadStats();
+    loadAll();
   }, []);
 
   const getActivePkgString = (pkgObj) => {
@@ -46,14 +52,39 @@ export default function AdminDashboardPage() {
     );
   }
 
+  const totals = charts?.totals || {};
   const statItems = [
     { label: t('admin_stats.totalUsers', 'Ümumi İstifadəçi'), value: stats?.totalUsers || 0, icon: Users, color: 'var(--color-primary)' },
     { label: t('admin_stats.totalBalance', 'Ümumi Balans'), value: formatCurrency(stats?.totalBalance || 0), icon: DollarSign, color: 'var(--color-warning)' },
     { label: t('admin_stats.dailyGrowth', 'Gündəlik Artım'), value: `+${stats?.dailyGrowth || 0}`, icon: TrendingUp, color: 'var(--color-secondary)' },
-    { label: t('admin_stats.pendingClaims', 'Gözləyən Claims'), value: stats?.pendingClaims || 0, icon: ClipboardCheck, color: 'var(--color-error)' },
+    { label: t('admin_stats.totalDeposits', 'Ümumi Depozit'), value: formatCurrency(totals.deposits_sum || 0), icon: Wallet, color: '#00E5FF' },
+    { label: t('admin_stats.totalWithdrawals', 'Ümumi Çıxarış'), value: formatCurrency(totals.withdrawals_sum || 0), icon: ArrowDownToLine, color: '#FF9100' },
+    { label: t('admin_stats.totalPoints', 'Ümumi Xal'), value: Number(totals.points_sum || 0).toFixed(1), icon: Star, color: '#7C4DFF' },
+    { label: t('admin_stats.activePkgUsers', 'Paketli İstifadəçi'), value: totals.active_pkg_users || 0, icon: Package, color: 'var(--color-success)' },
     { label: t('admin_stats.pendingDeposits', 'Gözləyən Depozit'), value: stats?.pendingDeposits || 0, icon: Wallet, color: '#00E5FF' },
     { label: t('admin_stats.pendingWithdrawals', 'Gözləyən Çıxarış'), value: stats?.pendingWithdrawals || 0, icon: ArrowDownToLine, color: '#FF9100' },
     { label: t('admin_stats.pendingKYC', 'Gözləyən KYC'), value: stats?.pendingKYC || 0, icon: ShieldCheck, color: '#7C4DFF' },
+  ];
+
+  const PKG_LABELS = { pkg19: '#19', pkg49: '#49', pkg99: '#99', pkg199: '#199', pkg399: '#399', pkg799: '#799' };
+  const TX_LABELS = t('tx_type_labels', {
+    package_purchase: 'Paket alışı',
+    referral_bonus: 'Referal bonusu',
+    depth_bonus: 'Dərinlik bonusu',
+    level_bonus: 'Level bonusu',
+    daily_earning: 'Gündəlik qazanc',
+    transfer: 'Köçürmə',
+    deposit: 'Depozit',
+    withdrawal: 'Çıxarış',
+    admin_adjust: 'Admin düzəlişi',
+  });
+
+  const kyc = charts?.kyc_dist || {};
+  const kycSegments = [
+    { key: 'approved', label: t('kyc_seg_approved', 'Təsdiqlənib'), value: Number(kyc.approved || 0), color: 'var(--chart-good)' },
+    { key: 'none', label: t('kyc_seg_none', 'Təqdim edilməyib'), value: Number(kyc.none || 0), color: 'var(--chart-neutral)' },
+    { key: 'pending', label: t('kyc_seg_pending', 'Gözləyir'), value: Number(kyc.pending || 0), color: 'var(--chart-warn)' },
+    { key: 'rejected', label: t('kyc_seg_rejected', 'Rədd edilib'), value: Number(kyc.rejected || 0), color: 'var(--chart-bad)' },
   ];
 
   return (
@@ -77,6 +108,65 @@ export default function AdminDashboardPage() {
           );
         })}
       </div>
+
+      {/* Charts */}
+      {charts && (
+        <>
+          <div className={styles.chartsGrid}>
+            <div className={styles.chartCard}>
+              <h3 className={styles.chartTitle}>{t('chart_regs_title', 'Yeni Qeydiyyatlar (30 gün)')}</h3>
+              <LineChart data={charts.regs_daily || []} color="var(--chart-1)" valueLabel={t('chart_regs_value', 'Qeydiyyat')} />
+            </div>
+            <div className={styles.chartCard}>
+              <h3 className={styles.chartTitle}>{t('chart_money_title', 'Depozit / Çıxarış Həcmi (30 gün, $)')}</h3>
+              <DualBarChart
+                seriesA={charts.deposits_daily || []}
+                seriesB={charts.withdrawals_daily || []}
+                labelA={t('deposit', 'Depozit')}
+                labelB={t('withdrawal', 'Çıxarış')}
+                valueKey="a"
+                formatValue={(v) => `$${Number(v).toLocaleString('en-US')}`}
+              />
+            </div>
+          </div>
+
+          <div className={styles.chartsGrid3}>
+            <div className={styles.chartCard}>
+              <h3 className={styles.chartTitle}><Activity size={14} style={{ verticalAlign: '-2px' }} /> {t('chart_activity_title', 'Əməliyyat Aktivliyi (30 gün)')}</h3>
+              <LineChart data={charts.activity_daily || []} color="var(--chart-2)" valueLabel={t('chart_activity_value', 'Əməliyyat')} height={170} />
+            </div>
+            <div className={styles.chartCard}>
+              <h3 className={styles.chartTitle}>{t('chart_pkg_title', 'Paket Paylanması')}</h3>
+              <HBarChart
+                items={(charts.pkg_dist || []).map((p) => ({ label: PKG_LABELS[p.pkg] || p.pkg, value: p.c }))}
+                color="var(--chart-1)"
+              />
+            </div>
+            <div className={styles.chartCard}>
+              <h3 className={styles.chartTitle}>{t('chart_kyc_title', 'KYC Statusu')}</h3>
+              <StatusStackedBar segments={kycSegments} />
+            </div>
+          </div>
+
+          <div className={styles.chartsGrid}>
+            <div className={styles.chartCard}>
+              <h3 className={styles.chartTitle}>{t('chart_tx_title', 'Əməliyyat Növləri üzrə Həcm (30 gün, $)')}</h3>
+              <HBarChart
+                items={(charts.tx_types_30d || []).map((x) => ({ label: TX_LABELS[x.type] || x.type, value: Number(x.a) }))}
+                color="var(--chart-2)"
+                formatValue={(v) => `$${Number(v).toLocaleString('en-US')}`}
+              />
+            </div>
+            <div className={styles.chartCard}>
+              <h3 className={styles.chartTitle}>{t('chart_tx_count_title', 'Əməliyyat Sayı üzrə (30 gün)')}</h3>
+              <HBarChart
+                items={(charts.tx_types_30d || []).map((x) => ({ label: TX_LABELS[x.type] || x.type, value: Number(x.c) }))}
+                color="var(--chart-1)"
+              />
+            </div>
+          </div>
+        </>
+      )}
 
       {/* Recent Users */}
       <h2 className={styles.sectionTitle}>{t('recent_signups', 'Son Qeydiyyatlar')}</h2>

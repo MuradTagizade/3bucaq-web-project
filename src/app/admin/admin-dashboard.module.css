@@ -126,3 +126,19 @@
     min-width: 600px;
   }
 }
+
+/* === Charts (Part 9) === */
+.chartsGrid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+.chartsGrid3 { display: grid; grid-template-columns: 1.2fr 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+.chartCard {
+  background: var(--bg-card);
+  border: 1px solid var(--border-default);
+  border-radius: 14px;
+  padding: 16px;
+  min-width: 0;
+}
+.chartTitle { font-size: 13px; font-weight: 600; color: var(--text-secondary); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.04em; }
+
+@media (max-width: 900px) {
+  .chartsGrid, .chartsGrid3 { grid-template-columns: 1fr; }
+}
