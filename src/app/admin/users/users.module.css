@@ -1,7 +1,12 @@
 .topRow { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
 .searchBar { margin-bottom: 16px; max-width: 400px; }
-.userHeader, .userRow { display: grid; grid-template-columns: 2fr 1fr 0.8fr 0.8fr 0.5fr; padding: 8px 16px; align-items: center; font-size: 13px; }
+.userHeader, .userRow { display: grid; grid-template-columns: 1.8fr 0.9fr 0.7fr 0.7fr 1fr 1fr 0.8fr 0.4fr; gap: 4px; padding: 8px 16px; align-items: center; font-size: 13px; }
 .userHeader { background: var(--bg-secondary); font-weight: 700; color: var(--text-muted); text-transform: uppercase; font-size: 11px; letter-spacing: 0.06em; border-radius: 8px 8px 0 0; }
+.sortBtn { background: none; border: none; padding: 0; cursor: pointer; text-align: left; font: inherit; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; transition: color 0.2s; white-space: nowrap; }
+.sortBtn:hover { color: var(--text-primary); }
+.sortActive { color: var(--color-primary); }
+.pkgCell { font-size: 12px; color: var(--text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pkgEmpty { color: var(--text-muted); }
 .userRow { border-top: 1px solid var(--border-color); color: var(--text-secondary); transition: background 0.2s; }
 .userRow:hover { background: rgba(124, 77, 255, 0.04); }
 .email { display: block; font-size: 11px; color: var(--text-muted); margin-top: 2px; }
@@ -38,7 +43,7 @@
 
   .userHeader,
   .userRow {
-    min-width: 650px;
+    min-width: 950px;
   }
 }
 

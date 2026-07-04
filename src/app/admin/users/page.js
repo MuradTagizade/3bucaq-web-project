@@ -30,6 +30,8 @@ export default function AdminUsersPage() {
   const [search, setSearch] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedUser, setSelectedUser] = useState(null);
+  const [sortField, setSortField] = useState(null); // 'balance' | 'current_level' | 'total_points'
+  const [sortDir, setSortDir] = useState('desc');
 
   // Modals
   const [blockModal, setBlockModal] = useState(false);
@@ -196,16 +198,44 @@ export default function AdminUsersPage() {
     setEditModal(true);
   };
 
-  // Filtering & pagination
+  const handleSort = (field) => {
+    if (sortField === field) {
+      setSortDir((d) => (d === 'desc' ? 'asc' : 'desc'));
+    } else {
+      setSortField(field);
+      setSortDir('desc');
+    }
+    setCurrentPage(1);
+  };
+
+  // Filtering, sorting & pagination
   const filtered = users.filter(
     (u) =>
       (u.user_code || '').toLowerCase().includes(search.toLowerCase()) ||
       (u.display_login || '').toLowerCase().includes(search.toLowerCase()) ||
       (u.email || '').toLowerCase().includes(search.toLowerCase())
   );
-  const totalPages = Math.ceil(filtered.length / PER_PAGE);
+  const sorted = sortField
+    ? [...filtered].sort((a, b) => {
+        const av = Number(a[sortField]) || 0;
+        const bv = Number(b[sortField]) || 0;
+        return sortDir === 'desc' ? bv - av : av - bv;
+      })
+    : filtered;
+  const totalPages = Math.ceil(sorted.length / PER_PAGE);
   const start = (currentPage - 1) * PER_PAGE;
-  const pageData = filtered.slice(start, start + PER_PAGE);
+  const pageData = sorted.slice(start, start + PER_PAGE);
+
+  const SortHeader = ({ field, label }) => (
+    <button
+      type="button"
+      className={`${uStyles.sortBtn} ${sortField === field ? uStyles.sortActive : ''}`}
+      onClick={() => handleSort(field)}
+      title={t('sort_tooltip', 'Sıralamaq üçün klikləyin')}
+    >
+      {label} {sortField === field ? (sortDir === 'desc' ? '↓' : '↑') : '↕'}
+    </button>
+  );
 
   if (loading) {
     return <div style={{ textAlign: 'center', padding: '40px 0' }}><span>{t('loading', 'Yüklənir...')}</span></div>;
@@ -230,33 +260,48 @@ export default function AdminUsersPage() {
       <div className={styles.table}>
         <div className={uStyles.userHeader}>
           <span>{t('user_code_col', 'Kod')}</span>
-          <span>{t('balance', 'Balans')}</span>
-          <span>{t('level', 'Level')}</span>
+          <SortHeader field="balance" label={t('balance', 'Balans')} />
+          <SortHeader field="current_level" label={t('level', 'Level')} />
+          <SortHeader field="total_points" label={t('points_col', 'Xallar')} />
+          <span>{t('packages_col', 'Paket')}</span>
+          <span>KYC</span>
           <span>{t('status', 'Status')}</span>
           <span></span>
         </div>
-        {pageData.map((u) => (
-          <div key={u.id} className={uStyles.userRow}>
-            <div>
-              <span className={styles.bold}>{u.user_code}</span>
-              <span className={uStyles.email}>{u.full_name || u.email}</span>
+        {pageData.map((u) => {
+          const activePkgs = PACKAGES.filter((p) => u.active_packages?.[p.id]);
+          return (
+            <div key={u.id} className={uStyles.userRow}>
+              <div>
+                <span className={styles.bold}>{u.user_code}</span>
+                <span className={uStyles.email}>{u.full_name || u.email}</span>
+              </div>
+              <span>${Number(u.balance).toFixed(2)}</span>
+              <span>LVL {u.current_level}</span>
+              <span>{Number(u.total_points || 0).toFixed(1)}</span>
+              <span className={activePkgs.length ? uStyles.pkgCell : uStyles.pkgEmpty}>
+                {activePkgs.length ? activePkgs.map((p) => p.displayName).join(', ') : '—'}
+              </span>
+              <span>
+                <Badge variant={getKYCStatusVariant(u.kyc_status || 'none')} size="sm">
+                  {getKYCStatusLabel(u.kyc_status || 'none')}
+                </Badge>
+              </span>
+              <span>
+                {u.is_blocked ? (
+                  <Badge variant="error" size="sm">{t('blocked_badge', 'Blok')}</Badge>
+                ) : u.role === 'admin' ? (
+                  <Badge variant="gold" size="sm">{t('admin_panel', 'Admin')}</Badge>
+                ) : (
+                  <Badge variant="success" size="sm">{t('active', 'Aktiv')}</Badge>
+                )}
+              </span>
+              <button className={uStyles.viewBtn} onClick={() => setSelectedUser(u)}>
+                <Eye size={16} />
+              </button>
             </div>
-            <span>${Number(u.balance).toFixed(2)}</span>
-            <span>LVL {u.current_level}</span>
-            <span>
-              {u.is_blocked ? (
-                <Badge variant="error" size="sm">{t('blocked_badge', 'Blok')}</Badge>
-              ) : u.role === 'admin' ? (
-                <Badge variant="gold" size="sm">{t('admin_panel', 'Admin')}</Badge>
-              ) : (
-                <Badge variant="success" size="sm">{t('active', 'Aktiv')}</Badge>
-              )}
-            </span>
-            <button className={uStyles.viewBtn} onClick={() => setSelectedUser(u)}>
-              <Eye size={16} />
-            </button>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
