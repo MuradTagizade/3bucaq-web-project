@@ -11,6 +11,7 @@ import { CheckCircle2, XCircle, ArrowDownToLine, CreditCard, Wallet, Upload, Eye
 import { getWithdrawals, approveWithdrawal, rejectWithdrawal, addAdminLog } from '@/lib/supabase/database';
 import { formatCurrency, formatDateTime } from '@/lib/utils/formatters';
 import { useAuthStore } from '@/lib/store/authStore';
+import SectionCharts from '@/components/charts/SectionCharts';
 import { supabase } from '@/lib/supabase/config';
 
 export default function AdminWithdrawalsPage() {
@@ -141,6 +142,8 @@ export default function AdminWithdrawalsPage() {
         <ArrowDownToLine size={24} style={{ display: 'inline', verticalAlign: 'middle', marginRight: 8 }} />
         {t('withdrawals', 'Çıxarışlar')}
       </h1>
+
+      <SectionCharts kinds={['withdrawals_amount', 'withdrawals_count']} />
 
       <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
         {['pending', 'done', 'rejected'].map((tVal) => (

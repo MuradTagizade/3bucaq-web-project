@@ -501,8 +501,8 @@ export async function getAdminStats() {
   };
 }
 
-export async function getAdminChartData() {
-  const { data, error } = await supabase.rpc('get_admin_chart_data');
+export async function getAdminChartData(range = '30d') {
+  const { data, error } = await supabase.rpc('get_admin_chart_data', { p_range: range });
   if (error) throw new Error(friendlyError(error));
   if (!data || data.error) throw new Error(data?.error || 'Qrafik dataları yüklənmədi');
   return data;

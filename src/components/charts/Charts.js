@@ -48,14 +48,38 @@ function TableToggle({ open, onToggle }) {
   );
 }
 
-// ---- Xətt (sahə) qrafiki: data = [{d, c}] -------------------------------
-export function LineChart({ data = [], color = 'var(--chart-1)', valueLabel = '', height = 190 }) {
+// ---- Dövr seçimi (bir filtr sətri — əhatə etdiyi bütün qrafiklərə şamil) --
+export const CHART_RANGES = ['7d', '30d', '90d', '180d', 'all'];
+
+export function RangeSelect({ value, onChange }) {
+  const { t } = useTranslation();
+  const LABELS = t('chart_ranges', {
+    '7d': 'Son 7 gün', '30d': 'Son 30 gün', '90d': 'Son 3 ay', '180d': 'Son 6 ay', all: 'Bütün zamanlar',
+  });
+  return (
+    <div className={styles.rangeRow}>
+      {CHART_RANGES.map((r) => (
+        <button
+          key={r}
+          type="button"
+          className={`${styles.rangePill} ${value === r ? styles.rangePillActive : ''}`}
+          onClick={() => onChange(r)}
+        >
+          {LABELS[r] || r}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+// ---- Xətt (sahə) qrafiki: data = [{d, <valueKey>}] -----------------------
+export function LineChart({ data = [], color = 'var(--chart-1)', valueLabel = '', height = 190, valueKey = 'c', formatValue = (v) => v }) {
   const { wrapRef, tip, show, hide } = useTooltip();
   const [showTable, setShowTable] = useState(false);
   const H = height;
 
   const { pts, ticks, maxV } = useMemo(() => {
-    const vals = data.map((p) => Number(p.c) || 0);
+    const vals = data.map((p) => Number(p[valueKey]) || 0);
     const maxV = Math.max(...vals, 1);
     const tks = niceTicks(maxV);
     const top = tks[tks.length - 1] || 1;
@@ -63,11 +87,11 @@ export function LineChart({ data = [], color = 'var(--chart-1)', valueLabel = ''
     const ih = H - PAD.top - PAD.bottom;
     const pts = data.map((p, i) => ({
       x: PAD.left + (data.length > 1 ? (i / (data.length - 1)) * iw : iw / 2),
-      y: PAD.top + ih - ((Number(p.c) || 0) / top) * ih,
-      d: p.d, v: Number(p.c) || 0,
+      y: PAD.top + ih - ((Number(p[valueKey]) || 0) / top) * ih,
+      d: p.d, v: Number(p[valueKey]) || 0,
     }));
     return { pts, ticks: tks, maxV: top };
-  }, [data, H]);
+  }, [data, H, valueKey]);
 
   if (!data.length) return <div className={styles.empty}>—</div>;
 
@@ -88,8 +112,8 @@ export function LineChart({ data = [], color = 'var(--chart-1)', valueLabel = ''
           <table className={styles.dataTable}>
             <thead><tr><th>Tarix</th><th>{valueLabel}</th></tr></thead>
             <tbody>
-              {[...data].reverse().map((p) => (
-                <tr key={p.d}><td>{p.d}</td><td>{p.c}</td></tr>
+              {[...pts].reverse().map((p) => (
+                <tr key={p.d}><td>{p.d}</td><td>{formatValue(p.v)}</td></tr>
               ))}
             </tbody>
           </table>
@@ -111,22 +135,25 @@ export function LineChart({ data = [], color = 'var(--chart-1)', valueLabel = ''
           <path d={area} fill={color} opacity="0.1" />
           <path d={line} fill="none" stroke={color} strokeWidth="2" strokeLinejoin="round" strokeLinecap="round" />
           <circle cx={last.x} cy={last.y} r="4" fill={color} stroke="var(--bg-card)" strokeWidth="2" />
-          <text x={last.x + 8} y={last.y + 4} className={styles.endLabel}>{last.v}</text>
-          {pts.map((p) => (
-            <rect key={`h-${p.d}`} x={p.x - 6} y={PAD.top} width="12" height={ih}
-              fill="transparent"
-              onMouseMove={(e) => show(e, (
-                <div>
-                  <div className={styles.tooltipLabel}>{p.d}</div>
-                  <div className={styles.tooltipRow}>
-                    <span className={styles.legendDot} style={{ background: color }} />
-                    {valueLabel}: <strong>{p.v}</strong>
+          <text x={last.x + 8} y={last.y + 4} className={styles.endLabel}>{formatValue(last.v)}</text>
+          {pts.map((p) => {
+            const hw = Math.max(10, (W - PAD.left - PAD.right) / Math.max(data.length, 1));
+            return (
+              <rect key={`h-${p.d}`} x={p.x - hw / 2} y={PAD.top} width={hw} height={ih}
+                fill="transparent"
+                onMouseMove={(e) => show(e, (
+                  <div>
+                    <div className={styles.tooltipLabel}>{p.d}</div>
+                    <div className={styles.tooltipRow}>
+                      <span className={styles.legendDot} style={{ background: color }} />
+                      {valueLabel}: <strong>{formatValue(p.v)}</strong>
+                    </div>
                   </div>
-                </div>
-              ))}
-              onMouseLeave={hide}
-            />
-          ))}
+                ))}
+                onMouseLeave={hide}
+              />
+            );
+          })}
         </svg>
       )}
       <Tooltip tip={tip} />

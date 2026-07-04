@@ -12,6 +12,7 @@ import { getDeposits, approveDeposit, rejectDeposit, addAdminLog } from '@/lib/s
 import { formatCurrency, formatDateTime } from '@/lib/utils/formatters';
 import { useAuthStore } from '@/lib/store/authStore';
 import { supabase } from '@/lib/supabase/config';
+import SectionCharts from '@/components/charts/SectionCharts';
 
 export default function AdminDepositsPage() {
   const { user: adminUser } = useAuthStore();
@@ -86,6 +87,8 @@ export default function AdminDepositsPage() {
         <Wallet size={24} style={{ display: 'inline', verticalAlign: 'middle', marginRight: 8 }} />
         {t('deposits', 'Depozitlər')}
       </h1>
+
+      <SectionCharts kinds={['deposits_amount', 'deposits_count']} />
 
       <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
         {['pending', 'approved', 'rejected'].map((tVal) => (

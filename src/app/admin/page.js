@@ -2,16 +2,18 @@
 
 import { useState, useEffect } from 'react';
 import styles from './admin-dashboard.module.css';
-import { Users, DollarSign, TrendingUp, ClipboardCheck, Wallet, ArrowDownToLine, ShieldCheck, Package, Star, Activity } from 'lucide-react';
+import { Users, DollarSign, TrendingUp, Wallet, ArrowDownToLine, ShieldCheck, Package, Star } from 'lucide-react';
 import { getAdminStats, getAdminChartData } from '@/lib/supabase/database';
 import { useTranslation } from '@/lib/store/languageStore';
 import { formatCurrency, formatDate } from '@/lib/utils/formatters';
-import { LineChart, DualBarChart, HBarChart, StatusStackedBar } from '@/components/charts/Charts';
+import { LineChart, DualBarChart, HBarChart, StatusStackedBar, RangeSelect } from '@/components/charts/Charts';
 
 export default function AdminDashboardPage() {
   const [stats, setStats] = useState(null);
   const [charts, setCharts] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [range, setRange] = useState('30d');
+  const [chartsLoading, setChartsLoading] = useState(false);
   const { t } = useTranslation();
 
   useEffect(() => {
@@ -19,7 +21,7 @@ export default function AdminDashboardPage() {
       try {
         const [statsData, chartData] = await Promise.all([
           getAdminStats(),
-          getAdminChartData().catch((err) => { console.error('Chart data:', err.message); return null; }),
+          getAdminChartData('30d').catch((err) => { console.error('Chart data:', err.message); return null; }),
         ]);
         setStats(statsData);
         setCharts(chartData);
@@ -31,6 +33,18 @@ export default function AdminDashboardPage() {
     }
     loadAll();
   }, []);
+
+  const handleRangeChange = async (r) => {
+    setRange(r);
+    setChartsLoading(true);
+    try {
+      setCharts(await getAdminChartData(r));
+    } catch (err) {
+      console.error('Chart data:', err.message);
+    } finally {
+      setChartsLoading(false);
+    }
+  };
 
   const getActivePkgString = (pkgObj) => {
     if (!pkgObj) return t('no_package', 'Yoxdur');
@@ -109,60 +123,63 @@ export default function AdminDashboardPage() {
         })}
       </div>
 
-      {/* Charts */}
+      {/* Charts — dövr seçimi bütün aşağıdakı qrafiklərə şamildir */}
       {charts && (
         <>
-          <div className={styles.chartsGrid}>
-            <div className={styles.chartCard}>
-              <h3 className={styles.chartTitle}>{t('chart_regs_title', 'Yeni Qeydiyyatlar (30 gün)')}</h3>
-              <LineChart data={charts.regs_daily || []} color="var(--chart-1)" valueLabel={t('chart_regs_value', 'Qeydiyyat')} />
+          <RangeSelect value={range} onChange={handleRangeChange} />
+          <div style={{ opacity: chartsLoading ? 0.55 : 1, transition: 'opacity 0.2s' }}>
+            <div className={styles.chartsGrid}>
+              <div className={styles.chartCard}>
+                <h3 className={styles.chartTitle}>{t('chart_regs_title', 'Yeni Qeydiyyatlar')}</h3>
+                <LineChart data={charts.regs_daily || []} color="var(--chart-1)" valueLabel={t('chart_regs_value', 'Qeydiyyat')} />
+              </div>
+              <div className={styles.chartCard}>
+                <h3 className={styles.chartTitle}>{t('chart_money_title', 'Depozit / Çıxarış Həcmi ($)')}</h3>
+                <DualBarChart
+                  seriesA={charts.deposits_daily || []}
+                  seriesB={charts.withdrawals_daily || []}
+                  labelA={t('deposit', 'Depozit')}
+                  labelB={t('withdrawal', 'Çıxarış')}
+                  valueKey="a"
+                  formatValue={(v) => `$${Number(v).toLocaleString('en-US')}`}
+                />
+              </div>
             </div>
-            <div className={styles.chartCard}>
-              <h3 className={styles.chartTitle}>{t('chart_money_title', 'Depozit / Çıxarış Həcmi (30 gün, $)')}</h3>
-              <DualBarChart
-                seriesA={charts.deposits_daily || []}
-                seriesB={charts.withdrawals_daily || []}
-                labelA={t('deposit', 'Depozit')}
-                labelB={t('withdrawal', 'Çıxarış')}
-                valueKey="a"
-                formatValue={(v) => `$${Number(v).toLocaleString('en-US')}`}
-              />
-            </div>
-          </div>
 
-          <div className={styles.chartsGrid3}>
-            <div className={styles.chartCard}>
-              <h3 className={styles.chartTitle}><Activity size={14} style={{ verticalAlign: '-2px' }} /> {t('chart_activity_title', 'Əməliyyat Aktivliyi (30 gün)')}</h3>
-              <LineChart data={charts.activity_daily || []} color="var(--chart-2)" valueLabel={t('chart_activity_value', 'Əməliyyat')} height={170} />
+            <div className={styles.chartsGrid3}>
+              <div className={styles.chartCard}>
+                <h3 className={styles.chartTitle}>{t('chart_activity_title', 'Əməliyyat Aktivliyi')}</h3>
+                <LineChart data={charts.activity_daily || []} color="var(--chart-2)" valueLabel={t('chart_activity_value', 'Əməliyyat')} height={170} />
+              </div>
+              <div className={styles.chartCard}>
+                <h3 className={styles.chartTitle}>{t('chart_pkg_title', 'Paket Paylanması')}</h3>
+                <HBarChart
+                  items={(charts.pkg_dist || []).map((p) => ({ label: PKG_LABELS[p.pkg] || p.pkg, value: p.c }))}
+                  color="var(--chart-1)"
+                />
+              </div>
+              <div className={styles.chartCard}>
+                <h3 className={styles.chartTitle}>{t('chart_kyc_title', 'KYC Statusu')}</h3>
+                <StatusStackedBar segments={kycSegments} />
+              </div>
             </div>
-            <div className={styles.chartCard}>
-              <h3 className={styles.chartTitle}>{t('chart_pkg_title', 'Paket Paylanması')}</h3>
-              <HBarChart
-                items={(charts.pkg_dist || []).map((p) => ({ label: PKG_LABELS[p.pkg] || p.pkg, value: p.c }))}
-                color="var(--chart-1)"
-              />
-            </div>
-            <div className={styles.chartCard}>
-              <h3 className={styles.chartTitle}>{t('chart_kyc_title', 'KYC Statusu')}</h3>
-              <StatusStackedBar segments={kycSegments} />
-            </div>
-          </div>
 
-          <div className={styles.chartsGrid}>
-            <div className={styles.chartCard}>
-              <h3 className={styles.chartTitle}>{t('chart_tx_title', 'Əməliyyat Növləri üzrə Həcm (30 gün, $)')}</h3>
-              <HBarChart
-                items={(charts.tx_types_30d || []).map((x) => ({ label: TX_LABELS[x.type] || x.type, value: Number(x.a) }))}
-                color="var(--chart-2)"
-                formatValue={(v) => `$${Number(v).toLocaleString('en-US')}`}
-              />
-            </div>
-            <div className={styles.chartCard}>
-              <h3 className={styles.chartTitle}>{t('chart_tx_count_title', 'Əməliyyat Sayı üzrə (30 gün)')}</h3>
-              <HBarChart
-                items={(charts.tx_types_30d || []).map((x) => ({ label: TX_LABELS[x.type] || x.type, value: Number(x.c) }))}
-                color="var(--chart-1)"
-              />
+            <div className={styles.chartsGrid}>
+              <div className={styles.chartCard}>
+                <h3 className={styles.chartTitle}>{t('chart_tx_title', 'Əməliyyat Növləri üzrə Həcm ($)')}</h3>
+                <HBarChart
+                  items={(charts.tx_types || []).map((x) => ({ label: TX_LABELS[x.type] || x.type, value: Number(x.a) }))}
+                  color="var(--chart-2)"
+                  formatValue={(v) => `$${Number(v).toLocaleString('en-US')}`}
+                />
+              </div>
+              <div className={styles.chartCard}>
+                <h3 className={styles.chartTitle}>{t('chart_tx_count_title', 'Əməliyyat Sayı üzrə')}</h3>
+                <HBarChart
+                  items={(charts.tx_types || []).map((x) => ({ label: TX_LABELS[x.type] || x.type, value: Number(x.c) }))}
+                  color="var(--chart-1)"
+                />
+              </div>
             </div>
           </div>
         </>

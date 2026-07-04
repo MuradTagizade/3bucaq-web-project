@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import styles from '../admin-dashboard.module.css';
 import lStyles from './user-logs.module.css';
 import Input from '@/components/ui/Input';
@@ -88,10 +88,14 @@ export default function AdminUserLogsPage() {
     }
   }, []);
 
-  useEffect(() => { load('', ''); }, [load]);
-
-  // Axtarış debounce (400ms)
+  // İlk yükləmə dərhal; sonrakı axtarış/filtr dəyişikliklərində 400ms debounce
+  const firstRun = useRef(true);
   useEffect(() => {
+    if (firstRun.current) {
+      firstRun.current = false;
+      load('', '');
+      return;
+    }
     const id = setTimeout(() => { load(search.trim(), actionFilter); }, 400);
     return () => clearTimeout(id);
   }, [search, actionFilter, load]);
