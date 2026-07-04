@@ -508,6 +508,30 @@ export async function getAdminChartData(range = '30d') {
   return data;
 }
 
+export async function getMyFinanceStats() {
+  const { data, error } = await supabase.rpc('get_my_finance_stats');
+  if (error) throw new Error(friendlyError(error));
+  if (!data || data.error) throw new Error(data?.error || 'Statistika yüklənmədi');
+  return {
+    net: Number(data.net || 0),
+    incoming: Number(data.incoming || 0),
+    outgoing: Number(data.outgoing || 0),
+    pending: Number(data.pending || 0),
+  };
+}
+
+export async function getMyTransfers(uid, limit = 20) {
+  const { data, error } = await supabase
+    .from('transactions')
+    .select('*')
+    .eq('type', 'transfer')
+    .or(`from_uid.eq.${uid},to_uid.eq.${uid}`)
+    .order('created_at', { ascending: false })
+    .limit(limit);
+  if (error) throw new Error(friendlyError(error));
+  return data || [];
+}
+
 export async function getTreasury() {
   const { data, error } = await supabase.rpc('get_treasury');
   if (error) throw new Error(friendlyError(error));

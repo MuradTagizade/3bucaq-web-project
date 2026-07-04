@@ -10,7 +10,7 @@ import {
 import { formatCurrency, formatDateTime } from '@/lib/utils/formatters';
 import { useAuthStore } from '@/lib/store/authStore';
 import { useTranslation } from '@/lib/store/languageStore';
-import { getTransactions, getDeposits, getWithdrawals } from '@/lib/supabase/database';
+import { getTransactions, getDeposits, getWithdrawals, getMyFinanceStats } from '@/lib/supabase/database';
 
 const PER_PAGE = 10;
 
@@ -48,7 +48,7 @@ export default function HistoryPage() {
   const [filterType, setFilterType] = useState('all');
   const [filterDate, setFilterDate] = useState('');
   const [typeDropdownOpen, setTypeDropdownOpen] = useState(false);
-  const [stats, setStats] = useState({ incoming: 0, outgoing: 0, pending: 0 });
+  const [stats, setStats] = useState({ incoming: 0, outgoing: 0, pending: 0, net: null });
 
   const TX_TYPE_LABELS = t('tx_type_labels', {
     deposit: 'Depozit',
@@ -89,10 +89,12 @@ export default function HistoryPage() {
     async function loadData() {
       if (!authUser?.uid) return;
       try {
-        const [txs, deps, withs] = await Promise.all([
+        const [txs, deps, withs, serverStats] = await Promise.all([
           getTransactions(authUser.uid),
           getDeposits(authUser.uid),
-          getWithdrawals(authUser.uid)
+          getWithdrawals(authUser.uid),
+          // Statlar DB-də BÜTÜN tarixdən dəqiq hesablanır (siyahı limitindən asılı deyil)
+          getMyFinanceStats().catch((err) => { console.error('Finance stats:', err.message); return null; }),
         ]);
 
         const unifiedList = [];
@@ -100,6 +102,10 @@ export default function HistoryPage() {
         // Add non-deposit, non-withdrawal transactions
         txs.forEach((tx) => {
           if (tx.type === 'deposit' || tx.type === 'withdrawal') return;
+          // Bonus/düzəliş sətirləri yalnız ALAN tərəfə aiddir — paketi alan
+          // (from_uid) tərəfdə göstərilsə, fantom "məxaric" yaranır.
+          if (['referral_bonus', 'depth_bonus', 'level_bonus', 'daily_earning', 'admin_adjust'].includes(tx.type)
+              && tx.to_uid !== authUser.uid) return;
 
           let calculatedAmount = Number(tx.amount);
           if (tx.type === 'package_purchase') {
@@ -191,25 +197,29 @@ export default function HistoryPage() {
 
         setTransactions(unifiedList);
 
-        // Calculate stats
-        let incomingSum = 0;
-        let outgoingSum = 0;
-        let pendingSum = 0;
+        // Statlar: əsas mənbə server RPC-sidir; alınmasa siyahıdan (limitli) hesabla
+        if (serverStats) {
+          setStats(serverStats);
+        } else {
+          let incomingSum = 0;
+          let outgoingSum = 0;
+          let pendingSum = 0;
 
-        unifiedList.forEach((item) => {
-          const amt = Number(item.amount);
-          if (item.status === 'pending') {
-            pendingSum += Math.abs(amt);
-          } else if (item.status === 'completed') {
-            if (amt > 0) {
-              incomingSum += amt;
-            } else {
-              outgoingSum += Math.abs(amt);
+          unifiedList.forEach((item) => {
+            const amt = Number(item.amount);
+            if (item.status === 'pending') {
+              pendingSum += Math.abs(amt);
+            } else if (item.status === 'completed') {
+              if (amt > 0) {
+                incomingSum += amt;
+              } else {
+                outgoingSum += Math.abs(amt);
+              }
             }
-          }
-        });
+          });
 
-        setStats({ incoming: incomingSum, outgoing: outgoingSum, pending: pendingSum });
+          setStats({ incoming: incomingSum, outgoing: outgoingSum, pending: pendingSum, net: null });
+        }
 
       } catch (err) {
         console.error('Failed to load transactions: ', err.message);
@@ -312,7 +322,8 @@ export default function HistoryPage() {
     return labels[val] || val;
   };
 
-  const netBalance = stats.incoming - stats.outgoing;
+  // Net Balans = real profil balansı (RPC); fallback: mədaxil - məxaric
+  const netBalance = stats.net != null ? stats.net : stats.incoming - stats.outgoing;
 
   return (
     <div className={styles.history}>

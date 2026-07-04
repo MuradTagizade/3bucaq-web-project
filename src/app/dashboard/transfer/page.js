@@ -13,7 +13,7 @@ import { validateAmount, validateUSDTAddress } from '@/lib/utils/validators';
 import { ArrowUpRight, CheckCircle2, User, Wallet, ArrowDownToLine, CreditCard, Image as ImageIcon, ArrowDown, ChevronDown, AlertTriangle } from 'lucide-react';
 import { useAuthStore } from '@/lib/store/authStore';
 import { useTranslation } from '@/lib/store/languageStore';
-import { transferFunds, lookupUserCode, getUserByUid, createWithdrawal, getWithdrawals, getSystemSetting } from '@/lib/supabase/database';
+import { transferFunds, lookupUserCode, getUserByUid, createWithdrawal, getWithdrawals, getSystemSetting, getMyTransfers } from '@/lib/supabase/database';
 import { supabase } from '@/lib/supabase/config';
 
 function TransferContent() {
@@ -48,6 +48,7 @@ function TransferContent() {
   const [wdLoading, setWdLoading] = useState(false);
   const [wdSuccess, setWdSuccess] = useState(false);
   const [withdrawals, setWithdrawals] = useState([]);
+  const [transfers, setTransfers] = useState([]);
   const [wdHistoryLoading, setWdHistoryLoading] = useState(true);
   const [isCardActive, setIsCardActive] = useState(false);
 
@@ -60,11 +61,13 @@ function TransferContent() {
     async function loadWd() {
       if (!authUser?.uid) return;
       try {
-        const [data, cardActiveSetting] = await Promise.all([
+        const [data, cardActiveSetting, transferData] = await Promise.all([
           getWithdrawals(authUser.uid),
-          getSystemSetting('card_payment_active')
+          getSystemSetting('card_payment_active'),
+          getMyTransfers(authUser.uid).catch(() => []),
         ]);
         setWithdrawals(data);
+        setTransfers(transferData);
         const active = cardActiveSetting === 'true';
         setIsCardActive(active);
         if (!active) {
@@ -145,6 +148,7 @@ function TransferContent() {
       }
 
       setSuccess(true);
+      getMyTransfers(authUser.uid).then(setTransfers).catch(() => {});
       setTimeout(() => {
         setSuccess(false);
         setRecipient('');
@@ -324,6 +328,33 @@ function TransferContent() {
               </Button>
             </form>
           </div>
+
+          {/* Transfer History */}
+          <h3 className={styles.historyTitle}>{t('transfer_history_title', 'Köçürmə Tarixçəsi')}</h3>
+          {transfers.length === 0 ? (
+            <div className={styles.empty}>{t('no_transfers_yet', 'Hələ köçürmə yoxdur')}</div>
+          ) : (
+            <div className={styles.historyList}>
+              {transfers.map((tr) => {
+                const isSent = tr.from_uid === authUser?.uid;
+                return (
+                  <div key={tr.id} className={styles.historyItem}>
+                    <div className={styles.historyInfo}>
+                      <span className={styles.historyAmount} style={{ color: isSent ? 'var(--color-error)' : 'var(--color-success)' }}>
+                        {isSent ? '-' : '+'}{formatCurrency(tr.amount)}
+                      </span>
+                      <span className={styles.historyDate}>{formatDateTime(tr.created_at)}</span>
+                      <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>
+                        {isSent
+                          ? `${t('transfer_to', 'Kimə')}: ${tr.to_login || '—'}`
+                          : `${t('transfer_from', 'Kimdən')}: ${tr.from_login || '—'}`}
+                      </span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </>
       )}
 
