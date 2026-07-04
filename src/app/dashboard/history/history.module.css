@@ -415,3 +415,5 @@
     grid-template-columns: 1fr 1fr;
   }
 }
+
+.pointsChip { display: block; margin-top: 2px; font-size: 11px; font-weight: 600; color: #FFD600; }

@@ -10,7 +10,7 @@ import {
 import { formatCurrency, formatDateTime } from '@/lib/utils/formatters';
 import { useAuthStore } from '@/lib/store/authStore';
 import { useTranslation } from '@/lib/store/languageStore';
-import { getTransactions, getDeposits, getWithdrawals, getMyFinanceStats } from '@/lib/supabase/database';
+import { getTransactions, getDeposits, getWithdrawals, getMyFinanceStats, getPointsHistory } from '@/lib/supabase/database';
 
 const PER_PAGE = 10;
 
@@ -89,13 +89,29 @@ export default function HistoryPage() {
     async function loadData() {
       if (!authUser?.uid) return;
       try {
-        const [txs, deps, withs, serverStats] = await Promise.all([
+        const [txs, deps, withs, serverStats, pts] = await Promise.all([
           getTransactions(authUser.uid),
           getDeposits(authUser.uid),
           getWithdrawals(authUser.uid),
           // Statlar DB-də BÜTÜN tarixdən dəqiq hesablanır (siyahı limitindən asılı deyil)
           getMyFinanceStats().catch((err) => { console.error('Finance stats:', err.message); return null; }),
+          getPointsHistory(authUser.uid).catch(() => []),
         ]);
+
+        // Bonus pul sətirinə uyğun xal qeydini tap (eyni alıcı+göndərən, ±10 san)
+        const usedPointIds = new Set();
+        const findBonusPoints = (tx) => {
+          const txTime = new Date(tx.created_at).getTime();
+          const match = pts.find((ph) =>
+            !usedPointIds.has(ph.id)
+            && ph.from_uid === tx.from_uid
+            && Math.abs(new Date(ph.created_at).getTime() - txTime) < 10000
+            && (tx.type === 'referral_bonus' ? Number(ph.line_number) === 1 : Number(ph.line_number) >= 2)
+          );
+          if (!match) return null;
+          usedPointIds.add(match.id);
+          return Number(match.points);
+        };
 
         const unifiedList = [];
 
@@ -151,6 +167,7 @@ export default function HistoryPage() {
             from_login: tx.from_login,
             to_login: tx.to_login,
             detail: detail,
+            points: (tx.type === 'referral_bonus' || tx.type === 'depth_bonus') ? findBonusPoints(tx) : null,
           });
         });
 
@@ -463,6 +480,9 @@ export default function HistoryPage() {
                           {item.amount > 0 ? '+' : ''}
                           {Number(item.amount).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                         </span>
+                        {item.points != null && (
+                          <span className={styles.pointsChip}>+{item.points} {t('points_short', 'xal')}</span>
+                        )}
                       </td>
                       <td>
                         <span className={`${styles.statusBadge} ${statusClass}`}>
@@ -525,6 +545,12 @@ export default function HistoryPage() {
                 {selectedTx.amount > 0 ? '+' : ''}{formatCurrency(selectedTx.amount)}
               </span>
             </div>
+            {selectedTx.points != null && (
+              <div className={styles.detailRow}>
+                <span>{t('earned_points', 'Qazanılan Xal')}</span>
+                <span style={{ fontWeight: 600, color: '#FFD600' }}>+{selectedTx.points} {t('points_short', 'xal')}</span>
+              </div>
+            )}
             <div className={styles.detailRow}>
               <span>{t('status', 'Status')}</span>
               <span style={{ fontWeight: 600, color: selectedTx.status === 'completed' ? '#00E676' : selectedTx.status === 'pending' ? '#FFD600' : '#FF5252' }}>

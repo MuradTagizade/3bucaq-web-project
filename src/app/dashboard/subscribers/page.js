@@ -467,7 +467,7 @@ export default function SubscribersPage() {
                     <div className={styles.mobileCardInfo}>
                       <span className={styles.mobileLogin}>{sub.userCode}</span>
                       <span className={styles.mobileDate}>
-                        {new Date(sub.joinedAt).toLocaleDateString('az-AZ')}
+                        {new Date(sub.joinedAt).toLocaleDateString('az-AZ')} · {new Date(sub.joinedAt).toLocaleTimeString('az-AZ', { hour: '2-digit', minute: '2-digit' })}
                       </span>
                     </div>
                     <span className={`${styles.statusDot} ${isActive ? styles.statusActive : styles.statusInactive}`} />
@@ -525,7 +525,7 @@ export default function SubscribersPage() {
             </div>
             <div className={styles.detailRow}>
               <span>{t('register', 'Qeydiyyat')}</span>
-              <span>{new Date(selectedUser.joinedAt).toLocaleDateString('az-AZ')}</span>
+              <span>{new Date(selectedUser.joinedAt).toLocaleDateString('az-AZ')} · {new Date(selectedUser.joinedAt).toLocaleTimeString('az-AZ', { hour: '2-digit', minute: '2-digit' })}</span>
             </div>
             <div className={styles.detailRow}>
               <span>{t('earned_points', 'Qazanılan Xal')}</span>
