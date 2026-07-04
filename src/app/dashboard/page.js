@@ -177,12 +177,6 @@ export default function DashboardPage() {
             </span>
           </div>
         )}
-        <div className={styles.refRow}>
-          <span className={styles.refLabel}>{t('your_id_code', 'Sizin ID Kodunuz')}: <strong>{user.userCode}</strong></span>
-          <button className={styles.refCopyBtn} onClick={() => navigator.clipboard?.writeText(user.userCode)}>
-            <Copy size={14} /> {t('copy', 'Kopyala')}
-          </button>
-        </div>
       </div>
 
       {/* Points Summary */}

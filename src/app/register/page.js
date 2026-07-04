@@ -248,6 +248,7 @@ function RegisterForm() {
                   const selected = COUNTRIES.find((c) => c.name === countryName);
                   if (selected) {
                     setPhonePrefix(selected.phoneCode);
+                    if (selected.phoneCode === '+994') setPhoneBody((prev) => prev.replace(/^0+/, '').slice(0, 9));
                   }
                 }}
                 error={errors.country}
@@ -292,7 +293,11 @@ function RegisterForm() {
               <Select
                 label={t('code', 'Kod')}
                 value={phonePrefix}
-                onChange={(e) => setPhonePrefix(e.target.value)}
+                onChange={(e) => {
+                  const code = e.target.value;
+                  setPhonePrefix(code);
+                  if (code === '+994') setPhoneBody((prev) => prev.replace(/^0+/, '').slice(0, 9));
+                }}
                 className={styles.phonePrefixSelect}
               >
                 {uniquePhoneCodes.map((code) => (
@@ -306,7 +311,12 @@ function RegisterForm() {
                 label={t('phone', 'Telefon')}
                 placeholder="50 123 45 67"
                 value={phoneBody}
-                onChange={(e) => setPhoneBody(e.target.value)}
+                onChange={(e) => {
+                  let digits = e.target.value.replace(/\D/g, '');
+                  if (phonePrefix === '+994') digits = digits.replace(/^0+/, '').slice(0, 9);
+                  else digits = digits.slice(0, 15);
+                  setPhoneBody(digits);
+                }}
                 error={errors.phone}
                 icon={<Phone size={18} />}
                 className={styles.phoneInput}

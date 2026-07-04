@@ -69,8 +69,16 @@ export function validateVerificationCode(code) {
 export function validatePhone(phone) {
   if (!phone || !phone.trim()) return 'Telefon nömrəsi tələb olunur';
   const cleaned = phone.replace(/[\s\-\(\)]/g, '');
-  if (cleaned.length < 7) return 'Düzgün telefon nömrəsi daxil edin';
   if (!/^\+?[0-9]+$/.test(cleaned)) return 'Telefon nömrəsi yalnız rəqəm olmalıdır';
+  if (/^\+?994/.test(cleaned)) {
+    // Azərbaycan nömrələri: +994-dən sonra düz 9 rəqəm (məs: 501234567)
+    const body = cleaned.replace(/^\+?994/, '');
+    if (body.length !== 9 || body.startsWith('0')) {
+      return 'Azərbaycan nömrəsi +994-dən sonra düz 9 rəqəm olmalıdır (məs: 50 123 45 67)';
+    }
+  } else if (cleaned.replace(/^\+/, '').length < 7) {
+    return 'Düzgün telefon nömrəsi daxil edin';
+  }
   return null;
 }
 

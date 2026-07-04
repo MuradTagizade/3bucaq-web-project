@@ -2,11 +2,12 @@
 
 import { useState, useEffect, useRef } from 'react';
 import styles from './personal-info.module.css';
-import { User, Lock, MapPin, ShieldCheck, Star, Headphones, Check } from 'lucide-react';
+import { User, Lock, MapPin, ShieldCheck, Star, Headphones, Check, Copy } from 'lucide-react';
 import { useAuthStore } from '@/lib/store/authStore';
 import { useTranslation } from '@/lib/store/languageStore';
 import { formatDate } from '@/lib/utils/formatters';
 import { updateUserProfile } from '@/lib/supabase/database';
+import { validatePhone } from '@/lib/utils/validators';
 import { supabase } from '@/lib/supabase/config';
 
 export default function PersonalInfoPage() {
@@ -20,6 +21,7 @@ export default function PersonalInfoPage() {
   const [phone, setPhone] = useState('');
   const [saving, setSaving] = useState(false);
   const [statusMsg, setStatusMsg] = useState({ type: '', text: '' });
+  const [codeCopied, setCodeCopied] = useState(false);
 
   // OTP Verification modal states
   const [showOtpModal, setShowOtpModal] = useState(false);
@@ -40,20 +42,6 @@ export default function PersonalInfoPage() {
     rejected: t('rejected', 'RƏDD EDİLİB'),
     none: t('not_submitted', 'GÖNDƏRİLMƏYİB'),
   };
-
-  function maskPhone(phone) {
-    if (!phone || phone === '—') return t('not_set', 'Təyin edilməyib');
-    const clean = phone.replace(/\s+/g, '');
-    if (clean.startsWith('+994')) {
-      const code = clean.slice(4, 6);
-      const last = clean.slice(-2);
-      return `+994 ${code} *** ** ${last}`;
-    }
-    if (clean.length > 6) {
-      return `${clean.slice(0, 4)} *** ** ${clean.slice(-2)}`;
-    }
-    return clean;
-  }
 
   const getHighestActivePackage = (pkgs) => {
     const labels = t('highest_package_labels', {
@@ -118,9 +106,31 @@ export default function PersonalInfoPage() {
     }
   };
 
+  const handleCopyCode = () => {
+    if (!authUser?.userCode) return;
+    navigator.clipboard?.writeText(authUser.userCode);
+    setCodeCopied(true);
+    setTimeout(() => setCodeCopied(false), 2000);
+  };
+
+  const handlePhoneChange = (e) => {
+    let v = e.target.value.replace(/[^\d+]/g, '');
+    v = v.startsWith('+') ? '+' + v.slice(1).replace(/\+/g, '') : v.replace(/\+/g, '');
+    const az = v.match(/^(\+?994)(.*)$/);
+    if (az) v = az[1] + az[2].replace(/^0+/, '').slice(0, 9);
+    setPhone(v);
+  };
+
   const handleUpdate = async (e) => {
     e.preventDefault();
     if (!authUser?.uid) return;
+    if (phone.trim()) {
+      const phoneErr = validatePhone(phone);
+      if (phoneErr) {
+        setStatusMsg({ type: 'error', text: phoneErr });
+        return;
+      }
+    }
     setSaving(true);
     setStatusMsg({ type: '', text: '' });
     try {
@@ -247,7 +257,14 @@ export default function PersonalInfoPage() {
                     disabled
                     className={styles.disabledInput}
                   />
-                  <Lock size={14} className={styles.lockIcon} />
+                  <button
+                    type="button"
+                    onClick={handleCopyCode}
+                    title={t('copy', 'Kopyala')}
+                    style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center', color: codeCopied ? 'var(--color-success)' : 'var(--text-muted)' }}
+                  >
+                    {codeCopied ? <Check size={15} /> : <Copy size={15} />}
+                  </button>
                 </div>
               </div>
 
@@ -265,11 +282,11 @@ export default function PersonalInfoPage() {
               <div className={styles.inputWrapper}>
                 <label className={styles.inputLabel}>{t('phone_label', 'TELEFON NÖMRƏSİ')}</label>
                 <input
-                  type="text"
+                  type="tel"
                   value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
+                  onChange={handlePhoneChange}
                   className={styles.textInput}
-                  placeholder={t('enter_phone_placeholder', 'Telefon nömrəsi daxil edin')}
+                  placeholder="+994501234567"
                 />
               </div>
 
