@@ -8,7 +8,7 @@ import Modal from '@/components/ui/Modal';
 import Badge from '@/components/ui/Badge';
 import {
   Users, UserCheck, DollarSign, Copy, Check, Share2,
-  Filter, ChevronDown, ChevronUp, Info, Star
+  Filter, ChevronDown, ChevronUp, Info, Star, RefreshCw
 } from 'lucide-react';
 import QRCode from 'qrcode';
 import { useAuthStore } from '@/lib/store/authStore';
@@ -44,35 +44,41 @@ export default function SubscribersPage() {
   // Total Points state
   const [totalPoints, setTotalPoints] = useState(0);
 
-  useEffect(() => {
-    async function loadTree() {
-      if (!authUser?.uid) return;
-      try {
-        const [data, pointsHistory] = await Promise.all([
-          getReferralTree(authUser.uid, 5),
-          getPointsHistory(authUser.uid)
-        ]);
+  async function loadTree() {
+    if (!authUser?.uid) return;
+    try {
+      const [data, pointsHistory] = await Promise.all([
+        getReferralTree(authUser.uid, 5),
+        getPointsHistory(authUser.uid)
+      ]);
 
-        setTree(data);
+      setTree(data);
 
-        // Sum points earned from each referral user and total points
-        const map = {};
-        let sum = 0;
-        pointsHistory.forEach((p) => {
-          if (p.from_uid && Number(p.points) > 0) {
-            map[p.from_uid] = (map[p.from_uid] || 0) + Number(p.points);
-          }
-          sum += Number(p.points || 0);
-        });
-        setPointsMap(map);
-        setTotalPoints(sum);
-      } catch (err) {
-        console.error('Failed to load referral data:', err.message);
-      } finally {
-        setLoading(false);
-      }
+      // Sum points earned from each referral user and total points
+      const map = {};
+      let sum = 0;
+      pointsHistory.forEach((p) => {
+        if (p.from_uid && Number(p.points) > 0) {
+          map[p.from_uid] = (map[p.from_uid] || 0) + Number(p.points);
+        }
+        sum += Number(p.points || 0);
+      });
+      setPointsMap(map);
+      setTotalPoints(sum);
+    } catch (err) {
+      console.error('Failed to load referral data:', err.message);
+    } finally {
+      setLoading(false);
     }
+  }
+
+  useEffect(() => {
     loadTree();
+    // Pəncərə fokusa qayıdanda siyahını təzələ — yeni referal dərhal görünsün
+    const onFocus = () => loadTree();
+    window.addEventListener('focus', onFocus);
+    return () => window.removeEventListener('focus', onFocus);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [authUser?.uid]);
 
   // Flatten all referrals
@@ -357,6 +363,14 @@ export default function SubscribersPage() {
             {t('referrals_list', '📋 Referal Siyahısı')}
           </h3>
           <div className={styles.filterWrapper}>
+            <button
+              className={styles.filterBtn}
+              onClick={() => loadTree()}
+              title={t('refresh', 'Yenilə')}
+              style={{ marginRight: 8 }}
+            >
+              <RefreshCw size={14} />
+            </button>
             <button
               className={styles.filterBtn}
               onClick={() => setFilterOpen(!filterOpen)}

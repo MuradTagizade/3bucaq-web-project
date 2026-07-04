@@ -101,7 +101,7 @@ export const translations = {
     claim_level_bonus: "Səviyyə Bonusunu Al",
     confirm_and_activate: "Təsdiqlə və Aktiv Et",
     required: "Tələb",
-    claim_modal_desc: "Bu səviyyəni aktiv etmək istəyirsiniz? Səviyyə üçün tələb olunan {{points}} point balansınızdan çıxılacaq və {{bonus}} bonus dərhal balansınıza əlavə olunacaq.",
+    claim_modal_desc: "Bu səviyyəni aktiv etmək istəyirsiniz? Xallarınız çıxılmır — {{points}} xal həddinə çatdığınız üçün {{bonus}} bonus dərhal balansınıza əlavə olunacaq. Növbəti səviyyə üçün xallarınız toplanmağa davam edir.",
 
     // Hot Bed Page
     investment_packages: "Yatırım Paketləri",
@@ -768,7 +768,7 @@ export const translations = {
     claim_level_bonus: "Claim Level Bonus",
     confirm_and_activate: "Confirm & Activate",
     required: "Required",
-    claim_modal_desc: "Do you want to activate this level? The required {{points}} points for this level will be deducted from your balance, and {{bonus}} bonus will be immediately added to your balance.",
+    claim_modal_desc: "Do you want to activate this level? Your points are NOT deducted — since you reached the {{points}} point threshold, the {{bonus}} bonus will be added to your balance immediately. Your points keep accumulating toward the next level.",
 
     // Hot Bed Page
     investment_packages: "Investment Packages",
