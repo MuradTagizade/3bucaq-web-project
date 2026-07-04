@@ -44,6 +44,10 @@
 
 /* Section charts (admin alt səhifələri) */
 .sectionCharts { margin-bottom: 20px; }
+.statRow { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 16px; }
+.statMini { background: var(--bg-card); border: 1px solid var(--border-default); border-radius: 12px; padding: 12px 14px; display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.statMiniValue { font-size: 18px; font-weight: 700; color: var(--text-primary); }
+.statMiniLabel { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; }
 .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
 .card { background: var(--bg-card); border: 1px solid var(--border-default); border-radius: 14px; padding: 16px; min-width: 0; }
 .cardTitle { font-size: 13px; font-weight: 600; color: var(--text-secondary); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.04em; }

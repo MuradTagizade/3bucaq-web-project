@@ -508,6 +508,20 @@ export async function getAdminChartData(range = '30d') {
   return data;
 }
 
+export async function getTreasury() {
+  const { data, error } = await supabase.rpc('get_treasury');
+  if (error) throw new Error(friendlyError(error));
+  if (!data || data.error) throw new Error(data?.error || 'Xəzinə məlumatı yüklənmədi');
+  return data;
+}
+
+export async function getReferralStats(range = '30d') {
+  const { data, error } = await supabase.rpc('get_referral_stats', { p_range: range });
+  if (error) throw new Error(friendlyError(error));
+  if (!data || data.error) throw new Error(data?.error || 'Statistika yüklənmədi');
+  return data;
+}
+
 export async function getUserActivity(limit = 300, search = null, action = null) {
   const { data, error } = await supabase.rpc('get_user_activity', {
     p_limit: limit,

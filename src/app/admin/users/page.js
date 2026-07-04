@@ -19,7 +19,7 @@ import { PACKAGES, BLOCK_DURATIONS } from '@/lib/utils/constants';
 import { formatCurrency, getKYCStatusLabel, getKYCStatusVariant, formatDateTime } from '@/lib/utils/formatters';
 import { useAuthStore } from '@/lib/store/authStore';
 import { supabase } from '@/lib/supabase/config';
-import SectionCharts from '@/components/charts/SectionCharts';
+import UsersCharts from '@/components/charts/UsersCharts';
 
 const PER_PAGE = 15;
 
@@ -249,7 +249,7 @@ export default function AdminUsersPage() {
         <Badge variant="info">{t('user_count', '{{count}} nəfər').replace('{{count}}', filtered.length)}</Badge>
       </div>
 
-      <SectionCharts kinds={['regs', 'kyc']} />
+      <UsersCharts />
 
       <div className={uStyles.searchBar}>
         <Input

@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import styles from './admin-dashboard.module.css';
-import { Users, DollarSign, TrendingUp, Wallet, ArrowDownToLine, ShieldCheck, Package, Star } from 'lucide-react';
-import { getAdminStats, getAdminChartData } from '@/lib/supabase/database';
+import { Users, DollarSign, TrendingUp, Wallet, ArrowDownToLine, ShieldCheck, Package, Star, Landmark } from 'lucide-react';
+import { getAdminStats, getAdminChartData, getTreasury } from '@/lib/supabase/database';
 import { useTranslation } from '@/lib/store/languageStore';
 import { formatCurrency, formatDate } from '@/lib/utils/formatters';
 import { LineChart, DualBarChart, HBarChart, StatusStackedBar, RangeSelect } from '@/components/charts/Charts';
@@ -11,6 +11,7 @@ import { LineChart, DualBarChart, HBarChart, StatusStackedBar, RangeSelect } fro
 export default function AdminDashboardPage() {
   const [stats, setStats] = useState(null);
   const [charts, setCharts] = useState(null);
+  const [treasury, setTreasury] = useState(null);
   const [loading, setLoading] = useState(true);
   const [range, setRange] = useState('30d');
   const [chartsLoading, setChartsLoading] = useState(false);
@@ -19,12 +20,14 @@ export default function AdminDashboardPage() {
   useEffect(() => {
     async function loadAll() {
       try {
-        const [statsData, chartData] = await Promise.all([
+        const [statsData, chartData, treasuryData] = await Promise.all([
           getAdminStats(),
           getAdminChartData('30d').catch((err) => { console.error('Chart data:', err.message); return null; }),
+          getTreasury().catch((err) => { console.error('Treasury:', err.message); return null; }),
         ]);
         setStats(statsData);
         setCharts(chartData);
+        setTreasury(treasuryData);
       } catch (err) {
         console.error('Failed to load admin stats:', err.message);
       } finally {
@@ -68,6 +71,7 @@ export default function AdminDashboardPage() {
 
   const totals = charts?.totals || {};
   const statItems = [
+    { label: t('admin_stats.treasury', 'Xəzinə'), value: formatCurrency(Number(treasury?.balance ?? 0)), icon: Landmark, color: '#FFD54F' },
     { label: t('admin_stats.totalUsers', 'Ümumi İstifadəçi'), value: stats?.totalUsers || 0, icon: Users, color: 'var(--color-primary)' },
     { label: t('admin_stats.totalBalance', 'Ümumi Balans'), value: formatCurrency(stats?.totalBalance || 0), icon: DollarSign, color: 'var(--color-warning)' },
     { label: t('admin_stats.dailyGrowth', 'Gündəlik Artım'), value: `+${stats?.dailyGrowth || 0}`, icon: TrendingUp, color: 'var(--color-secondary)' },
