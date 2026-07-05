@@ -661,7 +661,7 @@ const tr = {
   admin_adjust: "Yönetici Düzeltmesi",
   external_wallet: "Harici Cüzdan",
   in_usdt_balance: "USDT Bakiyesinde",
-  receive: "Talep Et",
+  receive: "Al",
   accuracy_rate: "Doğruluk oranı",
   balance_updated: "Bakiye güncellendi",
   block_user_title: "Kullanıcıyı Engelle",

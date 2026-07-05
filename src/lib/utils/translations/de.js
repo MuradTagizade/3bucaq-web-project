@@ -660,7 +660,7 @@ const de = {
   admin_adjust: "Admin-Anpassung",
   external_wallet: "Externe Wallet",
   in_usdt_balance: "Im USDT-Guthaben",
-  receive: "Beanspruchen",
+  receive: "Erhalten",
   accuracy_rate: "Genauigkeitsrate",
   balance_updated: "Guthaben aktualisiert",
   block_user_title: "Benutzer sperren",

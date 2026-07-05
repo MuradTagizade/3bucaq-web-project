@@ -662,7 +662,7 @@ const en = {
   admin_adjust: "Admin Adjustment",
   external_wallet: "External Wallet",
   in_usdt_balance: "In USDT Balance",
-  receive: "Claim",
+  receive: "Receive",
   accuracy_rate: "Accuracy rate",
   balance_updated: "Balance updated",
   block_user_title: "Block User",

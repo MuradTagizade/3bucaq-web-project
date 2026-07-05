@@ -661,7 +661,7 @@ const fr = {
   admin_adjust: "Ajustement admin",
   external_wallet: "Portefeuille externe",
   in_usdt_balance: "Sur le solde USDT",
-  receive: "Réclamer",
+  receive: "Recevoir",
   accuracy_rate: "Taux de précision",
   balance_updated: "Solde mis à jour",
   block_user_title: "Bloquer l'utilisateur",
