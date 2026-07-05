@@ -143,7 +143,7 @@ export default function HistoryPage() {
           }
 
           // Detail formatting
-          let detail = 'Sistem';
+          let detail = t('system', 'System');
           if (tx.type === 'transfer') {
             detail = tx.from_uid === authUser.uid 
               ? `${t('user', 'İstifadəçi')}: @${tx.to_login}` 
