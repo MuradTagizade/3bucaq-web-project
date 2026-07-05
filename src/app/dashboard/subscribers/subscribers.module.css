@@ -3,6 +3,10 @@
   display: flex;
   flex-direction: column;
   gap: 24px;
+  /* Qəti zəmanət: bu səhifə heç vaxt üfüqi daşma/kayma göstərməsin */
+  overflow-x: clip;
+  max-width: 100%;
+  min-width: 0;
 }
 
 .pageHeader {
@@ -112,6 +116,9 @@
   border: 1px solid var(--border-default);
   border-radius: var(--radius-lg);
   padding: 24px;
+  min-width: 0; /* grid/flex daxilində daralsın, uzun məzmun daşmasın */
+  max-width: 100%;
+  overflow: hidden;
 }
 
 .sectionTitle {
