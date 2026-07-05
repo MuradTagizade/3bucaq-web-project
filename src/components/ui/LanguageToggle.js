@@ -9,11 +9,25 @@ export default function LanguageToggle({ className = '', size = 16 }) {
   const { language, setLanguage } = useTranslation();
   const [mounted, setMounted] = useState(false);
   const [open, setOpen] = useState(false);
+  const [dropUp, setDropUp] = useState(false);
+  const [alignRight, setAlignRight] = useState(true);
   const wrapRef = useRef(null);
 
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  // Menyunu açmadan əvvəl mövqeyi ölç: aşağıda yer yoxdursa yuxarı aç, düymə
+  // ekranın sol yarısındadırsa sağa aç. Beləcə admin sidebar-ın altındakı
+  // toggle-də menyu ekrandan çıxmır və dil seçilə bilir.
+  const handleToggle = () => {
+    if (!open && wrapRef.current && typeof window !== 'undefined') {
+      const rect = wrapRef.current.getBoundingClientRect();
+      setDropUp(window.innerHeight - rect.bottom < 260);
+      setAlignRight(rect.left > window.innerWidth / 2);
+    }
+    setOpen((v) => !v);
+  };
 
   useEffect(() => {
     if (!open) return;
@@ -45,7 +59,7 @@ export default function LanguageToggle({ className = '', size = 16 }) {
   return (
     <div className={`${styles.wrap} ${className}`} ref={wrapRef}>
       <button
-        onClick={() => setOpen((v) => !v)}
+        onClick={handleToggle}
         className={styles.langBtn}
         aria-label="Select language"
         aria-haspopup="listbox"
@@ -57,7 +71,7 @@ export default function LanguageToggle({ className = '', size = 16 }) {
       </button>
 
       {open && (
-        <ul className={styles.menu} role="listbox">
+        <ul className={`${styles.menu} ${dropUp ? styles.menuUp : ''} ${alignRight ? styles.menuRight : ''}`} role="listbox">
           {SUPPORTED_LANGUAGES.map((l) => (
             <li key={l.code}>
               <button

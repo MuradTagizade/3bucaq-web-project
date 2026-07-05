@@ -8,7 +8,7 @@ import Badge from '@/components/ui/Badge';
 import Modal from '@/components/ui/Modal';
 import Input from '@/components/ui/Input';
 import { LEVELS, PACKAGES } from '@/lib/utils/constants';
-import { formatUSDT, formatPoints, formatCurrency, getKYCStatusLabel, getKYCStatusVariant } from '@/lib/utils/formatters';
+import { formatUSDT, formatPoints, formatCurrency, getKYCStatusLabel, getKYCStatusVariant, withMinDuration } from '@/lib/utils/formatters';
 import { Trophy, ChevronRight, Lock, Check, Clock, Wallet, Copy, Shield, DollarSign, ArrowDownToLine, User } from 'lucide-react';
 import { useAuthStore } from '@/lib/store/authStore';
 import { useTranslation } from '@/lib/store/languageStore';
@@ -81,11 +81,14 @@ export default function DashboardPage() {
 
     setSubmitting(true);
     try {
-      await createLevelClaim(
-        activeUser.uid,
-        receiveModal.level.level,
-        receiveModal.level.bonus,
-        'balance'
+      await withMinDuration(
+        createLevelClaim(
+          activeUser.uid,
+          receiveModal.level.level,
+          receiveModal.level.bonus,
+          'balance'
+        ),
+        2000
       );
 
       // Fetch updated user profile and update Zustand store
@@ -261,11 +264,11 @@ export default function DashboardPage() {
                 ) : (
                   <Button
                     size="sm"
-                    variant={status.isReady ? 'primary' : 'ghost'}
+                    variant={status.isReady ? 'success' : 'ghost'}
                     onClick={() => handleReceiveClick(level)}
                     disabled={!status.isReady}
                   >
-                    {status.isReady ? t('receive', 'Bonus Al') : t('locked', 'Kilidli')}
+                    {t('receive', 'Al')}
                   </Button>
                 )}
               </div>

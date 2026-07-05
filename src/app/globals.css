@@ -238,6 +238,8 @@ html {
   font-size: 16px;
   -webkit-text-size-adjust: 100%;
   scroll-behavior: smooth;
+  /* Üfüqi daşmanı kəs ki, mobil "fixed" alt naviqasiya sürüşməsin (kayma) */
+  overflow-x: clip;
 }
 
 body {

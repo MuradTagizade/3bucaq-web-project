@@ -8,7 +8,7 @@ import Input from '@/components/ui/Input';
 import Button from '@/components/ui/Button';
 import Badge from '@/components/ui/Badge';
 import Modal from '@/components/ui/Modal';
-import { formatCurrency, formatDateTime } from '@/lib/utils/formatters';
+import { formatCurrency, formatDateTime, withMinDuration } from '@/lib/utils/formatters';
 import { validateAmount, validateUSDTAddress } from '@/lib/utils/validators';
 import { ArrowUpRight, CheckCircle2, User, Wallet, ArrowDownToLine, CreditCard, Image as ImageIcon, ArrowDown, ChevronDown, AlertTriangle } from 'lucide-react';
 import { useAuthStore } from '@/lib/store/authStore';
@@ -144,7 +144,7 @@ function TransferContent() {
     setLoading(true);
 
     try {
-      await transferFunds(authUser.uid, recipient, amount);
+      await withMinDuration(transferFunds(authUser.uid, recipient, amount), 2000);
 
       const updatedProfile = await getUserByUid(authUser.uid);
       if (updatedProfile) {
@@ -203,11 +203,10 @@ function TransferContent() {
 
     setWdLoading(true);
     try {
-      if (wdMethod === 'usdt') {
-        await createWithdrawal(authUser.uid, wdAmount, wdAddress, wdNetwork, 'usdt', null);
-      } else {
-        await createWithdrawal(authUser.uid, wdAmount, null, null, 'card', formattedCard);
-      }
+      const wdPromise = wdMethod === 'usdt'
+        ? createWithdrawal(authUser.uid, wdAmount, wdAddress, wdNetwork, 'usdt', null)
+        : createWithdrawal(authUser.uid, wdAmount, null, null, 'card', formattedCard);
+      await withMinDuration(wdPromise, 2000);
 
       const updatedProfile = await getUserByUid(authUser.uid);
       if (updatedProfile) {

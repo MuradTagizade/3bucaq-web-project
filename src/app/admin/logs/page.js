@@ -36,7 +36,7 @@ const ACTION_LABELS = {
 const PER_PAGE = 15;
 
 export default function AdminLogsPage() {
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
   const [logs, setLogs] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -261,6 +261,7 @@ export default function AdminLogsPage() {
               <Calendar size={16} className={lStyles.inputIcon} />
               <input
                 type="date"
+                lang={language}
                 value={dateFrom}
                 onChange={(e) => {
                   setDateFrom(e.target.value);
@@ -278,6 +279,7 @@ export default function AdminLogsPage() {
               <Calendar size={16} className={lStyles.inputIcon} />
               <input
                 type="date"
+                lang={language}
                 value={dateTo}
                 onChange={(e) => {
                   setDateTo(e.target.value);

@@ -1,17 +1,36 @@
 .nav {
   position: fixed;
   bottom: var(--space-md);
-  left: 50%;
-  transform: translateX(-50%);
+  /* Robust mərkəzləmə: left:50%+translate əvəzinə hər iki kənar + auto margin.
+     Bu, üfüqi daşma zamanı bəzi telefonlarda yaranan sürüşməni (kayma) aradan qaldırır. */
+  left: 0;
+  right: 0;
+  margin-inline: auto;
   width: calc(100% - var(--space-xl));
   max-width: 400px;
-  background: var(--glass-card-bg);
-  backdrop-filter: var(--glass-card-blur);
-  -webkit-backdrop-filter: var(--glass-card-blur);
-  border: var(--glass-card-border);
+  /* Buzlu (frosted) fon — çox şəffaf deyil; arxa fon bulanıq görünür, sızmır */
+  background: rgba(12, 15, 25, 0.86);
+  backdrop-filter: blur(24px) saturate(160%);
+  -webkit-backdrop-filter: blur(24px) saturate(160%);
+  border: 1px solid rgba(255, 255, 255, 0.14);
   border-radius: var(--radius-full);
   z-index: var(--z-sticky);
-  box-shadow: var(--glass-card-shadow);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+}
+
+/* backdrop-filter dəstəklənmirsə (bəzi Android WebView) demək olar tam qeyri-şəffaf et */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .nav { background: rgba(12, 15, 25, 0.97); }
+}
+
+:global([data-theme='light']) .nav {
+  background: rgba(255, 255, 255, 0.88);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 12px 40px rgba(15, 23, 42, 0.14);
+}
+
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  :global([data-theme='light']) .nav { background: rgba(255, 255, 255, 0.98); }
 }
 
 .inner {

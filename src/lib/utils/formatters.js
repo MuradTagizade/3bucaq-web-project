@@ -139,6 +139,15 @@ export function getKYCStatusVariant(status) {
   return variants[status] || 'info';
 }
 
+export const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+// Bir async əməliyyatın ən azı `ms` müddət çəkməsini təmin edir ki, istifadəçi
+// "yüklənir / göndərilir / alınır" loading vəziyyətini görsün (ani baş verməsin).
+export async function withMinDuration(promise, ms = 2000) {
+  const [result] = await Promise.all([Promise.resolve(promise), sleep(ms)]);
+  return result;
+}
+
 export function getPackageDisplayName(pkgId) {
   const names = {
     pkg19: '#19',

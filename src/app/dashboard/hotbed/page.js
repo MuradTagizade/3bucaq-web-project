@@ -7,7 +7,7 @@ import Modal from '@/components/ui/Modal';
 import Button from '@/components/ui/Button';
 import Badge from '@/components/ui/Badge';
 import { PACKAGES } from '@/lib/utils/constants';
-import { formatCurrency } from '@/lib/utils/formatters';
+import { formatCurrency, withMinDuration } from '@/lib/utils/formatters';
 import { Info, Flame, Zap, Clock } from 'lucide-react';
 import { useAuthStore } from '@/lib/store/authStore';
 import { useTranslation } from '@/lib/store/languageStore';
@@ -87,7 +87,7 @@ export default function HotBedPage() {
 
     setLoading(true);
     try {
-      await buyPackage(authUser.uid, confirmModal.pkg.id, confirmModal.pkg.price);
+      await withMinDuration(buyPackage(authUser.uid, confirmModal.pkg.id, confirmModal.pkg.price), 2000);
       await refreshUser();
       setConfirmModal({ open: false, pkg: null });
     } catch (err) {
@@ -136,7 +136,6 @@ export default function HotBedPage() {
                 <Badge variant={pkg.type === 'earning' ? 'gold' : 'info'} size="sm">
                   {pkg.type === 'earning' ? t('earning', 'Qazanc') : t('investment', 'Yatırım')}
                 </Badge>
-                <span className={styles.pkgDesc}>{t(pkg.id + '_desc', pkg.description)}</span>
               </div>
               {pkg.dailyEarning > 0 && (
                 <div className={styles.dailyTag}>

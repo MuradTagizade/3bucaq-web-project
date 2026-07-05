@@ -8,7 +8,7 @@ import Button from '@/components/ui/Button';
 import Badge from '@/components/ui/Badge';
 import Modal from '@/components/ui/Modal';
 import { Wallet, ArrowDown, Clock, CheckCircle2, XCircle, Copy, Upload, CreditCard, Image as ImageIcon, ArrowUpRight, ArrowDownToLine } from 'lucide-react';
-import { formatCurrency, formatDateTime } from '@/lib/utils/formatters';
+import { formatCurrency, formatDateTime, withMinDuration } from '@/lib/utils/formatters';
 import { validateAmount } from '@/lib/utils/validators';
 import { useAuthStore } from '@/lib/store/authStore';
 import { useTranslation } from '@/lib/store/languageStore';
@@ -156,7 +156,10 @@ export default function DepositPage() {
       setLoading(true);
       try {
         const receiptPath = await uploadReceiptFile(cryptoReceiptFile);
-        await createDeposit(authUser.uid, amount, txHash, `${cryptoAsset.toUpperCase()} ${network}`, cryptoAsset, null, receiptPath);
+        await withMinDuration(
+          createDeposit(authUser.uid, amount, txHash, `${cryptoAsset.toUpperCase()} ${network}`, cryptoAsset, null, receiptPath),
+          1500
+        );
         showToast(t('deposit_success', 'Depozit sorğusu göndərildi! Sorğunuz 24 saat ərzində icra olunacaq.'));
         setAmount('');
         setTxHash('');
@@ -197,7 +200,10 @@ export default function DepositPage() {
       setLoading(true);
       try {
         const receiptPath = await uploadReceiptFile(receiptFile);
-        await createDeposit(authUser.uid, cardAmount, null, null, 'card', formattedCard, receiptPath);
+        await withMinDuration(
+          createDeposit(authUser.uid, cardAmount, null, null, 'card', formattedCard, receiptPath),
+          1500
+        );
         showToast(t('card_deposit_success', 'Kart ilə depozit sorğusu göndərildi! Admin təsdiq edəcək.'));
         setCardAmount('');
         setUserCardNumber('');

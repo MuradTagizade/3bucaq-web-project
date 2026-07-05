@@ -40,7 +40,7 @@ const getAmountColorClass = (type, amt) => {
 
 export default function HistoryPage() {
   const { user: authUser } = useAuthStore();
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
@@ -378,12 +378,12 @@ export default function HistoryPage() {
             </div>
 
             <div className={styles.datePickerWrapper}>
-              <input 
-                type="date" 
+              <input
+                type="date"
+                lang={language}
                 value={filterDate}
                 onChange={handleDateChange}
                 className={styles.datePickerInput}
-                placeholder="gg.aa.yyyy"
               />
               <Calendar size={16} className={styles.calendarIcon} />
             </div>

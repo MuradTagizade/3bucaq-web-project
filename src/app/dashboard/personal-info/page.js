@@ -221,7 +221,6 @@ export default function PersonalInfoPage() {
     }
   };
 
-  const currentPkgLabel = authUser ? getHighestActivePackage(authUser.activePackages) : t('no_packages', 'Paket yoxdur');
   const isKycApproved = authUser?.kycStatus === 'approved';
 
   return (
@@ -415,16 +414,6 @@ export default function PersonalInfoPage() {
             </button>
           </div>
 
-          {/* Current Package Card */}
-          <div className={`${styles.card} ${styles.packageCard}`}>
-            <div className={styles.packageIconBox}>
-              <Star size={20} className={styles.starIcon} />
-            </div>
-            <div className={styles.packageInfo}>
-              <span className={styles.packageLabel}>{t('current_package', 'Cari Paket')}</span>
-              <span className={styles.packageValue}>{currentPkgLabel}</span>
-            </div>
-          </div>
         </div>
       </div>
 
