@@ -151,6 +151,7 @@
 
 .levelBarWrapper {
   flex: 1;
+  min-width: 0;
   height: 8px;
   background: var(--bg-glass);
   border-radius: var(--radius-full);
@@ -203,20 +204,28 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 8px;
   padding: 12px 16px;
   background: var(--bg-input);
   border: 1px solid var(--border-default);
   border-radius: var(--radius-sm);
   margin-bottom: 16px;
+  max-width: 100%;
 }
 
 .refLinkText {
+  flex: 1;
+  min-width: 0; /* flex item-in daralmasına icazə ver ki, uzun URL qutunu genişləndirməsin (ellipsis işləsin) */
   font-family: var(--font-mono);
   font-size: 13px;
   color: var(--color-primary);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.refCopyBtn {
+  flex-shrink: 0;
 }
 
 .refCopyBtn {
