@@ -205,10 +205,10 @@ export default function AdminWithdrawalsPage() {
               ) : (
                 <div style={{ display: 'flex', flexDirection: 'column' }}>
                   <span style={{ fontSize: 11, color: 'var(--text-muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 200 }} title={w.crypto_address}>
-                    Ünvan: {w.crypto_address || '—'}
+                    {t('address', 'Address')}: {w.crypto_address || '—'}
                   </span>
                   <span style={{ fontSize: 10, color: 'var(--text-muted)' }}>
-                    Şəbəkə: {w.network || 'TRC20'} {w.tx_hash ? `| TX: ${w.tx_hash.slice(0, 8)}...` : ''}
+                    {t('network', 'Network')}: {w.network || 'TRC20'} {w.tx_hash ? `| TX: ${w.tx_hash.slice(0, 8)}...` : ''}
                   </span>
                 </div>
               )}

@@ -27,15 +27,27 @@ import {
 import { formatCurrency } from '@/lib/utils/formatters';
 
 const SIDEBAR_ITEMS = [
-  { id: 'home', label: 'Ana Səhifə', href: '/dashboard', icon: Triangle },
+  { id: 'home', label: 'Home', href: '/dashboard', icon: Triangle },
   { id: 'hotbed', label: 'Hot Bed', href: '/dashboard/hotbed', icon: Flame },
-  { id: 'subscribers', label: 'Referallar', href: '/dashboard/subscribers', icon: Users },
-  { id: 'transfer', label: 'Transfer & Çıxarış', href: '/dashboard/transfer', icon: ArrowLeftRight },
-  { id: 'deposit', label: 'Depozit', href: '/dashboard/deposit', icon: Wallet },
-  { id: 'history', label: 'USDT Tarixçə', href: '/dashboard/history', icon: History },
-  { id: 'personalInfo', label: 'Şəxsi Məlumat', href: '/dashboard/personal-info', icon: User },
+  { id: 'subscribers', label: 'Referrals', href: '/dashboard/subscribers', icon: Users },
+  { id: 'transfer', label: 'Transfer & Withdrawal', href: '/dashboard/transfer', icon: ArrowLeftRight },
+  { id: 'deposit', label: 'Deposit', href: '/dashboard/deposit', icon: Wallet },
+  { id: 'history', label: 'USDT History', href: '/dashboard/history', icon: History },
+  { id: 'personalInfo', label: 'Personal Info', href: '/dashboard/personal-info', icon: User },
   { id: 'kyc', label: 'KYC', href: '/dashboard/kyc', icon: ShieldCheck },
 ];
+
+// Sidebar nav id → i18n key (resolved via useTranslation inside the component)
+const NAV_TKEYS = {
+  home: 'home',
+  hotbed: 'hotbed',
+  subscribers: 'subscribers',
+  transfer: 'nav_transfer_withdrawal',
+  deposit: 'deposit',
+  history: 'tx_history_title',
+  personalInfo: 'personal_info',
+  kyc: 'kyc',
+};
 
 export default function Sidebar({ userName, referralLink, hasActivePackage = false, onLogout }) {
   const pathname = usePathname();
@@ -81,7 +93,7 @@ export default function Sidebar({ userName, referralLink, hasActivePackage = fal
         {SIDEBAR_ITEMS.map((item) => {
           const Icon = item.icon;
           const isActive = pathname === item.href;
-          const translationKey = item.id === 'personalInfo' ? 'personal_info' : item.id === 'home' ? 'home' : item.id;
+          const translationKey = NAV_TKEYS[item.id] || item.id;
 
           return (
             <Link

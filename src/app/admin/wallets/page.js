@@ -158,24 +158,24 @@ export default function AdminWalletsPage() {
         <div className={styles.card}>
           <h3 className={styles.title}>
             <Coins size={18} color="var(--color-primary)" />
-            USDT Cüzdanları (Tether)
+            {t('wallet_usdt_title', 'USDT Wallets (Tether)')}
           </h3>
           <div className={styles.inputs}>
             <Input
-              label="USDT TRC20 Cüzdan Ünvanı"
-              placeholder="T... ilə başlayan ünvan"
+              label={t('wallet_usdt_trc20_label', 'USDT TRC20 Wallet Address')}
+              placeholder={t('wallet_addr_t_placeholder', 'Address starting with T...')}
               value={wallets.wallet_usdt_trc20}
               onChange={(e) => handleChange('wallet_usdt_trc20', e.target.value)}
             />
             <Input
-              label="USDT ERC20 Cüzdan Ünvanı"
-              placeholder="0x... ilə başlayan ünvan"
+              label={t('wallet_usdt_erc20_label', 'USDT ERC20 Wallet Address')}
+              placeholder={t('wallet_addr_0x_placeholder', 'Address starting with 0x...')}
               value={wallets.wallet_usdt_erc20}
               onChange={(e) => handleChange('wallet_usdt_erc20', e.target.value)}
             />
             <Input
-              label="USDT BEP20 Cüzdan Ünvanı"
-              placeholder="0x... ilə başlayan ünvan"
+              label={t('wallet_usdt_bep20_label', 'USDT BEP20 Wallet Address')}
+              placeholder={t('wallet_addr_0x_placeholder', 'Address starting with 0x...')}
               value={wallets.wallet_usdt_bep20}
               onChange={(e) => handleChange('wallet_usdt_bep20', e.target.value)}
             />
@@ -185,7 +185,7 @@ export default function AdminWalletsPage() {
               fullWidth
               style={{ marginTop: 8 }}
             >
-              <Save size={16} /> USDT Cüzdanlarını Yadda Saxla
+              <Save size={16} /> {t('wallet_save_usdt', 'Save USDT Wallets')}
             </Button>
           </div>
         </div>
@@ -194,24 +194,24 @@ export default function AdminWalletsPage() {
         <div className={styles.card}>
           <h3 className={styles.title}>
             <Coins size={18} color="var(--color-secondary)" />
-            USDC Cüzdanları (USD Coin)
+            {t('wallet_usdc_title', 'USDC Wallets (USD Coin)')}
           </h3>
           <div className={styles.inputs}>
             <Input
-              label="USDC TRC20 Cüzdan Ünvanı"
-              placeholder="T... ilə başlayan ünvan"
+              label={t('wallet_usdc_trc20_label', 'USDC TRC20 Wallet Address')}
+              placeholder={t('wallet_addr_t_placeholder', 'Address starting with T...')}
               value={wallets.wallet_usdc_trc20}
               onChange={(e) => handleChange('wallet_usdc_trc20', e.target.value)}
             />
             <Input
-              label="USDC ERC20 Cüzdan Ünvanı"
-              placeholder="0x... ilə başlayan ünvan"
+              label={t('wallet_usdc_erc20_label', 'USDC ERC20 Wallet Address')}
+              placeholder={t('wallet_addr_0x_placeholder', 'Address starting with 0x...')}
               value={wallets.wallet_usdc_erc20}
               onChange={(e) => handleChange('wallet_usdc_erc20', e.target.value)}
             />
             <Input
-              label="USDC BEP20 Cüzdan Ünvanı"
-              placeholder="0x... ilə başlayan ünvan"
+              label={t('wallet_usdc_bep20_label', 'USDC BEP20 Wallet Address')}
+              placeholder={t('wallet_addr_0x_placeholder', 'Address starting with 0x...')}
               value={wallets.wallet_usdc_bep20}
               onChange={(e) => handleChange('wallet_usdc_bep20', e.target.value)}
             />
@@ -222,7 +222,7 @@ export default function AdminWalletsPage() {
               style={{ marginTop: 8 }}
               variant="secondary"
             >
-              <Save size={16} /> USDC Cüzdanlarını Yadda Saxla
+              <Save size={16} /> {t('wallet_save_usdc', 'Save USDC Wallets')}
             </Button>
           </div>
         </div>
@@ -231,16 +231,16 @@ export default function AdminWalletsPage() {
         <div className={styles.card}>
           <h3 className={styles.title}>
             <CreditCard size={18} color="var(--color-primary)" />
-            Bank Kartı Tənzimləmələri
+            {t('wallet_bank_card_settings', 'Bank Card Settings')}
           </h3>
-          
+
           <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
             {/* Toggle Status */}
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: 16, borderBottom: '1px solid var(--border-subtle)' }}>
               <div style={{ flex: 1, paddingRight: 12 }}>
-                <strong style={{ fontSize: 13, color: 'var(--text-primary)' }}>Kart ilə Ödəniş Sistemi</strong>
+                <strong style={{ fontSize: 13, color: 'var(--text-primary)' }}>{t('card_active_system', 'Bank Card System Status')}</strong>
                 <p style={{ fontSize: 11, color: 'var(--text-muted)', margin: '4px 0 0 0', lineHeight: '1.4' }}>
-                  Bütün istifadəçi profillərində kart ilə mədaxil və məxarici aktiv/deaktiv edin.
+                  {t('card_active_desc', 'Enable or disable bank card deposit and withdrawal requests system-wide.')}
                 </p>
               </div>
               <button
@@ -267,7 +267,7 @@ export default function AdminWalletsPage() {
             {/* Target Card Input */}
             <div className={styles.inputs}>
               <Input
-                label="Mədaxil üçün Kart Hesabı"
+                label={t('wallet_deposit_card_label', 'Deposit Card Account')}
                 placeholder="1234 5678 1234 5678"
                 value={depositCard}
                 maxLength={19}
@@ -283,7 +283,7 @@ export default function AdminWalletsPage() {
                 fullWidth
                 style={{ marginTop: 8 }}
               >
-                <Save size={16} /> Kart Hesabını Yadda Saxla
+                <Save size={16} /> {t('wallet_save_card', 'Save Card Account')}
               </Button>
             </div>
           </div>

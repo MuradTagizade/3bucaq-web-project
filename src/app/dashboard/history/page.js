@@ -394,20 +394,6 @@ export default function HistoryPage() {
       {/* Stats Cards */}
       <div className={styles.statsGrid}>
         <div className={styles.statCard}>
-          <span className={styles.statLabel}>{t('incoming_sum', 'Ümumi Mədaxil')}</span>
-          <div className={`${styles.statValue} ${styles.valIncoming}`}>
-            +{stats.incoming.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} <span className={styles.currency}>USDT</span>
-          </div>
-        </div>
-
-        <div className={styles.statCard}>
-          <span className={styles.statLabel}>{t('outgoing_sum', 'Ümumi Məxaric')}</span>
-          <div className={`${styles.statValue} ${styles.valOutgoing}`}>
-            -{stats.outgoing.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} <span className={styles.currency}>USDT</span>
-          </div>
-        </div>
-
-        <div className={styles.statCard}>
           <span className={styles.statLabel}>{t('pending', 'Gözləmədə')}</span>
           <div className={`${styles.statValue} ${styles.valPending}`}>
             {stats.pending.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} <span className={styles.currency}>USDT</span>

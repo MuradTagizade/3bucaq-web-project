@@ -40,7 +40,7 @@ export default function Modal({
           <div className={styles.header}>
             {title && <h3 className={styles.title}>{title}</h3>}
             {showClose && (
-              <button className={styles.close} onClick={onClose} aria-label="Bağla">
+              <button className={styles.close} onClick={onClose} aria-label="Close">
                 <X size={20} />
               </button>
             )}

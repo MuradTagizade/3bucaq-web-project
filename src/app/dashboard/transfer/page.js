@@ -36,6 +36,7 @@ function TransferContent() {
   const [errors, setErrors] = useState({});
   const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [kycPopup, setKycPopup] = useState(false);
 
   // Withdrawal state
   const [wdMethod, setWdMethod] = useState('usdt'); // 'usdt' or 'card'
@@ -121,6 +122,12 @@ function TransferContent() {
 
   const handleTransferSubmit = async (e) => {
     e.preventDefault();
+
+    if (!isKycApproved) {
+      setKycPopup(true);
+      return;
+    }
+
     const newErrors = {};
 
     if (!recipient.trim()) newErrors.recipient = t('enter_code', 'Kod yazın');
@@ -165,6 +172,12 @@ function TransferContent() {
   // --- Withdrawal handlers ---
   const handleWithdrawalSubmit = async (e) => {
     e.preventDefault();
+
+    if (!isKycApproved) {
+      setKycPopup(true);
+      return;
+    }
+
     const newErrors = {};
 
     const amountErr = validateAmount(wdAmount, balance);
@@ -323,7 +336,7 @@ function TransferContent() {
                 icon={<ArrowUpRight size={18} />}
               />
 
-              <Button type="submit" fullWidth size="lg" loading={loading} disabled={loading || !recipientValid || !isKycApproved}>
+              <Button type="submit" fullWidth size="lg" loading={loading} disabled={loading || !recipientValid}>
                 {t('submit', 'Göndər')}
               </Button>
             </form>
@@ -513,7 +526,7 @@ function TransferContent() {
                 />
               )}
 
-              <Button type="submit" fullWidth size="lg" loading={wdLoading} disabled={wdLoading || !isKycApproved}>
+              <Button type="submit" fullWidth size="lg" loading={wdLoading} disabled={wdLoading}>
                 {t('send_withdrawal_request', 'Çıxarış Sorğusu Göndər')}
               </Button>
             </form>
@@ -587,6 +600,29 @@ function TransferContent() {
         )}
       </Modal>
 
+      {/* KYC Required Popup */}
+      <Modal
+        isOpen={kycPopup}
+        onClose={() => setKycPopup(false)}
+        title={t('kyc_popup_title', 'KYC Təsdiqi Tələb Olunur')}
+        size="sm"
+      >
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: 16, padding: '8px 0' }}>
+          <AlertTriangle size={48} color="var(--color-warning, #f59e0b)" />
+          <p style={{ margin: 0, color: 'var(--text-secondary)', lineHeight: 1.5 }}>
+            {t('kyc_popup_desc', 'Bu əməliyyatı həyata keçirmək üçün KYC təsdiqi tələb olunur. Zəhmət olmasa əvvəlcə şəxsiyyətinizi təsdiq edin.')}
+          </p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10, width: '100%' }}>
+            <Link href="/dashboard/kyc" style={{ textDecoration: 'none', display: 'block' }} onClick={() => setKycPopup(false)}>
+              <Button fullWidth size="lg">{t('go_to_kyc', 'KYC Təsdiq Et')}</Button>
+            </Link>
+            <Button variant="ghost" fullWidth onClick={() => setKycPopup(false)}>
+              {t('later', 'Sonra')}
+            </Button>
+          </div>
+        </div>
+      </Modal>
+
       {/* Success Popup */}
       {(success || wdSuccess) && (
         <div className={styles.successOverlay}>
@@ -606,7 +642,7 @@ export default function TransferPage() {
   return (
     <Suspense fallback={
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '200px' }}>
-        <span>Yüklənir...</span>
+        <span>Loading...</span>
       </div>
     }>
       <TransferContent />

@@ -105,9 +105,9 @@ export default function AdminUsersPage() {
   const handleConfirmBlock = async () => {
     if (!selectedUser) return;
     try {
-      await blockUser(selectedUser.id, blockReasonInput || 'Qaydaları pozma', blockDuration);
+      await blockUser(selectedUser.id, blockReasonInput || 'Violating rules', blockDuration);
       await addAdminLog(adminUser?.uid, 'block_user', selectedUser.id,
-        `Blocked ${blockDuration} days. Reason: ${blockReasonInput || 'Qaydaları pozma'}`);
+        `Blocked ${blockDuration} days. Reason: ${blockReasonInput || 'Violating rules'}`);
       await loadUsers();
       setBlockModal(false);
       setSelectedUser(null);

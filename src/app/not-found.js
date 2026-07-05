@@ -8,9 +8,9 @@ export default function NotFound() {
       background: '#060a13', color: '#e8eefc', textAlign: 'center', padding: 24,
     }}>
       <div style={{ fontSize: 56, fontWeight: 800, color: '#3cedeb' }}>404</div>
-      <h1 style={{ fontSize: 22, fontWeight: 700, margin: 0 }}>Səhifə tapılmadı</h1>
+      <h1 style={{ fontSize: 22, fontWeight: 700, margin: 0 }}>Page not found</h1>
       <p style={{ opacity: 0.7, maxWidth: 420, margin: 0 }}>
-        Axtardığınız səhifə mövcud deyil və ya köçürülüb.
+        The page you are looking for does not exist or has been moved.
       </p>
       <Link
         href="/"
@@ -20,7 +20,7 @@ export default function NotFound() {
           textDecoration: 'none',
         }}
       >
-        Ana səhifəyə qayıt
+        Back to home
       </Link>
     </div>
   );

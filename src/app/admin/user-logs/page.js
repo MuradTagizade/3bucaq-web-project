@@ -51,31 +51,6 @@ export default function AdminUserLogsPage() {
   const [search, setSearch] = useState('');
   const [actionFilter, setActionFilter] = useState('');
 
-  const ACTION_LABELS = t('user_log_actions', {
-    registered: 'Qeydiyyat',
-    kyc_submitted: 'KYC göndərildi',
-    kyc_approved: 'KYC təsdiqləndi',
-    kyc_rejected: 'KYC rədd edildi',
-    kyc_reset: 'KYC sıfırlandı',
-    profile_updated: 'Profil yeniləndi',
-    blocked: 'Bloklandı',
-    unblocked: 'Blok açıldı',
-    deposit_request: 'Depozit sorğusu',
-    deposit: 'Depozit (təsdiqli)',
-    withdrawal_request: 'Çıxarış sorğusu',
-    withdrawal: 'Çıxarış',
-    transfer_out: 'Köçürmə (göndərdi)',
-    transfer_in: 'Köçürmə (aldı)',
-    package_purchase: 'Paket alışı',
-    referral_bonus: 'Referal bonusu',
-    depth_bonus: 'Dərinlik bonusu',
-    level_bonus: 'Level bonusu',
-    level_bonus_claim: 'Level bonusu',
-    daily_earning: 'Gündəlik qazanc',
-    points_earned: 'Xal qazandı',
-    admin_adjust: 'Admin düzəlişi',
-  });
-
   const load = useCallback(async (searchVal, actionVal) => {
     setLoading(true);
     try {
@@ -168,7 +143,7 @@ export default function AdminUserLogsPage() {
         >
           <option value="">{t('all_actions', 'Bütün hərəkətlər')}</option>
           {FILTER_ACTIONS.map((a) => (
-            <option key={a} value={a}>{ACTION_LABELS[a] || a}</option>
+            <option key={a} value={a}>{t(`user_log_actions.${a}`, a)}</option>
           ))}
         </select>
         <button type="button" className={lStyles.refreshBtn} onClick={() => load(search.trim(), actionFilter)} title={t('refresh', 'Yenilə')}>
@@ -195,7 +170,7 @@ export default function AdminUserLogsPage() {
               <span className={styles.bold}>{e.user_code}</span>
               <span>
                 <Badge variant={ACTION_META[e.action]?.variant || 'info'} size="sm">
-                  {ACTION_LABELS[e.action] || e.action}
+                  {t(`user_log_actions.${e.action}`, e.action)}
                 </Badge>
               </span>
               <span className={lStyles.amount}>

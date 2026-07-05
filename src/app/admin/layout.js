@@ -14,15 +14,15 @@ import { logoutUser } from '@/lib/supabase/auth';
 
 const NAV_ITEMS = [
   { href: '/admin', label: 'Dashboard', icon: LayoutDashboard },
-  { href: '/admin/users', label: 'İstifadəçilər', icon: Users },
-  { href: '/admin/kyc', label: 'KYC Sorğuları', icon: ShieldCheck },
-  { href: '/admin/claims', label: 'Bonus Tarixçəsi', icon: ClipboardCheck },
-  { href: '/admin/deposits', label: 'Depozitlər', icon: Wallet },
-  { href: '/admin/withdrawals', label: 'Çıxarışlar', icon: ArrowDownToLine },
-  { href: '/admin/wallets', label: 'Cüzdanlar', icon: Coins },
-  { href: '/admin/user-logs', label: 'İstifadəçi Logları', icon: Activity },
-  { href: '/admin/logs', label: 'Loglar', icon: ScrollText },
-  { href: '/admin/admins', label: 'Adminlər', icon: Shield },
+  { href: '/admin/users', label: 'Users', icon: Users },
+  { href: '/admin/kyc', label: 'KYC Requests', icon: ShieldCheck },
+  { href: '/admin/claims', label: 'Bonus History', icon: ClipboardCheck },
+  { href: '/admin/deposits', label: 'Deposits', icon: Wallet },
+  { href: '/admin/withdrawals', label: 'Withdrawals', icon: ArrowDownToLine },
+  { href: '/admin/wallets', label: 'Wallets', icon: Coins },
+  { href: '/admin/user-logs', label: 'User Logs', icon: Activity },
+  { href: '/admin/logs', label: 'Admin Logs', icon: ScrollText },
+  { href: '/admin/admins', label: 'Admins', icon: Shield },
 ];
 
 function hasPermission(user, path) {

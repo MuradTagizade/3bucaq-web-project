@@ -295,43 +295,43 @@ export default function AdminKYCRequestsPage() {
                 {isPending ? (
                   <div className={styles.documentsRow}>
                     {/* Front side */}
-                    <div 
+                    <div
                       className={styles.documentBox}
                       onClick={() => setPreviewImage(signedUrls[user.kyc_document_url])}
-                      title="Sənəd Ön Üzünü böyüt"
+                      title={t('doc_front_zoom', 'Zoom document front')}
                     >
                       {signedUrls[user.kyc_document_url] ? (
-                        <img src={signedUrls[user.kyc_document_url]} alt="Sənəd Ön" className={styles.docImage} />
+                        <img src={signedUrls[user.kyc_document_url]} alt={t('doc_front', 'Document Front')} className={styles.docImage} />
                       ) : (
-                        <div className={styles.docPlaceholder}>Sənəd Ön Şəkli Yoxdur</div>
+                        <div className={styles.docPlaceholder}>{t('doc_front_missing', 'No Front Image')}</div>
                       )}
-                      <span className={styles.docLabel}>{t('doc_front_label', 'Ön Üz')} ({DOC_TYPE_LABELS[user.kyc_document_type] || 'Sənəd'})</span>
+                      <span className={styles.docLabel}>{t('doc_front_label', 'Ön Üz')} ({DOC_TYPE_LABELS[user.kyc_document_type] || t('document', 'Document')})</span>
                     </div>
 
                     {/* Back side */}
-                    <div 
+                    <div
                       className={styles.documentBox}
                       onClick={() => setPreviewImage(signedUrls[user.kyc_document_back_url])}
-                      title="Sənəd Arxa Üzünü böyüt"
+                      title={t('doc_back_zoom', 'Zoom document back')}
                     >
                       {signedUrls[user.kyc_document_back_url] ? (
-                        <img src={signedUrls[user.kyc_document_back_url]} alt="Sənəd Arxa" className={styles.docImage} />
+                        <img src={signedUrls[user.kyc_document_back_url]} alt={t('doc_back', 'Document Back')} className={styles.docImage} />
                       ) : (
-                        <div className={styles.docPlaceholder}>Sənəd Arxa Şəkli Yoxdur</div>
+                        <div className={styles.docPlaceholder}>{t('doc_back_missing', 'No Back Image')}</div>
                       )}
-                      <span className={styles.docLabel}>{t('doc_back_label', 'Arxa Üz')} ({DOC_TYPE_LABELS[user.kyc_document_type] || 'Sənəd'})</span>
+                      <span className={styles.docLabel}>{t('doc_back_label', 'Arxa Üz')} ({DOC_TYPE_LABELS[user.kyc_document_type] || t('document', 'Document')})</span>
                     </div>
 
                     {/* Selfie side */}
-                    <div 
+                    <div
                       className={styles.documentBox}
                       onClick={() => setPreviewImage(signedUrls[user.kyc_selfie_url])}
-                      title="Selfini böyüt"
+                      title={t('selfie_zoom', 'Zoom selfie')}
                     >
                       {signedUrls[user.kyc_selfie_url] ? (
-                        <img src={signedUrls[user.kyc_selfie_url]} alt="Selfi" className={styles.docImage} />
+                        <img src={signedUrls[user.kyc_selfie_url]} alt={t('selfie', 'Selfie')} className={styles.docImage} />
                       ) : (
-                        <div className={styles.docPlaceholder}>Selfi Şəkli Yoxdur</div>
+                        <div className={styles.docPlaceholder}>{t('selfie_missing', 'No Selfie Image')}</div>
                       )}
                       <span className={styles.docLabel}>{t('selfie_doc_label', 'Sənədlə Selfi')}</span>
                     </div>
@@ -368,7 +368,7 @@ export default function AdminKYCRequestsPage() {
                     </>
                   ) : (
                     <button 
-                      onClick={() => alert(`Log detal: KYC Rədd edilib. Səbəb: ${rejectReasonText}`)}
+                      onClick={() => alert(t('kyc_reject_log_detail', 'Log detail: KYC rejected. Reason: {{reason}}').replace('{{reason}}', rejectReasonText))}
                       className={styles.historyBtn}
                     >
                       <Eye size={16} />

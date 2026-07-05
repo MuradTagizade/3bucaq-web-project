@@ -149,7 +149,7 @@ export default function AdminDepositsPage() {
                 </div>
               ) : (
                 <div style={{ display: 'flex', flexDirection: 'column' }}>
-                  <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>Şəbəkə: {d.network || 'TRC20'}</span>
+                  <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{t('network', 'Network')}: {d.network || 'TRC20'}</span>
                   <span style={{ fontSize: 10, color: 'var(--text-muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 180 }} title={d.tx_hash}>
                     TX: {d.tx_hash || '—'}
                   </span>

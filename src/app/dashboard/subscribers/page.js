@@ -193,7 +193,7 @@ export default function SubscribersPage() {
                   title: t('total_invites', 'Ümumi Dəvətlər'),
                   content: t('total_invites_desc', 'Sizin referal linkiniz vasitəsilə platformada qeydiyyatdan keçmiş (hesab yaratmış) bütün istifadəçilərin sayıdır. Bura paket almayan istifadəçilər də daxildir.')
                 })}
-                aria-label="Məlumat"
+                aria-label={t('info', 'Info')}
               >
                 <Info size={13} />
               </button>
@@ -216,7 +216,7 @@ export default function SubscribersPage() {
                   title: t('active_referrals', 'Aktiv Referallar'),
                   content: t('active_referrals_desc', 'Sizin referal linkinizlə qeydiyyatdan keçmiş və ən azı 1 aktiv investisiya paketi (Hot Bed) olan istifadəçilərin sayıdır.')
                 })}
-                aria-label="Məlumat"
+                aria-label={t('info', 'Info')}
               >
                 <Info size={13} />
               </button>
@@ -240,7 +240,7 @@ export default function SubscribersPage() {
             <span className={styles.currency}>$</span>
             {formatCurrency(authUser?.balance || 0, '').trim()}
           </div>
-          <div className={styles.statSub}>USDT Balansında</div>
+          <div className={styles.statSub}>{t('in_usdt_balance', 'In USDT Balance')}</div>
         </div>
 
         <div className={styles.statCard}>
@@ -254,7 +254,7 @@ export default function SubscribersPage() {
                   title: t('total_points_label', 'Toplam Xallar'),
                   content: t('total_points_desc', 'Referallarınızın paket aktivasiyalarından qazandığınız ümumi sistem daxili xalların cəmidir.')
                 })}
-                aria-label="Məlumat"
+                aria-label={t('info', 'Info')}
               >
                 <Info size={13} />
               </button>

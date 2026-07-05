@@ -5,28 +5,46 @@
 import { useLanguageStore } from '@/lib/store/languageStore';
 import { translations } from './translations';
 
+const DEFAULT_LANG = 'en';
+
+// Locale used for Intl date formatting per UI language.
+const INTL_LOCALE = {
+  en: 'en-US',
+  ru: 'ru-RU',
+  tr: 'tr-TR',
+  de: 'de-DE',
+  fr: 'fr-FR',
+};
+
+function currentLang() {
+  try {
+    return useLanguageStore.getState().language || DEFAULT_LANG;
+  } catch (e) {
+    return DEFAULT_LANG;
+  }
+}
+
+function resolveKey(dict, key) {
+  if (!dict) return undefined;
+  if (key.includes('.')) {
+    let current = dict;
+    for (const part of key.split('.')) {
+      if (current === undefined || current === null) return undefined;
+      current = current[part];
+    }
+    return current;
+  }
+  return dict[key];
+}
+
 function getTranslation(key, fallback) {
   try {
-    const lang = useLanguageStore.getState().language || 'az';
-    const dict = translations[lang] || translations.az;
-    if (dict) {
-      if (key.includes('.')) {
-        const parts = key.split('.');
-        let current = dict;
-        for (const part of parts) {
-          if (current === undefined || current === null) {
-            current = undefined;
-            break;
-          }
-          current = current[part];
-        }
-        if (current !== undefined) {
-          return current;
-        }
-      } else if (dict[key] !== undefined) {
-        return dict[key];
-      }
-    }
+    const lang = currentLang();
+    // Current language first, then English base.
+    const active = resolveKey(translations[lang], key);
+    if (active !== undefined) return active;
+    const base = resolveKey(translations[DEFAULT_LANG], key);
+    if (base !== undefined) return base;
   } catch (e) {
     // Fallback if store is not initialized or inside SSR
   }
@@ -57,11 +75,8 @@ export function formatPoints(current, required) {
 export function formatDate(timestamp) {
   if (!timestamp) return '';
   const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
-  let lang = 'az';
-  try {
-    lang = useLanguageStore.getState().language || 'az';
-  } catch (e) {}
-  return date.toLocaleDateString(lang === 'az' ? 'az-AZ' : 'en-US', {
+  const locale = INTL_LOCALE[currentLang()] || 'en-US';
+  return date.toLocaleDateString(locale, {
     year: 'numeric',
     month: 'short',
     day: 'numeric',
@@ -71,11 +86,8 @@ export function formatDate(timestamp) {
 export function formatDateTime(timestamp) {
   if (!timestamp) return '';
   const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
-  let lang = 'az';
-  try {
-    lang = useLanguageStore.getState().language || 'az';
-  } catch (e) {}
-  return date.toLocaleString(lang === 'az' ? 'az-AZ' : 'en-US', {
+  const locale = INTL_LOCALE[currentLang()] || 'en-US';
+  return date.toLocaleString(locale, {
     year: 'numeric',
     month: 'short',
     day: 'numeric',
@@ -92,33 +104,29 @@ export function formatCompactNumber(num) {
 
 export function getTransactionTypeLabel(type) {
   const defaultLabels = {
-    transfer: 'Hesabdan transfer',
-    referral_bonus: '10% bonus',
-    depth_bonus: '1% referal bonusu',
-    daily_earning: 'Gündəlik qazanc',
-    package_purchase: 'Paket alışı',
-    level_bonus: 'Level bonusu',
-    deposit: 'Depozit',
-    withdrawal: 'Çıxarış',
-    admin_adjust: 'Admin düzəlişi',
+    transfer: 'Transfer',
+    referral_bonus: 'Referral bonus',
+    depth_bonus: 'Depth bonus',
+    daily_earning: 'Daily earning',
+    package_purchase: 'Package purchase',
+    level_bonus: 'Level bonus',
+    deposit: 'Deposit',
+    withdrawal: 'Withdrawal',
+    admin_adjust: 'Admin adjustment',
   };
-  
+
   const txLabels = getTranslation('tx_type_labels', defaultLabels);
   return txLabels[type] || defaultLabels[type] || type;
 }
 
 export function getKYCStatusLabel(status) {
-  const defaultLabels = {
-    none: 'Təqdim edilməyib',
-    pending: 'Gözləyir',
-    approved: 'Təsdiqlənib',
-    rejected: 'Rədd edilib',
+  if (status === 'none') return getTranslation('kyc_not_submitted', 'Not submitted');
+  const map = {
+    pending: getTranslation('pending', 'Pending'),
+    approved: getTranslation('approved', 'Approved'),
+    rejected: getTranslation('rejected', 'Rejected'),
   };
-  
-  const kycLabels = getTranslation('kyc_status_labels', defaultLabels);
-  // check direct mapping or under doc_types
-  if (status === 'none') return getTranslation('not_submitted', defaultLabels.none);
-  return kycLabels[status] || getTranslation(status, defaultLabels[status]) || status;
+  return map[status] || status;
 }
 
 export function getKYCStatusVariant(status) {

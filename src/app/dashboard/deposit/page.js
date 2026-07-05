@@ -40,7 +40,7 @@ export default function DepositPage() {
   const [userCardNumber, setUserCardNumber] = useState('');
   const [receiptFile, setReceiptFile] = useState(null);
   const [cryptoReceiptFile, setCryptoReceiptFile] = useState(null);
-  const [adminCardNumber, setAdminCardNumber] = useState('Yüklənir...');
+  const [adminCardNumber, setAdminCardNumber] = useState(t('loading', 'Loading...'));
   
   const [loading, setLoading] = useState(false);
   const [toast, setToast] = useState(null);

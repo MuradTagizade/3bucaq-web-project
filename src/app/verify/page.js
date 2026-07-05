@@ -11,11 +11,13 @@ import { OTPInput } from '@/components/ui/be-ui-otp-input';
 import LanguageToggle from '@/components/ui/LanguageToggle';
 import ThemeToggle from '@/components/ui/ThemeToggle';
 import NeuralBackground from '@/components/ui/flow-field-background';
+import { useTranslation } from '@/lib/store/languageStore';
 
 function VerifyForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const email = searchParams.get('email') || '';
+  const { t } = useTranslation();
 
   const [code, setCode] = useState('');
   const [status, setStatus] = useState('idle');
@@ -32,13 +34,13 @@ function VerifyForm() {
 
   const handleSubmit = async () => {
     if (code.length !== 6) {
-      setError('6 rəqəmli kodu daxil edin');
+      setError(t('enter_6_digits', 'Enter 6-digit verification code'));
       setStatus('error');
       return;
     }
 
     if (!email) {
-      setError('Email ünvanı tapılmadı. Zəhmət olmasa yenidən qeydiyyatdan keçin.');
+      setError(t('verify_email_not_found', 'Email address not found. Please register again.'));
       setStatus('error');
       return;
     }
@@ -91,7 +93,7 @@ function VerifyForm() {
 
   const handleResend = async () => {
     if (!email) {
-      setError('Email ünvanı tapılmadı.');
+      setError(t('verify_email_missing', 'Email address not found.'));
       return;
     }
     if (cooldown > 0) return;
@@ -103,7 +105,7 @@ function VerifyForm() {
       });
       if (resendErr) throw new Error(resendErr.message);
       setCooldown(60);
-      alert('Təsdiq emaili yenidən göndərildi!');
+      alert(t('otp_resent', 'Verification code resent successfully!'));
     } catch (err) {
       setError(err.message);
     }
@@ -130,9 +132,10 @@ function VerifyForm() {
             <Logo size={72} showText={false} />
           </div>
 
-          <h1 className={styles.title}>Email Təsdiqi</h1>
+          <h1 className={styles.title}>{t('email_verification', 'Email Verification')}</h1>
           <p className={styles.subtitle}>
-            {email ? <strong>{email}</strong> : 'Email'} ünvanına göndərilən 6 rəqəmli kodu daxil edin
+            {t('verify_code_sent', 'Enter the 6-digit code sent to')}{' '}
+            {email ? <strong>{email}</strong> : 'Email'}
           </p>
 
           <div style={{ display: 'flex', justifyContent: 'center', margin: '24px 0 16px' }}>
@@ -153,11 +156,11 @@ function VerifyForm() {
           {error && <div className={styles.error} style={{ marginTop: '0', marginBottom: '16px' }}>{error}</div>}
 
           <Button fullWidth size="lg" onClick={handleSubmit} loading={loading} disabled={status === 'success'}>
-            İrəli
+            {t('verify_next', 'Next')}
           </Button>
 
           <button className={styles.resend} onClick={handleResend} disabled={!email || loading || cooldown > 0}>
-            {cooldown > 0 ? `Kodu yenidən göndər (${cooldown}s)` : 'Kodu yenidən göndər'}
+            {cooldown > 0 ? `${t('resend_code', 'Resend Code')} (${cooldown}s)` : t('resend_code', 'Resend Code')}
           </button>
         </div>
       </div>
@@ -166,13 +169,14 @@ function VerifyForm() {
 }
 
 export default function VerifyPage() {
+  const { t } = useTranslation();
   return (
     <Suspense
       fallback={
         <div className={styles.page}>
           <div className={styles.container}>
             <div className={styles.card} style={{ textAlign: 'center', padding: '40px 0' }}>
-              <span>Yüklənir...</span>
+              <span>{t('loading', 'Loading...')}</span>
             </div>
           </div>
         </div>

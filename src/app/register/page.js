@@ -41,8 +41,8 @@ function RegisterForm() {
     email: '',
     password: '',
     confirmPassword: '',
-    country: 'Azərbaycan',
-    city: 'Bakı',
+    country: 'Azerbaijan',
+    city: 'Baku',
     phone: '',
     referralCode: refCode,
   });
@@ -219,7 +219,7 @@ function RegisterForm() {
               <Input
                 label={t('password', 'Şifrə')}
                 type="password"
-                placeholder="Min 10 simvol..."
+                placeholder={t('password_min_placeholder', 'Min 10 characters...')}
                 value={form.password}
                 onChange={(e) => updateField('password', e.target.value)}
                 error={errors.password}
@@ -262,7 +262,7 @@ function RegisterForm() {
                 ))}
               </Select>
 
-              {['Azərbaycan', 'Türkiyə', 'Rusiya'].includes(form.country) ? (
+              {['Azerbaijan', 'Turkey', 'Russia'].includes(form.country) ? (
                 <Select
                   label={t('city', 'Şəhər')}
                   value={form.city}
@@ -280,7 +280,7 @@ function RegisterForm() {
               ) : (
                 <Input
                   label={t('city', 'Şəhər')}
-                  placeholder="Şəhər daxil edin"
+                  placeholder={t('enter_city', 'Enter city')}
                   value={form.city}
                   onChange={(e) => updateField('city', e.target.value)}
                   error={errors.city}

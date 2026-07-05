@@ -25,7 +25,7 @@ export default function Pagination({ currentPage, totalPages, onPageChange }) {
         className={styles.arrow}
         disabled={currentPage === 1}
         onClick={() => onPageChange(currentPage - 1)}
-        aria-label="Əvvəlki"
+        aria-label="Previous"
       >
         <ChevronLeft size={18} />
       </button>
@@ -60,7 +60,7 @@ export default function Pagination({ currentPage, totalPages, onPageChange }) {
         className={styles.arrow}
         disabled={currentPage === totalPages}
         onClick={() => onPageChange(currentPage + 1)}
-        aria-label="Növbəti"
+        aria-label="Next"
       >
         <ChevronRight size={18} />
       </button>

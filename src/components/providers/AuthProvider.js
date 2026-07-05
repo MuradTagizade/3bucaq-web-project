@@ -14,6 +14,23 @@ export function AuthProvider({ children }) {
   useEffect(() => {
     setLoading(true);
 
+    // Köhnəlmiş / etibarsız refresh token (server-side sessiya ləğvi, parol
+    // sıfırlama və ya JWT rotasiyasından sonra) SDK-nı hər yükləmədə
+    // "AuthApiError: Invalid Refresh Token" verməyə məcbur edir. Aşkarla və yerli
+    // sessiyanı bir dəfə təmizlə ki, xəta təkrarlanmasın və istifadəçi təmiz
+    // şəkildə login ekranına düşsün. (scope: 'local' server çağırışı etmir.)
+    supabase.auth
+      .getSession()
+      .then(({ error }) => {
+        if (error) {
+          const msg = String(error.message || '').toLowerCase();
+          if (msg.includes('refresh token') || msg.includes('jwt') || msg.includes('invalid')) {
+            supabase.auth.signOut({ scope: 'local' }).catch(() => {});
+          }
+        }
+      })
+      .catch(() => {});
+
     // Profili getir: trigger gecikmesine karşı kısa retry + self-healing RPC.
     const loadProfile = async (authUser) => {
       // Fetch user profile from Supabase Database

@@ -85,17 +85,6 @@ export default function AdminDashboardPage() {
   ];
 
   const PKG_LABELS = { pkg19: '#19', pkg49: '#49', pkg99: '#99', pkg199: '#199', pkg399: '#399', pkg799: '#799' };
-  const TX_LABELS = t('tx_type_labels', {
-    package_purchase: 'Paket alışı',
-    referral_bonus: 'Referal bonusu',
-    depth_bonus: 'Dərinlik bonusu',
-    level_bonus: 'Level bonusu',
-    daily_earning: 'Gündəlik qazanc',
-    transfer: 'Köçürmə',
-    deposit: 'Depozit',
-    withdrawal: 'Çıxarış',
-    admin_adjust: 'Admin düzəlişi',
-  });
 
   const kyc = charts?.kyc_dist || {};
   const kycSegments = [
@@ -172,7 +161,7 @@ export default function AdminDashboardPage() {
               <div className={styles.chartCard}>
                 <h3 className={styles.chartTitle}>{t('chart_tx_title', 'Əməliyyat Növləri üzrə Həcm ($)')}</h3>
                 <HBarChart
-                  items={(charts.tx_types || []).map((x) => ({ label: TX_LABELS[x.type] || x.type, value: Number(x.a) }))}
+                  items={(charts.tx_types || []).map((x) => ({ label: t(`tx_type_labels.${x.type}`, x.type), value: Number(x.a) }))}
                   color="var(--chart-2)"
                   formatValue={(v) => `$${Number(v).toLocaleString('en-US')}`}
                 />
@@ -180,7 +169,7 @@ export default function AdminDashboardPage() {
               <div className={styles.chartCard}>
                 <h3 className={styles.chartTitle}>{t('chart_tx_count_title', 'Əməliyyat Sayı üzrə')}</h3>
                 <HBarChart
-                  items={(charts.tx_types || []).map((x) => ({ label: TX_LABELS[x.type] || x.type, value: Number(x.c) }))}
+                  items={(charts.tx_types || []).map((x) => ({ label: t(`tx_type_labels.${x.type}`, x.type), value: Number(x.c) }))}
                   color="var(--chart-1)"
                 />
               </div>

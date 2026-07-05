@@ -13,24 +13,24 @@ import { formatDateTime } from '@/lib/utils/formatters';
 import { useTranslation } from '@/lib/store/languageStore';
 
 const ACTION_LABELS = {
-  approve_withdrawal: { label: 'Çıxarış Təsdiq', variant: 'success' },
-  reject_withdrawal: { label: 'Çıxarış Rədd', variant: 'error' },
-  approve_deposit: { label: 'Mədaxil Təsdiq', variant: 'success' },
-  reject_deposit: { label: 'Mədaxil Rədd', variant: 'error' },
-  update_role: { label: 'Rol Yeniləndi', variant: 'gold' },
-  unblock_user: { label: 'Blok Açıldı', variant: 'info' },
-  block_user: { label: 'Bloklandı', variant: 'error' },
-  update_balance: { label: 'Balans Dəyişdi', variant: 'accent' },
-  update_points: { label: 'Xal Dəyişdi', variant: 'accent' },
-  update_package: { label: 'Paket Yeniləndi', variant: 'info' },
-  kyc_approved: { label: 'KYC Təsdiq', variant: 'success' },
-  kyc_rejected: { label: 'KYC Rədd', variant: 'error' },
-  add_admin: { label: 'Admin Əlavə Edildi', variant: 'gold' },
-  update_admin_permissions: { label: 'Səlahiyyət Yeniləndi', variant: 'info' },
-  remove_admin: { label: 'Admin Silindi', variant: 'error' },
-  create_subadmin: { label: 'Alt-Admin Yaradıldı', variant: 'gold' },
-  approve_claim: { label: 'Səviyyə Təsdiq', variant: 'success' },
-  reject_claim: { label: 'Səviyyə Rədd', variant: 'error' },
+  approve_withdrawal: { variant: 'success' },
+  reject_withdrawal: { variant: 'error' },
+  approve_deposit: { variant: 'success' },
+  reject_deposit: { variant: 'error' },
+  update_role: { variant: 'gold' },
+  unblock_user: { variant: 'info' },
+  block_user: { variant: 'error' },
+  update_balance: { variant: 'accent' },
+  update_points: { variant: 'accent' },
+  update_package: { variant: 'info' },
+  kyc_approved: { variant: 'success' },
+  kyc_rejected: { variant: 'error' },
+  add_admin: { variant: 'gold' },
+  update_admin_permissions: { variant: 'info' },
+  remove_admin: { variant: 'error' },
+  create_subadmin: { variant: 'gold' },
+  approve_claim: { variant: 'success' },
+  reject_claim: { variant: 'error' },
 };
 
 const PER_PAGE = 15;
@@ -65,10 +65,7 @@ export default function AdminLogsPage() {
     loadLogs();
   }, []);
 
-  const getActionLabel = (actionKey) => {
-    const trans = t('action_labels', {});
-    return trans[actionKey] || ACTION_LABELS[actionKey]?.label || actionKey;
-  };
+  const getActionLabel = (actionKey) => t(`action_labels.${actionKey}`, actionKey);
 
   // Compute unique admins and actions from data for filtering
   const uniqueAdmins = Array.from(
@@ -170,8 +167,6 @@ export default function AdminLogsPage() {
       </div>
     );
   }
-
-  const logsTableHeader = t('logs_table_header', {});
 
   return (
     <div>
@@ -301,12 +296,12 @@ export default function AdminLogsPage() {
           <table className={lStyles.logsTable}>
             <thead>
               <tr>
-                <th>{logsTableHeader.date || 'Tarix'}</th>
-                <th>{logsTableHeader.admin || 'Admin'}</th>
-                <th>{logsTableHeader.action || 'Əməliyyat'}</th>
-                <th>{logsTableHeader.target || 'Hədəf İstifadəçi'}</th>
-                <th>{logsTableHeader.details || 'Detallar'}</th>
-                <th className={lStyles.centerAlign}>{logsTableHeader.view || 'Bax'}</th>
+                <th>{t('logs_table_header.date', 'Date')}</th>
+                <th>{t('logs_table_header.admin', 'Admin')}</th>
+                <th>{t('logs_table_header.action', 'Action')}</th>
+                <th>{t('logs_table_header.target', 'Target User')}</th>
+                <th>{t('logs_table_header.details', 'Details')}</th>
+                <th className={lStyles.centerAlign}>{t('logs_table_header.view', 'View')}</th>
               </tr>
             </thead>
             <tbody>
@@ -439,7 +434,7 @@ export default function AdminLogsPage() {
                 </span>
               </div>
               <div className={lStyles.modalItem}>
-                <span className={lStyles.modalLabel}>{(logsTableHeader.target || 'Hədəf istifadəçi')}:</span>
+                <span className={lStyles.modalLabel}>{t('logs_table_header.target', 'Target User')}:</span>
                 <span className={lStyles.modalValue}>
                   {selectedLog.target
                     ? `${selectedLog.target?.user_code} (${selectedLog.target.email})`

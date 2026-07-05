@@ -30,14 +30,7 @@ import {
   validateCity 
 } from '@/lib/utils/validators';
 
-const PERMISSION_LABELS = {
-  superadmin: 'Super Admin (Bütün səlahiyyətlər + Admin idarəetməsi)',
-  users: 'İstifadəçiləri İdarə Et (Bloklama, Balans/Points dəyişmə)',
-  kyc: 'KYC Sorğularını İdarə Et (Təsdiq/Rədd)',
-  claims: 'Bonus Tarixçəsinə Baxış',
-  finance: 'Maliyyə İdarə Et (Depozit/Çıxarış Təsdiq/Rədd)',
-  logs: 'Sistem Loglarını İzlə',
-};
+const PERMISSION_KEYS = ['superadmin', 'users', 'kyc', 'claims', 'finance', 'logs'];
 
 export default function AdminsPage() {
   const { user: superAdminUser } = useAuthStore();
@@ -74,8 +67,8 @@ export default function AdminsPage() {
     email: '',
     password: '',
     phone: '',
-    country: 'Azərbaycan',
-    city: 'Bakı',
+    country: 'Azerbaijan',
+    city: 'Baku',
   });
   const [formErrors, setFormErrors] = useState({});
   const [userSearch, setUserSearch] = useState('');
@@ -194,8 +187,8 @@ export default function AdminsPage() {
           email: '',
           password: '',
           phone: '',
-          country: 'Azərbaycan',
-          city: 'Bakı',
+          country: 'Azerbaijan',
+          city: 'Baku',
         });
       } else {
         if (!selectedUser) {
@@ -331,10 +324,7 @@ export default function AdminsPage() {
         (u.user_code || '').toLowerCase().includes(userSearch.toLowerCase()))
   );
 
-  const getPermissionLabel = (key) => {
-    const trans = t('permission_labels', {});
-    return trans[key] || PERMISSION_LABELS[key] || key;
-  };
+  const getPermissionLabel = (key) => t(`permission_labels.${key}`, key);
 
   if (loading) {
     return (
@@ -344,8 +334,6 @@ export default function AdminsPage() {
       </div>
     );
   }
-
-  const tableHeader = t('admins_table_header', {});
 
   return (
     <div className={styles.adminsPage}>
@@ -370,10 +358,10 @@ export default function AdminsPage() {
       {/* Admin List */}
       <div className={styles.table}>
         <div className={styles.tableHeader}>
-          <span>{tableHeader.name || 'Login / Ad'}</span>
-          <span>{tableHeader.perms || 'Səlahiyyətlər'}</span>
-          <span>{tableHeader.status || 'Status'}</span>
-          <span style={{ textAlign: 'right' }}>{tableHeader.edit || 'Düzəliş'}</span>
+          <span>{t('admins_table_header.name', 'Username / Name')}</span>
+          <span>{t('admins_table_header.perms', 'Permissions')}</span>
+          <span>{t('admins_table_header.status', 'Status')}</span>
+          <span style={{ textAlign: 'right' }}>{t('admins_table_header.edit', 'Edit')}</span>
         </div>
         {filteredAdmins.length === 0 ? (
           <div style={{ padding: 20, textAlign: 'center', color: 'var(--text-muted)' }}>
@@ -502,8 +490,8 @@ export default function AdminsPage() {
               </div>
 
               <div className={styles.permissionsGrid} style={{ marginTop: 'var(--space-md)' }}>
-                <h3 className={styles.modalSubtitle}>{tableHeader.perms || 'Səlahiyyətlər'}</h3>
-                {Object.keys(PERMISSION_LABELS).map((key) => (
+                <h3 className={styles.modalSubtitle}>{t('admins_table_header.perms', 'Permissions')}</h3>
+                {PERMISSION_KEYS.map((key) => (
                   <div key={key} className={styles.permRow}>
                     <span className={styles.permLabel}>{getPermissionLabel(key)}</span>
                     <Toggle
@@ -568,8 +556,8 @@ export default function AdminsPage() {
 
               {selectedUser && (
                 <div className={styles.permissionsGrid}>
-                  <h3 className={styles.modalSubtitle}>{tableHeader.perms || 'Səlahiyyətlər'}</h3>
-                  {Object.keys(PERMISSION_LABELS).map((key) => (
+                  <h3 className={styles.modalSubtitle}>{t('admins_table_header.perms', 'Permissions')}</h3>
+                  {PERMISSION_KEYS.map((key) => (
                     <div key={key} className={styles.permRow}>
                       <span className={styles.permLabel}>{getPermissionLabel(key)}</span>
                       <Toggle
@@ -612,8 +600,8 @@ export default function AdminsPage() {
             </div>
 
             <div className={styles.permissionsGrid}>
-              <h3 className={styles.modalSubtitle}>{tableHeader.perms || 'Səlahiyyətlər'}</h3>
-              {Object.keys(PERMISSION_LABELS).map((key) => (
+              <h3 className={styles.modalSubtitle}>{t('admins_table_header.perms', 'Permissions')}</h3>
+              {PERMISSION_KEYS.map((key) => (
                 <div key={key} className={styles.permRow}>
                   <span className={styles.permLabel}>{getPermissionLabel(key)}</span>
                   <Toggle

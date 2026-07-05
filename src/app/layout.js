@@ -18,8 +18,8 @@ const jetbrainsMono = JetBrains_Mono({
 
 export const metadata = {
   title: 'LEVEL UP — Make World Green Again',
-  description: 'LEVEL UP investisiya və MLM platforması. Paketlər alın, referal cəlb edin, qazanc əldə edin.',
-  keywords: 'LEVEL UP, investisiya, MLM, USDT, qazanc, referal',
+  description: 'LEVEL UP investment and MLM platform. Buy packages, invite referrals, earn rewards.',
+  keywords: 'LEVEL UP, investment, MLM, USDT, earnings, referral',
   manifest: '/manifest.json',
   icons: {
     icon: '/favicon.ico',
@@ -27,9 +27,9 @@ export const metadata = {
   },
   openGraph: {
     title: 'LEVEL UP — Make World Green Again',
-    description: 'İnvestisiya və MLM platforması',
+    description: 'Investment and MLM platform',
     type: 'website',
-    locale: 'az_AZ',
+    locale: 'en_US',
     siteName: 'LEVEL UP',
   },
 };
@@ -42,7 +42,7 @@ export const viewport = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="az" data-scroll-behavior="smooth" suppressHydrationWarning className={`${inter.variable} ${jetbrainsMono.variable}`}>
+    <html lang="en" data-scroll-behavior="smooth" suppressHydrationWarning className={`${inter.variable} ${jetbrainsMono.variable}`}>
       <head>
         <Script
           id="theme-initializer"
