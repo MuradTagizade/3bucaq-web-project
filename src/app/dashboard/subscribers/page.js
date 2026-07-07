@@ -14,7 +14,7 @@ import QRCode from 'qrcode';
 import { useAuthStore } from '@/lib/store/authStore';
 import { useTranslation } from '@/lib/store/languageStore';
 import { getReferralTree, getPointsHistory } from '@/lib/supabase/database';
-import { formatCurrency, getPackageDisplayName } from '@/lib/utils/formatters';
+import { formatCurrency, getPackageDisplayName, formatDate, formatTime } from '@/lib/utils/formatters';
 
 const PER_PAGE = 10;
 
@@ -431,12 +431,7 @@ export default function SubscribersPage() {
                   </span>
                   <span className={styles.cellLevel}>{sub.line}</span>
                   <span className={styles.cellDate}>
-                    {new Date(sub.joinedAt).toLocaleDateString('az-AZ', {
-                      year: 'numeric', month: '2-digit', day: '2-digit',
-                    })}{' '}
-                    {new Date(sub.joinedAt).toLocaleTimeString('az-AZ', {
-                      hour: '2-digit', minute: '2-digit',
-                    })}
+                    {formatDate(sub.joinedAt)} {formatTime(sub.joinedAt)}
                   </span>
                   <span className={styles.cellPkg}>
                     {activePkg ? (
@@ -480,7 +475,7 @@ export default function SubscribersPage() {
                     <div className={styles.mobileCardInfo}>
                       <span className={styles.mobileLogin}>{sub.username || sub.userCode}</span>
                       <span className={styles.mobileDate}>
-                        {new Date(sub.joinedAt).toLocaleDateString('az-AZ')} · {new Date(sub.joinedAt).toLocaleTimeString('az-AZ', { hour: '2-digit', minute: '2-digit' })}
+                        {formatDate(sub.joinedAt)} · {formatTime(sub.joinedAt)}
                       </span>
                     </div>
                     <span className={`${styles.statusDot} ${isActive ? styles.statusActive : styles.statusInactive}`} />
@@ -538,7 +533,7 @@ export default function SubscribersPage() {
             </div>
             <div className={styles.detailRow}>
               <span>{t('register', 'Qeydiyyat')}</span>
-              <span>{new Date(selectedUser.joinedAt).toLocaleDateString('az-AZ')} · {new Date(selectedUser.joinedAt).toLocaleTimeString('az-AZ', { hour: '2-digit', minute: '2-digit' })}</span>
+              <span>{formatDate(selectedUser.joinedAt)} · {formatTime(selectedUser.joinedAt)}</span>
             </div>
             <div className={styles.detailRow}>
               <span>{t('earned_points', 'Qazanılan Xal')}</span>

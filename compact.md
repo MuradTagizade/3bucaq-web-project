@@ -554,3 +554,16 @@ Bu sessiyada admin panel əhəmiyyətli genişləndirildi. Digər UI işləri: d
     * `history/page.js`: tranzaksiya siyahısı qurulmazdan əvvəl transfer/referral_bonus/depth_bonus sətirlərinin qarşı tərəf user_code-ları toplanır → `usernamesForCodes` ilə xəritə çəkilir → `partyLabel(code)` = username varsa **`KOD (username)`**, yoxdursa `KOD`. `@`-prefiks çıxarıldı. Transfer + referal `detail` sətirləri (siyahı + detal modalı — hər ikisi `detail`-i istifadə edir).
     * `transfer/page.js`: "Köçürmə Tarixçəsi" siyahısı üçün `transferNames` state + `transfers` dəyişəndə xəritə çəkən useEffect (cancel-guard) + eyni `partyLabel`. `Kimə/Kimdən: KOD (username)`.
 * Aktiv SQL zənciri: `sql/`-də **_18-ə qədər**. §20 LANSMAN SIFIRLAMA PLANI hələ də gözləyir.
+
+## 27. Son Sessiya (2026-07-08): Tarixçə tarixi dilə uyğun deyildi (sabit ay massivi / az-AZ) — Intl-ə keçirildi (yalnız frontend)
+
+İstifadəçi istəyi: history-də tarix "türkcə/sabit qalıb", başqa şeylər də dilə uyğun deyil — hamısını dilə görə tənzimlə.
+
+* **Kök səbəb:** `history/page.js`-də tarix sətri lokal `formatRowDate` + **sabit `MONTHS` massivi** (`t('months', [az fallback])`) ilə render olunurdu; modal isə onsuz da dilə-uyğun `formatDateTime` (Intl) işlədirdi — uyğunsuzluq. `subscribers/page.js` tarixləri **sabit `'az-AZ'`** locale ilə idi.
+* **Düzəliş (build ✅, yalnız frontend):**
+    * `formatters.js`: yeni **`formatTime()`** (Intl, `hour:2-digit minute:2-digit`, cari dil locale-i). `formatDate`/`formatDateTime` onsuz da `INTL_LOCALE[currentLang()]` işlədir.
+    * `history/page.js`: `MONTHS` + `formatRowDate` + `formatRowTime` **silindi**; sətir tarixi `formatDate()`, saatı `formatTime()` işlədir (modal onsuz da `formatDateTime`). `@`-prefiks əvvəlki addımda getmişdi.
+    * `subscribers/page.js`: 4 `toLocaleDateString('az-AZ')`/`toLocaleTimeString('az-AZ')` → `formatDate()`/`formatTime()`.
+    * Doğrulama: Intl çıxışı hər dildə düzgün — en `Jul 8, 2026 · 06:05 PM`, ru `8 июл. 2026`, tr `8 Tem 2026`, de `8. Juli 2026`, fr `8 juil. 2026`.
+* **Audit:** user-facing dashboard səhifələrində `t('key')` açarlarının HAMISI `en.js`-də var (skript ilə yoxlandı) → İngilis rejimində sızma yox. Qalan sabit-locale yalnız `toLocaleString('en-US')` = məbləğ/rəqəm formatı (qəsdən, dildən asılı deyil). Admin səhifələri onsuz da `formatDate/formatDateTime` işlədir. `months` tərcümə açarları artıq istifadə olunmur (zərərsiz qalır).
+* SQL dəyişməz (`_18`-də). §20 LANSMAN SIFIRLAMA PLANI hələ də gözləyir.

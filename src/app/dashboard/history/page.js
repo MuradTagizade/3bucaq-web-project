@@ -7,7 +7,7 @@ import {
   ArrowDown, ArrowUp, ArrowLeftRight, Users, Gift, Award, TrendingUp, ShoppingBag, Sliders,
   Calendar, ChevronDown, ChevronLeft, ChevronRight, Info 
 } from 'lucide-react';
-import { formatCurrency, formatDateTime } from '@/lib/utils/formatters';
+import { formatCurrency, formatDateTime, formatDate, formatTime } from '@/lib/utils/formatters';
 import { useAuthStore } from '@/lib/store/authStore';
 import { useTranslation } from '@/lib/store/languageStore';
 import { getTransactions, getDeposits, getWithdrawals, getMyFinanceStats, getPointsHistory, usernamesForCodes } from '@/lib/supabase/database';
@@ -68,22 +68,6 @@ export default function HistoryPage() {
     rejected: 'Rədd edilib',
   });
 
-  const MONTHS = t('months', ['Yan', 'Fev', 'Mar', 'Apr', 'May', 'İyun', 'İyul', 'Avq', 'Sen', 'Okt', 'Noy', 'Dek']);
-
-  function formatRowDate(dateString) {
-    if (!dateString) return '';
-    const d = new Date(dateString);
-    return `${d.getDate()} ${MONTHS[d.getMonth()]} ${d.getFullYear()}`;
-  }
-
-  function formatRowTime(dateString) {
-    if (!dateString) return '';
-    const d = new Date(dateString);
-    const h = String(d.getHours()).padStart(2, '0');
-    const m = String(d.getMinutes()).padStart(2, '0');
-    const s = String(d.getSeconds()).padStart(2, '0');
-    return `${h}:${m}:${s}`;
-  }
 
   useEffect(() => {
     async function loadData() {
@@ -465,8 +449,8 @@ export default function HistoryPage() {
                     <tr key={item.id} className={styles.clickableRow} onClick={() => setSelectedTx(item)}>
                       <td>
                         <div className={styles.dateCol}>
-                          <span className={styles.dateStr}>{formatRowDate(item.created_at)}</span>
-                          <span className={styles.timeStr}>{formatRowTime(item.created_at)}</span>
+                          <span className={styles.dateStr}>{formatDate(item.created_at)}</span>
+                          <span className={styles.timeStr}>{formatTime(item.created_at)}</span>
                         </div>
                       </td>
                       <td>

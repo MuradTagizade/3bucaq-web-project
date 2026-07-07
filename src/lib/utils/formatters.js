@@ -96,6 +96,17 @@ export function formatDateTime(timestamp) {
   });
 }
 
+// Yalnız saat:dəqiqə — cari UI dilinə uyğun (Intl). Tarix və saat ayrı-ayrı göstərilən yerlərdə.
+export function formatTime(timestamp) {
+  if (!timestamp) return '';
+  const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+  const locale = INTL_LOCALE[currentLang()] || 'en-US';
+  return date.toLocaleTimeString(locale, {
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+}
+
 export function formatCompactNumber(num) {
   if (num >= 1000000) return `${(num / 1000000).toFixed(1)}M`;
   if (num >= 1000) return `${(num / 1000).toFixed(1)}K`;
