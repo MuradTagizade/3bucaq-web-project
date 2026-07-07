@@ -47,12 +47,21 @@ export async function verifyReferralCode(code) {
   return data || { valid: false };
 }
 
-// Transfer alıcısını 6 karakterlik user_code ile doğrula (büyük/küçük harf duyarsız).
+// Transfer alıcısını user_code VƏ ya username ile doğrula (büyük/küçük harf duyarsız).
 export async function lookupUserCode(code) {
   if (!code) return { exists: false };
   const { data, error } = await supabase.rpc('lookup_user_code', { p_code: code });
   if (error) throw new Error(friendlyError(error));
   return data || { exists: false };
+}
+
+// Qeydiyyatda istifadəçi adının müsaitliyini canlı yoxla (anon+auth RPC).
+// { available: bool, reason?: 'empty'|'invalid'|'taken' } qaytarır.
+export async function checkUsernameAvailable(username) {
+  if (!username) return { available: false, reason: 'empty' };
+  const { data, error } = await supabase.rpc('check_username_available', { p_username: username });
+  if (error) throw new Error(friendlyError(error));
+  return data || { available: false };
 }
 
 export async function blockUser(uid, reason, days) {

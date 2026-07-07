@@ -13,14 +13,16 @@ export async function loginUser(email, password) {
   return data.user;
 }
 
-export async function registerUser(email, password, { fullName, country, city, phone, referralCode }) {
-  // Kullanıcı adı YOK — user_code trigger tarafından otomatik atanır.
+export async function registerUser(email, password, { fullName, username, country, city, phone, referralCode }) {
+  // username: istifadəçinin seçdiyi ad (trigger `handle_new_user` metadata-dan alır,
+  // formatı/unikallığı DB tərəfdə də yoxlanılır). user_code yenə də avtomatik atanır.
   const { data, error } = await supabase.auth.signUp({
     email,
     password,
     options: {
       data: {
         full_name: fullName,
+        username: username ? username.trim() : null,
         country: country || null,
         city: city || null,
         phone: phone || null,

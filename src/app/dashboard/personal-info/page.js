@@ -7,7 +7,6 @@ import { useAuthStore } from '@/lib/store/authStore';
 import { useTranslation } from '@/lib/store/languageStore';
 import { formatDate } from '@/lib/utils/formatters';
 import { updateUserProfile } from '@/lib/supabase/database';
-import { validatePhone } from '@/lib/utils/validators';
 import { supabase } from '@/lib/supabase/config';
 
 export default function PersonalInfoPage() {
@@ -18,7 +17,6 @@ export default function PersonalInfoPage() {
   const [country, setCountry] = useState('');
   const [city, setCity] = useState('');
   const [email, setEmail] = useState('');
-  const [phone, setPhone] = useState('');
   const [saving, setSaving] = useState(false);
   const [statusMsg, setStatusMsg] = useState({ type: '', text: '' });
   const [codeCopied, setCodeCopied] = useState(false);
@@ -70,7 +68,6 @@ export default function PersonalInfoPage() {
       setCountry(authUser.country || '');
       setCity(authUser.city || '');
       setEmail(authUser.email || '');
-      setPhone(authUser.phone || '');
     }
   }, [authUser]);
 
@@ -113,24 +110,9 @@ export default function PersonalInfoPage() {
     setTimeout(() => setCodeCopied(false), 2000);
   };
 
-  const handlePhoneChange = (e) => {
-    let v = e.target.value.replace(/[^\d+]/g, '');
-    v = v.startsWith('+') ? '+' + v.slice(1).replace(/\+/g, '') : v.replace(/\+/g, '');
-    const az = v.match(/^(\+?994)(.*)$/);
-    if (az) v = az[1] + az[2].replace(/^0+/, '').slice(0, 9);
-    setPhone(v);
-  };
-
   const handleUpdate = async (e) => {
     e.preventDefault();
     if (!authUser?.uid) return;
-    if (phone.trim()) {
-      const phoneErr = validatePhone(phone);
-      if (phoneErr) {
-        setStatusMsg({ type: 'error', text: phoneErr });
-        return;
-      }
-    }
     setSaving(true);
     setStatusMsg({ type: '', text: '' });
     try {
@@ -152,7 +134,6 @@ export default function PersonalInfoPage() {
         full_name: fullName,
         country: country,
         city: city,
-        phone: phone,
       });
 
       setUser({
@@ -160,7 +141,6 @@ export default function PersonalInfoPage() {
         fullName: fullName,
         country: country,
         city: city,
-        phone: phone,
       });
 
       setStatusMsg({ type: 'success', text: t('update_success', 'Məlumatlar uğurla yeniləndi!') });
@@ -198,7 +178,6 @@ export default function PersonalInfoPage() {
         full_name: fullName,
         country: country,
         city: city,
-        phone: phone,
       });
 
       setUser({
@@ -206,7 +185,6 @@ export default function PersonalInfoPage() {
         fullName: fullName,
         country: country,
         city: city,
-        phone: phone,
         email: email,
       });
 
@@ -267,6 +245,21 @@ export default function PersonalInfoPage() {
                 </div>
               </div>
 
+              {authUser?.username && (
+                <div className={styles.inputWrapper}>
+                  <label className={styles.inputLabel}>{t('username_label', 'İSTİFADƏÇİ ADI')}</label>
+                  <div className={styles.disabledInputContainer}>
+                    <input
+                      type="text"
+                      value={authUser.username}
+                      disabled
+                      className={styles.disabledInput}
+                    />
+                    <Lock size={14} className={styles.lockIcon} />
+                  </div>
+                </div>
+              )}
+
               <div className={styles.inputWrapper}>
                 <label className={styles.inputLabel}>{t('email_label', 'E-POÇT')}</label>
                 <input
@@ -275,17 +268,6 @@ export default function PersonalInfoPage() {
                   onChange={(e) => setEmail(e.target.value)}
                   className={styles.textInput}
                   placeholder={t('enter_email_placeholder', 'E-poçt daxil edin')}
-                />
-              </div>
-
-              <div className={styles.inputWrapper}>
-                <label className={styles.inputLabel}>{t('phone_label', 'TELEFON NÖMRƏSİ')}</label>
-                <input
-                  type="tel"
-                  value={phone}
-                  onChange={handlePhoneChange}
-                  className={styles.textInput}
-                  placeholder="+994501234567"
                 />
               </div>
 
