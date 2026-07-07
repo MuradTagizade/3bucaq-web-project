@@ -6,6 +6,7 @@ import styles from './hotbed.module.css';
 import Modal from '@/components/ui/Modal';
 import Button from '@/components/ui/Button';
 import Badge from '@/components/ui/Badge';
+import Toggle from '@/components/ui/Toggle';
 import { PACKAGES } from '@/lib/utils/constants';
 import { formatCurrency, withMinDuration } from '@/lib/utils/formatters';
 import { Info, Flame, Zap, Clock } from 'lucide-react';
@@ -152,32 +153,25 @@ export default function HotBedPage() {
                 </div>
               )}
 
-              {/* Buy / Active Button */}
-              <div className={styles.pkgAction} style={{ marginTop: 'auto' }}>
-                {isActive ? (
-                  <Button
-                    variant="ghost"
-                    disabled={true}
-                    fullWidth
-                    style={{
-                      borderColor: 'rgba(0, 255, 163, 0.2)',
-                      background: 'rgba(0, 255, 163, 0.05)',
-                      color: 'var(--color-success)',
-                      cursor: 'not-allowed',
-                      opacity: 0.9
-                    }}
-                  >
-                    {t('active', 'Aktivdir')}
-                  </Button>
-                ) : (
-                  <Button
-                    variant="primary"
-                    onClick={() => handleToggle(pkg)}
-                    fullWidth
-                  >
-                    {t('buy_package', 'Satın Al')}
-                  </Button>
-                )}
+              {/* ON/OFF Toggle — ON = paketi aktiv edir (alır). Aktiv paketi əl ilə
+                  söndürmək olmaz; yalnız yeni levelə keçəndə avtomatik OFF olur. */}
+              <div
+                className={styles.pkgAction}
+                style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px' }}
+              >
+                <Toggle
+                  checked={isActive}
+                  onChange={() => handleToggle(pkg)}
+                  label={true}
+                />
+                <span
+                  style={{
+                    fontSize: '0.72rem',
+                    color: isActive ? 'var(--color-success)' : 'var(--text-secondary)',
+                  }}
+                >
+                  {isActive ? t('active', 'Aktivdir') : t('buy_package', 'Satın Al')}
+                </span>
               </div>
             </div>
           );
@@ -204,10 +198,13 @@ export default function HotBedPage() {
             <p className={styles.confirmNote}>
               <Clock size={13} style={{ display: 'inline', verticalAlign: 'middle' }} />
               {' '}
-              {confirmModal.pkg.expiryDays 
-                ? t('lock_period_info', 'Müddət: {{days}} gün').replace('{{days}}', confirmModal.pkg.expiryDays)
-                : t('lifetime_info', 'Müddət: Ömürlük')
+              {confirmModal.pkg.expiryDays
+                ? t('lock_period_info', 'Duration: {{days}} days').replace('{{days}}', confirmModal.pkg.expiryDays)
+                : t('lifetime_info', 'Active until next level-up')
               }
+            </p>
+            <p className={styles.confirmNote}>
+              {t('reset_on_levelup_note', 'The package deactivates when you level up and the amount is not refunded.')}
             </p>
             <div className={styles.confirmActions}>
               <Button variant="ghost" onClick={() => setConfirmModal({ open: false, pkg: null })}>
@@ -260,7 +257,7 @@ export default function HotBedPage() {
           <p>{t('pkg_desc_earn', 'Bu paketlər həm xal, həm gündəlik dollar qazandırır. Qazanc balansınıza əlavə olunur.')}</p>
 
           <h4>{t('lock_info_title', 'Paket Müddətləri')}</h4>
-          <p>{t('lock_info_desc_updated', 'Yatırım paketləri (#19-#199) bir dəfə alınır və ömürlük (süresiz) aktiv qalır. Qazanc paketləri (#399-#799) isə 120 gün aktiv qalır və müddət bitdikdən sonra yenidən alınmalıdır.')}</p>
+          <p>{t('lock_info_desc_updated', 'All packages deactivate when you level up and must be repurchased to claim the next level bonus — the amount is not refunded. Earning packages (#399-#799) also expire after 120 days.')}</p>
 
           <div className={styles.infoTable}>
             <div className={styles.infoRow}>
@@ -274,7 +271,7 @@ export default function HotBedPage() {
                 <span style={{ color: pkg.color }}>{pkg.displayName}</span>
                 <span>{pkg.points > 0 ? pkg.points : '-'}</span>
                 <span>{pkg.dailyEarning > 0 ? formatCurrency(pkg.dailyEarning) : '-'}</span>
-                <span>{pkg.expiryDays ? `${pkg.expiryDays} ${t('days_short', 'gün')}` : t('lifetime', 'Ömürlük')}</span>
+                <span>{pkg.expiryDays ? `${pkg.expiryDays} ${t('days_short', 'gün')}` : t('lifetime', 'Until level-up')}</span>
               </div>
             ))}
           </div>

@@ -82,7 +82,7 @@ export const LEVELS = [
   { level: 7, points: 5314, bonus: 8999, requiredPkgs: ['pkg19', 'pkg49', 'pkg99', 'pkg199'] },
   { level: 8, points: 10723, bonus: 18999, requiredPkgs: ['pkg19', 'pkg49', 'pkg99', 'pkg199', 'pkg399'] },
   { level: 9, points: 21552, bonus: 39999, requiredPkgs: ['pkg19', 'pkg49', 'pkg99', 'pkg199', 'pkg399'] },
-  { level: 10, points: 43321, bonus: 72999, requiredPkgs: ['pkg19', 'pkg49', 'pkg99', 'pkg199', 'pkg399'] },
+  { level: 10, points: 43321, bonus: 72999, requiredPkgs: ['pkg19', 'pkg49', 'pkg99', 'pkg199', 'pkg399', 'pkg799'] },
 ];
 
 export const REFERRAL_BONUS = {

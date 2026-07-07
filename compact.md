@@ -464,3 +464,20 @@ Bu sessiyada admin panel əhəmiyyətli genişləndirildi. Digər UI işləri: d
 * **Mobil UI daşma/kayma düzəlişləri:** `FooterNav` şəffaf → buzlu (frosted, `rgba(12,15,25,0.86)` + `backdrop-filter` + `@supports` fallback ~0.97) + mərkəzləmə `left:0/right:0/margin auto`; `html { overflow-x: clip }` (globals) — mobil fixed nav sürüşməsi. Referrals səhifəsi: `.refLinkText { flex:1; min-width:0 }` (uzun URL ellipsis, sütunu genişlətmir — yalnız aktiv paketdə görünürdü), kartlara `min-width:0/overflow:hidden`, `.page { overflow-x:clip }`.
 * **Dil auditi:** ə qalığı yox, dil qarışması yox (ru kiril, digərləri latın), tərcümə olunmamış xəta yox (İngiliscə ilə eyni dəyərlər legitim koqnatlardır — Transfer/Status/Details/Menu/System-de və s.). Tərcümələr AI ilə hazırlandı — lansmandan əvvəl DE/FR native gözdən keçirmə tövsiyə olunur.
 * **Bütün dəyişikliklər `main`-ə push olundu (Vercel production deploy)** — commit-lər: `34f7aa7`, `6afcc13`, `262dc94`, `615c2e0`, `4d87b0e`, `db45808`. Working tree təmiz, lokal=remote. Bu sessiya **yalnız frontend/CSS** idi — yeni SQL migration yoxdur. §20-dəki LANSMAN SIFIRLAMA PLANI hələ də gözləyir.
+
+## 22. Son Sessiya (2026-07-07): Hotbed paketləri level-up-da sıfırlanır + ON/OFF toggle + gündəlik bonus paket-başına (`sql/security_remediation_14.sql` ✅ CANLIDA)
+
+İstifadəçi istəyi: hotbed paketləri artıq **ömürlük deyil** — hər level bonusu alınanda sönür, növbəti level üçün **yenidən alınır** (re-invest, **pul geri qaytarılmır**). "Satın Al" düyməsi **ON/OFF toggle** oldu. #399/#799 gündəlik bonusu **Bakı gecəyarısı** hesablanır və history-də **hər paket ayrı sətir**.
+
+* **`sql/security_remediation_14.sql` — TƏTBİQ EDİLDİ ✅ (psql, canlı DB; rollback-lı simulyasiya ilə doğrulandı):**
+    * **`create_level_claim` yenidən yazıldı** (`_13`-ü əvəz edir): (1) **level > 1** olan uğurlu claim-dən sonra `active_packages='{}'` + `package_activated_at='{}'` (BÜTÜN paketlər sönür — tələb olunmayan da; pul geri qaytarılmır, balansa toxunulmur). Level 1 tələbsizdir → sıfırlama YOX. (2) **level 10 tələbinə `pkg799` əlavə** (8,9 = 5 paket; 10 = 6 paket #19-#799). Xal-çıxılmaması (Part 13) qorunub.
+    * **`process_daily_earnings` yenidən yazıldı** (`_3`-ü əvəz edir): balans tək UPDATE (cəm, atomik guard qalır), amma transactions-a **hər aktiv paket üçün ayrı `daily_earning` sətri** (`from_login='#399'`/`'#799'`, amount 3.3/6.5). Tarix-guard `current_date`(UTC) → **`(now() at time zone 'Asia/Baku')::date`** (Bakı günü). Grant service_role.
+    * **pg_cron reschedule:** `daily-maintenance` (jobid 1) `5 0 * * *` → **`0 20 * * *`** (20:00 UTC = Bakı 00:00). Fayl idempotent `cron.schedule` ilə repo-da saxlanır. Aktiv SQL zənciri: `sql/`-də **_14-ə qədər** (CLAUDE.md yeniləndi).
+    * **Doğrulama (hamısı rollback-lı):** L2 claim → balans +299, `active_packages={}`, claimed_levels=[2], current_level=2 ✓; L1 claim → paketlər QALIR, +99 ✓; daily → 2 sətir (#399 3.3 + #799 6.5), +9.8, Bakı bugün, təkrar=0 (idempotent) ✓; anon claim → permission denied ✓; cron `0 20 * * *` ✓.
+* **Frontend (build ✅, HƏLƏ PUSH EDİLMƏYİB — deploy istifadəçi təsdiqi gözləyir):**
+    * `constants.js`: `LEVELS[10].requiredPkgs`-ə `pkg799`.
+    * `hotbed/page.js`: buy/"Aktivdir" düyməsi → `Toggle` (ON=al, confirm modal → `buyPackage`; aktiv paket ON-kilidli, əl ilə söndürmə YOX — `handleToggle` guard-ı). Modal/info mətnləri "ömürlük" → "level-ə qədər / yeni levelə keçəndə sönür, geri ödəniş yox"; yeni `reset_on_levelup_note`.
+    * `dashboard/page.js`: `handleSubmitClaim` claim sonrası store-a `activePackages`+`packageActivatedAt` yazır (reset UI-da dərhal görünsün).
+    * `history/page.js`: `daily_earning` etiketi `from_login`-lə zənginləşir → "Gündəlik Qazanc #399" / "#799".
+    * **i18n:** `lock_info_desc_updated`, `lifetime`, `lifetime_info` yeniləndi + `reset_on_levelup_note` əlavə — 5 dildə (en/ru/tr/de/fr), paritet təsdiqləndi.
+* **Qeyd:** SQL CANLIDA, frontend lokaldadır → keçici olaraq köhnə canlı frontend claim-dən sonra paketləri stale göstərə bilər (refresh düzəldir; SQL geriyə-uyğundur). Deploy (`main` push) üçün istifadəçi təsdiqi lazımdır.

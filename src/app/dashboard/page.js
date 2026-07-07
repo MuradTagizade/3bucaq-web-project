@@ -100,6 +100,16 @@ export default function DashboardPage() {
           totalPoints: Number(updatedProfile.total_points),
           currentLevel: Number(updatedProfile.current_level),
           claimedLevels: updatedProfile.claimed_levels || [],
+          // Part 14: level-up bütün paketləri sıfırlayır — UI köhnə "aktiv" göstərməsin
+          activePackages: {
+            pkg19: updatedProfile.active_packages?.pkg19 || false,
+            pkg49: updatedProfile.active_packages?.pkg49 || false,
+            pkg99: updatedProfile.active_packages?.pkg99 || false,
+            pkg199: updatedProfile.active_packages?.pkg199 || false,
+            pkg399: updatedProfile.active_packages?.pkg399 || false,
+            pkg799: updatedProfile.active_packages?.pkg799 || false,
+          },
+          packageActivatedAt: updatedProfile.package_activated_at || {},
         });
       }
 

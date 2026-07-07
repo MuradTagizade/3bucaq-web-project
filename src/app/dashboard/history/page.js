@@ -153,7 +153,9 @@ export default function HistoryPage() {
           } else if (tx.type === 'level_bonus') {
             detail = t('level_bonus', 'Level Bonusu');
           } else if (tx.type === 'daily_earning') {
-            detail = t('daily_revenue', 'Gündəlik Qazanc');
+            // Part 14: hər paket ayrı sətir — from_login paket adını daşıyır (#399/#799)
+            detail = t('daily_revenue', 'Gündəlik Qazanc')
+              + (tx.from_login && tx.from_login !== 'System' ? ` ${tx.from_login}` : '');
           } else if (tx.type === 'admin_adjust') {
             detail = t('admin_adjust', 'Admin Düzəlişi');
           }
