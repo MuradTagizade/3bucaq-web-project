@@ -132,6 +132,23 @@ export default function HotBedPage() {
                 <div className={styles.pkgPrice} style={{ color: pkg.color }}>
                   {formatCurrency(pkg.price)}
                 </div>
+                {/* ON/OFF Toggle — yuxarı sağ. ON = paketi aktiv edir (alır).
+                    Aktiv paket kilidlidir; yalnız yeni levelə keçəndə avtomatik OFF olur. */}
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '4px' }}>
+                  <Toggle
+                    checked={isActive}
+                    onChange={() => handleToggle(pkg)}
+                    label={true}
+                  />
+                  <span
+                    style={{
+                      fontSize: '0.72rem',
+                      color: isActive ? 'var(--color-success)' : 'var(--text-secondary)',
+                    }}
+                  >
+                    {isActive ? t('active', 'Aktivdir') : t('buy_package', 'Satın Al')}
+                  </span>
+                </div>
               </div>
               <div className={styles.pkgInfo}>
                 <Badge variant={pkg.type === 'earning' ? 'gold' : 'info'} size="sm">
@@ -153,26 +170,6 @@ export default function HotBedPage() {
                 </div>
               )}
 
-              {/* ON/OFF Toggle — ON = paketi aktiv edir (alır). Aktiv paketi əl ilə
-                  söndürmək olmaz; yalnız yeni levelə keçəndə avtomatik OFF olur. */}
-              <div
-                className={styles.pkgAction}
-                style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px' }}
-              >
-                <Toggle
-                  checked={isActive}
-                  onChange={() => handleToggle(pkg)}
-                  label={true}
-                />
-                <span
-                  style={{
-                    fontSize: '0.72rem',
-                    color: isActive ? 'var(--color-success)' : 'var(--text-secondary)',
-                  }}
-                >
-                  {isActive ? t('active', 'Aktivdir') : t('buy_package', 'Satın Al')}
-                </span>
-              </div>
             </div>
           );
         })}

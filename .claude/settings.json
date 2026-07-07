@@ -19,6 +19,9 @@
       "Read(.env.development)",
       "Read(**/*.pem)",
       "Read(**/*.key)"
+    ],
+    "allow": [
+      "Bash(git push *)"
     ]
   }
 }
