@@ -64,6 +64,17 @@ export async function checkUsernameAvailable(username) {
   return data || { available: false };
 }
 
+// Verilən user_code massivi üçün { user_code: username } xəritəsi
+// (tarixçədə qarşı tərəfi ID + username ilə göstərmək üçün). RLS profiles-i
+// bağladığından toplu definer RPC ilə həll olunur.
+export async function usernamesForCodes(codes) {
+  const list = [...new Set((codes || []).filter(Boolean))];
+  if (list.length === 0) return {};
+  const { data, error } = await supabase.rpc('usernames_for_codes', { p_codes: list });
+  if (error) throw new Error(friendlyError(error));
+  return data || {};
+}
+
 export async function blockUser(uid, reason, days) {
   const updateData = {
     is_blocked: true,

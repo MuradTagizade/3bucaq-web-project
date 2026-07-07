@@ -13,7 +13,7 @@ import { validateAmount, validateUSDTAddress } from '@/lib/utils/validators';
 import { ArrowUpRight, CheckCircle2, User, Wallet, ArrowDownToLine, CreditCard, Image as ImageIcon, ArrowDown, ChevronDown, AlertTriangle } from 'lucide-react';
 import { useAuthStore } from '@/lib/store/authStore';
 import { useTranslation } from '@/lib/store/languageStore';
-import { transferFunds, lookupUserCode, getUserByUid, createWithdrawal, getWithdrawals, getSystemSetting, getMyTransfers } from '@/lib/supabase/database';
+import { transferFunds, lookupUserCode, getUserByUid, createWithdrawal, getWithdrawals, getSystemSetting, getMyTransfers, usernamesForCodes } from '@/lib/supabase/database';
 import { supabase } from '@/lib/supabase/config';
 
 function TransferContent() {
@@ -50,6 +50,7 @@ function TransferContent() {
   const [wdSuccess, setWdSuccess] = useState(false);
   const [withdrawals, setWithdrawals] = useState([]);
   const [transfers, setTransfers] = useState([]);
+  const [transferNames, setTransferNames] = useState({});
   const [wdHistoryLoading, setWdHistoryLoading] = useState(true);
   const [isCardActive, setIsCardActive] = useState(false);
 
@@ -82,6 +83,26 @@ function TransferContent() {
     }
     loadWd();
   }, [authUser?.uid]);
+
+  // Köçürmə tarixçəsində qarşı tərəf user_code-larını username-ə çevir (ID + username göstər)
+  useEffect(() => {
+    const codes = new Set();
+    transfers.forEach((tr) => {
+      if (tr.from_login) codes.add(tr.from_login);
+      if (tr.to_login) codes.add(tr.to_login);
+    });
+    if (codes.size === 0) { setTransferNames({}); return; }
+    let cancelled = false;
+    usernamesForCodes([...codes]).then((m) => { if (!cancelled) setTransferNames(m); }).catch(() => {});
+    return () => { cancelled = true; };
+  }, [transfers]);
+
+  // ID + username formatı: username varsa "KOD (username)", yoxdursa yalnız "KOD"
+  const partyLabel = (code) => {
+    if (!code) return '—';
+    const uname = transferNames[code];
+    return uname ? `${code} (${uname})` : code;
+  };
 
   // --- Transfer handlers ---
   // Alıcı sorgusu debounce edilir (400ms) — her tuş vuruşunda RPC atma;
@@ -358,8 +379,8 @@ function TransferContent() {
                       <span className={styles.historyDate}>{formatDateTime(tr.created_at)}</span>
                       <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>
                         {isSent
-                          ? `${t('transfer_to', 'Kimə')}: ${tr.to_login || '—'}`
-                          : `${t('transfer_from', 'Kimdən')}: ${tr.from_login || '—'}`}
+                          ? `${t('transfer_to', 'Kimə')}: ${partyLabel(tr.to_login)}`
+                          : `${t('transfer_from', 'Kimdən')}: ${partyLabel(tr.from_login)}`}
                       </span>
                     </div>
                   </div>

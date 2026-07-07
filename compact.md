@@ -542,3 +542,15 @@ Bu sessiyada admin panel əhəmiyyətli genişləndirildi. Digər UI işləri: d
     * `dashboard`, `subscribers`, `Sidebar`, `SlideUpMenu` — açılmayıbsa **"🔒 bir dəfə hotbed paketi al"** göstərir; açılıbsa link həmişə (level-up paketləri sönsə də). `subscribers`-ə `next/link` import geri qaytarıldı.
     * **i18n:** `referral_locked` 5 dildə "bir dəfə al — kalıcı aktiv qalır" mətninə yeniləndi.
 * Aktiv SQL zənciri: `sql/`-də **_17-yə qədər**. **QEYD (lansman sıfırlaması üçün):** `launch_reset.sql`-ə `referral_unlocked=false` sıfırlaması da əlavə edilməlidir (transactions silinir → yenidən alana qədər kilidli olmalı). §20 LANSMAN SIFIRLAMA PLANI hələ də gözləyir.
+
+## 26. Son Sessiya (2026-07-07, davamı 4): Tarixçədə qarşı tərəf ID + username (`sql/security_remediation_18.sql` ✅ CANLIDA)
+
+İstifadəçi istəyi: transfer/referal tarixçəsində qarşı tərəf yalnız **ID (user_code)** ilə görünür — **ID İLƏ BİRLİKDƏ username** də görünsün (dahili transferlərdə yoxlanılıb).
+
+* **`sql/security_remediation_18.sql` — TƏTBİQ EDİLDİ ✅ (psql, canlı DB):** `usernames_for_codes(p_codes text[])` **SQL STABLE SECURITY DEFINER** RPC — verilən user_code massivinə görə `{user_code: username}` JSON xəritəsi qaytarır (yalnız username-i olanlar; `auth.uid()` guard-ı). `transactions.from_login/to_login` user_code saxlayır, username ayrı sütun deyil; RLS profiles cross-user oxumanı bağladığı üçün toplu (batch) definer RPC ilə həll olundu. Grant: authenticated (revoke public/anon). Enumerasyon lookup_user_code ilə eyni səviyyə (qəbul).
+    * **Doğrulama:** guard-sız xəritə məntiqi düzgün (`{"M7G97B":"mockadmin",...}`); authenticated JWT simulyasiyası ilə eyni nəticə; anon/guard-sız → `{}`.
+* **Frontend (build ✅):**
+    * `database.js`: `usernamesForCodes(codes)` helper (dedup + boş massiv qısayolu; `{code: username}` qaytarır).
+    * `history/page.js`: tranzaksiya siyahısı qurulmazdan əvvəl transfer/referral_bonus/depth_bonus sətirlərinin qarşı tərəf user_code-ları toplanır → `usernamesForCodes` ilə xəritə çəkilir → `partyLabel(code)` = username varsa **`KOD (username)`**, yoxdursa `KOD`. `@`-prefiks çıxarıldı. Transfer + referal `detail` sətirləri (siyahı + detal modalı — hər ikisi `detail`-i istifadə edir).
+    * `transfer/page.js`: "Köçürmə Tarixçəsi" siyahısı üçün `transferNames` state + `transfers` dəyişəndə xəritə çəkən useEffect (cancel-guard) + eyni `partyLabel`. `Kimə/Kimdən: KOD (username)`.
+* Aktiv SQL zənciri: `sql/`-də **_18-ə qədər**. §20 LANSMAN SIFIRLAMA PLANI hələ də gözləyir.

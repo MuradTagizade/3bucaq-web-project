@@ -10,7 +10,7 @@ import {
 import { formatCurrency, formatDateTime } from '@/lib/utils/formatters';
 import { useAuthStore } from '@/lib/store/authStore';
 import { useTranslation } from '@/lib/store/languageStore';
-import { getTransactions, getDeposits, getWithdrawals, getMyFinanceStats, getPointsHistory } from '@/lib/supabase/database';
+import { getTransactions, getDeposits, getWithdrawals, getMyFinanceStats, getPointsHistory, usernamesForCodes } from '@/lib/supabase/database';
 
 const PER_PAGE = 10;
 
@@ -113,6 +113,23 @@ export default function HistoryPage() {
           return Number(match.points);
         };
 
+        // Qarşı tərəf user_code-larını username-ə çevir (transfer/referal sətirləri)
+        const partyCodes = new Set();
+        txs.forEach((tx) => {
+          if (['transfer', 'referral_bonus', 'depth_bonus'].includes(tx.type)) {
+            if (tx.from_login) partyCodes.add(tx.from_login);
+            if (tx.to_login) partyCodes.add(tx.to_login);
+          }
+        });
+        let nameMap = {};
+        try { nameMap = await usernamesForCodes([...partyCodes]); } catch { nameMap = {}; }
+        // ID + username formatı: username varsa "KOD (username)", yoxdursa yalnız "KOD"
+        const partyLabel = (code) => {
+          if (!code) return '—';
+          const uname = nameMap[code];
+          return uname ? `${code} (${uname})` : code;
+        };
+
         const unifiedList = [];
 
         // Add non-deposit, non-withdrawal transactions
@@ -145,11 +162,11 @@ export default function HistoryPage() {
           // Detail formatting
           let detail = t('system', 'System');
           if (tx.type === 'transfer') {
-            detail = tx.from_uid === authUser.uid 
-              ? `${t('user', 'İstifadəçi')}: @${tx.to_login}` 
-              : `${t('user', 'İstifadəçi')}: @${tx.from_login}`;
+            detail = tx.from_uid === authUser.uid
+              ? `${t('user', 'İstifadəçi')}: ${partyLabel(tx.to_login)}`
+              : `${t('user', 'İstifadəçi')}: ${partyLabel(tx.from_login)}`;
           } else if (tx.type === 'referral_bonus' || tx.type === 'depth_bonus') {
-            detail = `Referral: @${tx.from_login}`;
+            detail = `Referral: ${partyLabel(tx.from_login)}`;
           } else if (tx.type === 'level_bonus') {
             detail = t('level_bonus', 'Level Bonusu');
           } else if (tx.type === 'daily_earning') {
