@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import styles from './subscribers.module.css';
 import Pagination from '@/components/ui/Pagination';
 import Modal from '@/components/ui/Modal';
@@ -101,7 +102,8 @@ export default function SubscribersPage() {
   const start = (currentPage - 1) * PER_PAGE;
   const pageData = filteredList.slice(start, start + PER_PAGE);
 
-  // Referral link — həmişə aktivdir (paket vəziyyətindən asılı deyil)
+  // Referal BİR DƏFƏ paket alındıqda ömürlük açılır (level-up paketləri sönsə də qalır)
+  const referralUnlocked = !!authUser?.referralUnlocked;
   const referralLink = authUser?.referralCode
     ? `${typeof window !== 'undefined' ? window.location.origin : ''}/register?ref=${authUser.referralCode}`
     : '';
@@ -300,7 +302,18 @@ export default function SubscribersPage() {
           </div>
         </div>
 
-        {/* Referral Link Card — həmişə aktivdir (paket vəziyyətindən asılı deyil) */}
+        {/* Referral Link Card — BİR DƏFƏ paket alındıqda ömürlük açılır */}
+        {!referralUnlocked ? (
+          <div className={styles.refCard} style={{ textAlign: 'center' }}>
+            <h3 className={styles.sectionTitle}>{t('referral_link', 'Referal Linkiniz')}</h3>
+            <p className={styles.refDesc} style={{ opacity: 0.85 }}>
+              🔒 {t('referral_locked', 'Referal sistemini aktiv etmək üçün bir dəfə hotbed paketi alın')}
+            </p>
+            <Link href="/dashboard/hotbed" className={styles.shareBtn} style={{ display: 'inline-flex', textDecoration: 'none', justifyContent: 'center' }}>
+              {t('go_to_packages', 'Paketlərə Get')} →
+            </Link>
+          </div>
+        ) : (
         <div className={styles.refCard}>
           <h3 className={styles.sectionTitle}>{t('referral_link', 'Referal Linkiniz')}</h3>
           <p className={styles.refDesc}>
@@ -339,6 +352,7 @@ export default function SubscribersPage() {
             {t('share', 'Paylaş')}
           </button>
         </div>
+        )}
       </div>
 
       {/* Referral List Table */}

@@ -710,7 +710,7 @@ const tr = {
   password_min_placeholder: "En az 10 karakter...",
   recipient_code_placeholder: "Alıcının kodu (örn. K7M2QX)",
   referral_code_optional: "Referans Kodu (isteğe bağlı)",
-  referral_locked: "Referans sistemini etkinleştirmek için en az 1 Hot Bed paketi satın alın",
+  referral_locked: "Referansı etkinleştirmek için bir kez Hot Bed paketi alın — kalıcı olarak aktif kalır",
   referral_locked_short: "Referans bağlantınızı açmak için bir paket satın alın",
   required_field: "Bu alan zorunludur",
   requirements_not_met: "Gereksinimler karşılanmadı",

@@ -710,7 +710,7 @@ const ru = {
   password_min_placeholder: "Минимум 10 символов...",
   recipient_code_placeholder: "Код получателя (например, K7M2QX)",
   referral_code_optional: "Реферальный код (необязательно)",
-  referral_locked: "Купите хотя бы 1 пакет Hot Bed, чтобы активировать реферальную систему",
+  referral_locked: "Купите пакет Hot Bed один раз, чтобы активировать рефералку — она останется активной навсегда",
   referral_locked_short: "Купите пакет, чтобы разблокировать реферальную ссылку",
   required_field: "Это поле обязательно для заполнения",
   requirements_not_met: "Требования не выполнены",

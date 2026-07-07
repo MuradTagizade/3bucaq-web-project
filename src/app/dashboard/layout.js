@@ -41,8 +41,8 @@ export default function DashboardLayout({ children }) {
 
   const userName = user?.fullName?.split(' ')[0] || '';
   const referralLink = user?.referralCode ? `${typeof window !== 'undefined' ? window.location.origin : ''}/register?ref=${user.referralCode}` : '';
-  // Referal yalnız ≥1 aktiv hotbed paketi olduqda aktivdir (dashboard/page.js ilə eyni yoxlama)
-  const hasActivePackage = Object.values(user?.activePackages || {}).some(Boolean);
+  // Referal BİR DƏFƏ paket alındıqda ömürlük açılır (referral_unlocked) — level-up paketləri sönsə də qalır
+  const referralUnlocked = !!user?.referralUnlocked;
 
   const handleLogout = async () => {
     try {
@@ -92,7 +92,7 @@ export default function DashboardLayout({ children }) {
       <Sidebar
         userName={userName}
         referralLink={referralLink}
-        hasActivePackage={hasActivePackage}
+        referralUnlocked={referralUnlocked}
         onLogout={handleLogout}
       />
       <div className="app-content-wrapper">
@@ -106,7 +106,7 @@ export default function DashboardLayout({ children }) {
         </main>
         <div className="mobile-only">
           <FooterNav />
-          <SlideUpMenu referralLink={referralLink} hasActivePackage={hasActivePackage} onLogout={handleLogout} />
+          <SlideUpMenu referralLink={referralLink} referralUnlocked={referralUnlocked} onLogout={handleLogout} />
         </div>
       </div>
     </div>

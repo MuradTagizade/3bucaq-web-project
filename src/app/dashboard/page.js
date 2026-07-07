@@ -41,6 +41,9 @@ export default function DashboardPage() {
     },
   };
 
+  // Referal BİR DƏFƏ paket alındıqda ömürlük açılır (level-up paketləri sönsə də qalır)
+  const referralUnlocked = !!authUser?.referralUnlocked;
+
   useEffect(() => {
     const activeUser = useAuthStore.getState().user;
     async function loadClaimed() {
@@ -181,12 +184,20 @@ export default function DashboardPage() {
             <span className={styles.balanceAmount}>{formatCurrency(user.balance)}</span>
           </div>
         </div>
-        <div className={styles.refRow}>
-          <span className={styles.refLabel}>{t('referral_code', 'Referal Kodu')}: {user.referralCode}</span>
-          <button className={styles.refCopyBtn} onClick={handleCopyRef}>
-            <Copy size={14} /> {t('copy', 'Kopyala')}
-          </button>
-        </div>
+        {referralUnlocked ? (
+          <div className={styles.refRow}>
+            <span className={styles.refLabel}>{t('referral_code', 'Referal Kodu')}: {user.referralCode}</span>
+            <button className={styles.refCopyBtn} onClick={handleCopyRef}>
+              <Copy size={14} /> {t('copy', 'Kopyala')}
+            </button>
+          </div>
+        ) : (
+          <div className={styles.refRow}>
+            <span className={styles.refLabel} style={{ opacity: 0.7 }}>
+              🔒 {t('referral_locked', 'Referal sistemini aktiv etmək üçün bir dəfə hotbed paketi alın')}
+            </span>
+          </div>
+        )}
       </div>
 
       {/* Points Summary */}

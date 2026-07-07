@@ -525,3 +525,20 @@ Bu sessiyada admin panel əhəmiyyətli genişləndirildi. Digər UI işləri: d
     * **register:** username input `toLowerCase().replace(/[^a-z0-9]/g,'')` (əvvəl `[^a-zA-Z]`) — rəqəm keçir, böyük hərf kiçildilir. `validators.js` `USERNAME_RE=/^[a-z0-9]{5,20}$/` + `validateUsernameCode` lower.
     * **i18n:** `username_invalid` 5 dildə "yalnız kiçik hərf və rəqəm" mətninə yeniləndi (en/ru/tr/de/fr).
 * Aktiv SQL zənciri: `sql/`-də **_16-ya qədər**. §20-dəki LANSMAN SIFIRLAMA PLANI hələ də gözləyir.
+
+## 25. Son Sessiya (2026-07-07, davamı 3): Referal "BİR DƏFƏ AL → ÖMÜRLÜK AÇIL" (`referral_unlocked`) — §16 və §24-ün referal davranışını əvəz edir (`sql/security_remediation_17.sql` ✅ CANLIDA)
+
+İstifadəçi istəyi: "1 kərə hotbed paketi alıb referal linkini aktiv etmələri yetər; digər levelə keçəndə hotbedlər deaktiv olanda **referal verməyi VƏ referaldan bonus qazanmağı** bu dəfə etkiləməsin. Yəni **yalnız ilk dəfə** hotbed alması yetər." → Referal şərti artıq "cari aktiv paket" deyil, **"heç vaxt ≥1 paket almış olmaq"** (kalıcı bayraq). Link həm də bonus qazancı bir dəfəlik alışla ömürlük açılır; level-up paketləri sönsə də qalır.
+
+* **`sql/security_remediation_17.sql` — TƏTBİQ EDİLDİ ✅ (psql, canlı DB; rollback-lı doğrulandı):** `_8`(buy_package), `_16`(check_referral_code/handle_new_user/create_profile_if_missing), `_15`(check_profile_updates) tanımlarını əvəz edir. Part 6 whitelist grant qorunur.
+    * **`profiles.referral_unlocked boolean not null default false`** sütunu. **Backfill: 19 istifadəçi** (heç vaxt `package_purchase` etmiş VƏ ya hazırda aktiv paketli) → `true`.
+    * **`buy_package`:** uğurlu alışda `referral_unlocked = true` (SET-ə əlavə, ömürlük). Upline bonus/xal paylanması şərti `exists(active_packages 'true')` → **`parent_profile.referral_unlocked`** (yəni upline bir dəfə almışsa, paketi sönsə də referal/dərinlik bonusu + xal qazanır). **§24-dəki "referal qazancı dəyişməz" qeydi ARTIQ KEÇƏRLİ DEYİL.**
+    * **`check_referral_code`:** `valid = exists(referral_code AND referral_unlocked)` (kod var, amma referrer heç vaxt almayıbsa valid:false).
+    * **`handle_new_user`/`create_profile_if_missing`:** `referred_by` yalnız `referral_unlocked` referrer üçün set edilir.
+    * **`check_profile_updates`:** `referral_unlocked` (A) sistem-sütun blokuna əlavə — client (admin daxil) birbaşa dəyişə bilməz, yalnız definer `buy_package`.
+    * **Doğrulama (canlı):** unlocked 19/36; **REF57322 (heç almayıb) → valid:false**; unlocked+aktiv paketli REFT6HV8C → paketləri `{}`-ə sıfırladıqda (level-up simulyasiyası, rollback-lı) `check_referral_code` **hələ də valid:true** ✓; 5 funksiya da `referral_unlocked`-a istinad edir ✓.
+* **Frontend (build ✅):** referal linkinin görünmə şərti `hasActivePackage` → **`referralUnlocked`** oldu (kalıcı). Bərpa olundu (§24-də silinmişdi, indi `referralUnlocked` ilə):
+    * `AuthProvider` `referralUnlocked: profile.referral_unlocked` map edir; `hotbed/page.js` `refreshUser` alışdan sonra store-a `referralUnlocked` yazır (link dərhal açılsın); `layout.js` `referralUnlocked` hesablayıb Sidebar/SlideUpMenu-ya ötürür (prop adı `hasActivePackage`→`referralUnlocked`).
+    * `dashboard`, `subscribers`, `Sidebar`, `SlideUpMenu` — açılmayıbsa **"🔒 bir dəfə hotbed paketi al"** göstərir; açılıbsa link həmişə (level-up paketləri sönsə də). `subscribers`-ə `next/link` import geri qaytarıldı.
+    * **i18n:** `referral_locked` 5 dildə "bir dəfə al — kalıcı aktiv qalır" mətninə yeniləndi.
+* Aktiv SQL zənciri: `sql/`-də **_17-yə qədər**. **QEYD (lansman sıfırlaması üçün):** `launch_reset.sql`-ə `referral_unlocked=false` sıfırlaması da əlavə edilməlidir (transactions silinir → yenidən alana qədər kilidli olmalı). §20 LANSMAN SIFIRLAMA PLANI hələ də gözləyir.

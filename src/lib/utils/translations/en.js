@@ -711,7 +711,7 @@ const en = {
   password_min_placeholder: "Min 10 characters...",
   recipient_code_placeholder: "Recipient's code (e.g. K7M2QX)",
   referral_code_optional: "Referral Code (optional)",
-  referral_locked: "Buy at least 1 Hot Bed package to activate the referral system",
+  referral_locked: "Buy a Hot Bed package once to activate your referral — it stays active for good",
   referral_locked_short: "Buy a package to unlock your referral link",
   required_field: "This field is required",
   requirements_not_met: "Requirements not met",

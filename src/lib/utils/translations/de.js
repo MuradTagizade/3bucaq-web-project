@@ -709,7 +709,7 @@ const de = {
   password_min_placeholder: "Mind. 10 Zeichen...",
   recipient_code_placeholder: "Code des Empfängers (z. B. K7M2QX)",
   referral_code_optional: "Empfehlungscode (optional)",
-  referral_locked: "Kaufen Sie mindestens 1 Hot Bed-Paket, um das Empfehlungssystem zu aktivieren",
+  referral_locked: "Kaufen Sie einmal ein Hot Bed-Paket, um Ihre Empfehlung zu aktivieren — sie bleibt dauerhaft aktiv",
   referral_locked_short: "Kaufen Sie ein Paket, um Ihren Empfehlungslink freizuschalten",
   required_field: "Dieses Feld ist erforderlich",
   requirements_not_met: "Anforderungen nicht erfüllt",

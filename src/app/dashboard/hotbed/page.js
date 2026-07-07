@@ -61,6 +61,7 @@ export default function HotBedPage() {
         ...authUser,
         balance: Number(updatedProfile.balance),
         totalPoints: Number(updatedProfile.total_points),
+        referralUnlocked: updatedProfile.referral_unlocked || false,
         activePackages: {
           pkg19: updatedProfile.active_packages?.pkg19 || false,
           pkg49: updatedProfile.active_packages?.pkg49 || false,

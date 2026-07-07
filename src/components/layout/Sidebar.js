@@ -49,7 +49,7 @@ const NAV_TKEYS = {
   kyc: 'kyc',
 };
 
-export default function Sidebar({ userName, referralLink, hasActivePackage = false, onLogout }) {
+export default function Sidebar({ userName, referralLink, referralUnlocked = false, onLogout }) {
   const pathname = usePathname();
   const { user } = useAuthStore();
   const { t } = useTranslation();
@@ -136,15 +136,23 @@ export default function Sidebar({ userName, referralLink, hasActivePackage = fal
       {/* Referral Link & Logout */}
       <div className={styles.footer}>
         <div className={styles.refBox}>
-          <div className={styles.refHeader}>
-            <span className={styles.refTitle}>{t('your_ref_link', 'Referal Linkiniz')}</span>
-            <button className={styles.copyBtn} onClick={handleCopyLink} aria-label="Kopyala">
-              {copied ? <Check size={14} color="var(--color-success)" /> : <Copy size={14} />}
-            </button>
-          </div>
-          <div className={styles.refLink} title={referralLink}>
-            {user?.referralCode || ''}
-          </div>
+          {referralUnlocked ? (
+            <>
+              <div className={styles.refHeader}>
+                <span className={styles.refTitle}>{t('your_ref_link', 'Referal Linkiniz')}</span>
+                <button className={styles.copyBtn} onClick={handleCopyLink} aria-label="Kopyala">
+                  {copied ? <Check size={14} color="var(--color-success)" /> : <Copy size={14} />}
+                </button>
+              </div>
+              <div className={styles.refLink} title={referralLink}>
+                {user?.referralCode || ''}
+              </div>
+            </>
+          ) : (
+            <span className={styles.refTitle}>
+              🔒 {t('referral_locked_short', 'Referal linki üçün paket alın')}
+            </span>
+          )}
         </div>
 
         <div className={styles.footerButtons}>

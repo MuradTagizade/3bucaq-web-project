@@ -710,7 +710,7 @@ const fr = {
   password_min_placeholder: "Min. 10 caractères...",
   recipient_code_placeholder: "Code du destinataire (ex. K7M2QX)",
   referral_code_optional: "Code de parrainage (facultatif)",
-  referral_locked: "Achetez au moins 1 forfait Hot Bed pour activer le système de parrainage",
+  referral_locked: "Achetez une fois un forfait Hot Bed pour activer votre parrainage — il reste actif définitivement",
   referral_locked_short: "Achetez un forfait pour débloquer votre lien de parrainage",
   required_field: "Ce champ est obligatoire",
   requirements_not_met: "Conditions non remplies",

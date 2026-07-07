@@ -103,6 +103,7 @@ export function AuthProvider({ children }) {
             currentLevel: Number(profile.current_level),
             referralCode: profile.referral_code,
             referredBy: profile.referred_by,
+            referralUnlocked: profile.referral_unlocked || false,
             activePackages: {
               pkg19: profile.active_packages?.pkg19 || false,
               pkg49: profile.active_packages?.pkg49 || false,
