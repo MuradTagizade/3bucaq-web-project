@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import Link from 'next/link';
 import styles from './subscribers.module.css';
 import Pagination from '@/components/ui/Pagination';
 import Modal from '@/components/ui/Modal';
@@ -102,9 +101,7 @@ export default function SubscribersPage() {
   const start = (currentPage - 1) * PER_PAGE;
   const pageData = filteredList.slice(start, start + PER_PAGE);
 
-  // Referral link
-  // Referral yalnızca ≥1 aktif hotbed paketi olduqda aktivdir
-  const hasActivePackage = Object.values(authUser?.activePackages || {}).some(Boolean);
+  // Referral link — həmişə aktivdir (paket vəziyyətindən asılı deyil)
   const referralLink = authUser?.referralCode
     ? `${typeof window !== 'undefined' ? window.location.origin : ''}/register?ref=${authUser.referralCode}`
     : '';
@@ -303,18 +300,7 @@ export default function SubscribersPage() {
           </div>
         </div>
 
-        {/* Referral Link Card — yalnızca ≥1 aktiv paket olduqda aktivdir */}
-        {!hasActivePackage ? (
-          <div className={styles.refCard} style={{ textAlign: 'center' }}>
-            <h3 className={styles.sectionTitle}>{t('referral_link', 'Referal Linkiniz')}</h3>
-            <p className={styles.refDesc} style={{ opacity: 0.85 }}>
-              🔒 {t('referral_locked', 'Referal sistemini aktiv etmək üçün ən azı 1 hotbed paketi alın')}
-            </p>
-            <Link href="/dashboard/hotbed" className={styles.shareBtn} style={{ display: 'inline-flex', textDecoration: 'none', justifyContent: 'center' }}>
-              {t('go_to_packages', 'Paketlərə Get')} →
-            </Link>
-          </div>
-        ) : (
+        {/* Referral Link Card — həmişə aktivdir (paket vəziyyətindən asılı deyil) */}
         <div className={styles.refCard}>
           <h3 className={styles.sectionTitle}>{t('referral_link', 'Referal Linkiniz')}</h3>
           <p className={styles.refDesc}>
@@ -353,7 +339,6 @@ export default function SubscribersPage() {
             {t('share', 'Paylaş')}
           </button>
         </div>
-        )}
       </div>
 
       {/* Referral List Table */}
@@ -426,9 +411,9 @@ export default function SubscribersPage() {
                 >
                   <span className={styles.cellLogin}>
                     <span className={styles.rowAvatar}>
-                      {sub.userCode.charAt(0).toUpperCase()}{sub.userCode.charAt(1)?.toUpperCase() || ''}
+                      {(sub.username || sub.userCode || 'U').charAt(0).toUpperCase()}{(sub.username || sub.userCode || '').charAt(1)?.toUpperCase() || ''}
                     </span>
-                    {sub.userCode}
+                    {sub.username || sub.userCode}
                   </span>
                   <span className={styles.cellLevel}>{sub.line}</span>
                   <span className={styles.cellDate}>
@@ -476,10 +461,10 @@ export default function SubscribersPage() {
                 >
                   <div className={styles.mobileCardTop}>
                     <span className={styles.rowAvatar}>
-                      {sub.userCode.charAt(0).toUpperCase()}{sub.userCode.charAt(1)?.toUpperCase() || ''}
+                      {(sub.username || sub.userCode || 'U').charAt(0).toUpperCase()}{(sub.username || sub.userCode || '').charAt(1)?.toUpperCase() || ''}
                     </span>
                     <div className={styles.mobileCardInfo}>
-                      <span className={styles.mobileLogin}>{sub.userCode}</span>
+                      <span className={styles.mobileLogin}>{sub.username || sub.userCode}</span>
                       <span className={styles.mobileDate}>
                         {new Date(sub.joinedAt).toLocaleDateString('az-AZ')} · {new Date(sub.joinedAt).toLocaleTimeString('az-AZ', { hour: '2-digit', minute: '2-digit' })}
                       </span>
@@ -523,11 +508,11 @@ export default function SubscribersPage() {
         {selectedUser && (
           <div className={styles.detail}>
             <div className={styles.detailAvatar}>
-              {(selectedUser.userCode || 'U').charAt(0).toUpperCase()}
+              {(selectedUser.username || selectedUser.userCode || 'U').charAt(0).toUpperCase()}
             </div>
             <div className={styles.detailRow}>
-              <span>{t('user_code_col', 'Kod')}</span>
-              <span>{selectedUser.userCode}</span>
+              <span>{selectedUser.username ? t('username_label', 'İstifadəçi adı') : t('user_code_col', 'Kod')}</span>
+              <span>{selectedUser.username || selectedUser.userCode}</span>
             </div>
             <div className={styles.detailRow}>
               <span>{t('fullname', 'Ad Soyad')}</span>

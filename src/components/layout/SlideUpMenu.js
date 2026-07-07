@@ -76,27 +76,19 @@ export default function SlideUpMenu({ referralLink = '', hasActivePackage = fals
               <Link2 size={20} />
               <span>{t('referral_link', 'Referal Link')}</span>
             </div>
-            {hasActivePackage ? (
-              <div className={styles.refActions}>
-                <div className={styles.refLink}>{referralLink || t('loading', 'Yüklənir...')}</div>
-                <div className={styles.refBtns}>
-                  <button className={styles.refBtn} onClick={handleCopy}>
-                    <Copy size={16} />
-                    {copied ? t('copied', 'Kopyalandı!') : t('copy', 'Kopyala')}
-                  </button>
-                  <button className={styles.refBtn} onClick={handleShare}>
-                    <Share2 size={16} />
-                    {t('share', 'Paylaş')}
-                  </button>
-                </div>
+            <div className={styles.refActions}>
+              <div className={styles.refLink}>{referralLink || t('loading', 'Yüklənir...')}</div>
+              <div className={styles.refBtns}>
+                <button className={styles.refBtn} onClick={handleCopy}>
+                  <Copy size={16} />
+                  {copied ? t('copied', 'Kopyalandı!') : t('copy', 'Kopyala')}
+                </button>
+                <button className={styles.refBtn} onClick={handleShare}>
+                  <Share2 size={16} />
+                  {t('share', 'Paylaş')}
+                </button>
               </div>
-            ) : (
-              <div className={styles.refActions}>
-                <div className={styles.refLink}>
-                  🔒 {t('referral_locked_short', 'Referal linki üçün paket alın')}
-                </div>
-              </div>
-            )}
+            </div>
           </div>
           <div className={styles.divider} />
           <button className={`${styles.item} ${styles.logout}`} onClick={onLogout}>

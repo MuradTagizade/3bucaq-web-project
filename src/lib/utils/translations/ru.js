@@ -65,7 +65,7 @@ const ru = {
   username_checking: "Проверка...",
   username_available: "Имя пользователя доступно",
   username_taken: "Это имя пользователя занято, выберите другое",
-  username_invalid: "Только буквы (A–Z), 5–20 символов",
+  username_invalid: "Только строчные буквы и цифры, 5–20 символов",
   username_required: "Введите имя пользователя",
   username_taken_retry: "Регистрация не удалась — имя пользователя могли только что занять. Попробуйте другое.",
   recipient_code_or_username_placeholder: "Код или имя пользователя (напр. K7M2QX)",

@@ -103,9 +103,12 @@ export default function PersonalInfoPage() {
     }
   };
 
+  // İstifadəçi kimliyi: username varsa onu göstər/kopyala, yoxdursa user_code (köhnə istifadəçilər).
+  const identityValue = authUser?.username || authUser?.userCode || '';
+
   const handleCopyCode = () => {
-    if (!authUser?.userCode) return;
-    navigator.clipboard?.writeText(authUser.userCode);
+    if (!identityValue) return;
+    navigator.clipboard?.writeText(identityValue);
     setCodeCopied(true);
     setTimeout(() => setCodeCopied(false), 2000);
   };
@@ -226,11 +229,13 @@ export default function PersonalInfoPage() {
               </div>
 
               <div className={styles.inputWrapper}>
-                <label className={styles.inputLabel}>{t('user_code_label', 'İSTİFADƏÇİ KODU')}</label>
+                <label className={styles.inputLabel}>
+                  {authUser?.username ? t('username_label', 'İSTİFADƏÇİ ADI') : t('user_code_label', 'İSTİFADƏÇİ KODU')}
+                </label>
                 <div className={styles.disabledInputContainer}>
                   <input
                     type="text"
-                    value={authUser?.userCode || ''}
+                    value={identityValue}
                     disabled
                     className={styles.disabledInput}
                   />
@@ -244,21 +249,6 @@ export default function PersonalInfoPage() {
                   </button>
                 </div>
               </div>
-
-              {authUser?.username && (
-                <div className={styles.inputWrapper}>
-                  <label className={styles.inputLabel}>{t('username_label', 'İSTİFADƏÇİ ADI')}</label>
-                  <div className={styles.disabledInputContainer}>
-                    <input
-                      type="text"
-                      value={authUser.username}
-                      disabled
-                      className={styles.disabledInput}
-                    />
-                    <Lock size={14} className={styles.lockIcon} />
-                  </div>
-                </div>
-              )}
 
               <div className={styles.inputWrapper}>
                 <label className={styles.inputLabel}>{t('email_label', 'E-POÇT')}</label>

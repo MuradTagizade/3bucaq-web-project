@@ -28,7 +28,7 @@ export default function DashboardPage() {
   
   // Resolve authUser from store
   const user = {
-    login: authUser?.fullName || authUser?.userCode || 'User',
+    login: authUser?.fullName || authUser?.username || authUser?.userCode || 'User',
     userCode: authUser?.userCode || '',
     balance: authUser?.balance || 0,
     totalPoints: authUser?.totalPoints || 0,
@@ -40,9 +40,6 @@ export default function DashboardPage() {
       pkg199: false, pkg399: false, pkg799: false,
     },
   };
-
-  // Referral yalnızca ≥1 aktif hotbed paketi olduqda aktivdir
-  const hasActivePackage = Object.values(user.activePackages || {}).some(Boolean);
 
   useEffect(() => {
     const activeUser = useAuthStore.getState().user;
@@ -184,20 +181,12 @@ export default function DashboardPage() {
             <span className={styles.balanceAmount}>{formatCurrency(user.balance)}</span>
           </div>
         </div>
-        {hasActivePackage ? (
-          <div className={styles.refRow}>
-            <span className={styles.refLabel}>{t('referral_code', 'Referal Kodu')}: {user.referralCode}</span>
-            <button className={styles.refCopyBtn} onClick={handleCopyRef}>
-              <Copy size={14} /> {t('copy', 'Kopyala')}
-            </button>
-          </div>
-        ) : (
-          <div className={styles.refRow}>
-            <span className={styles.refLabel} style={{ opacity: 0.7 }}>
-              🔒 {t('referral_locked', 'Referal sistemini aktiv etmək üçün ən azı 1 hotbed paketi alın')}
-            </span>
-          </div>
-        )}
+        <div className={styles.refRow}>
+          <span className={styles.refLabel}>{t('referral_code', 'Referal Kodu')}: {user.referralCode}</span>
+          <button className={styles.refCopyBtn} onClick={handleCopyRef}>
+            <Copy size={14} /> {t('copy', 'Kopyala')}
+          </button>
+        </div>
       </div>
 
       {/* Points Summary */}

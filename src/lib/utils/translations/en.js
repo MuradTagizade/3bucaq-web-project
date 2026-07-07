@@ -65,7 +65,7 @@ const en = {
   username_checking: "Checking...",
   username_available: "Username is available",
   username_taken: "This username is taken, choose another",
-  username_invalid: "Only letters (A–Z), 5–20 characters",
+  username_invalid: "Only lowercase letters and numbers, 5–20 characters",
   username_required: "Username is required",
   username_taken_retry: "Registration failed — the username may have just been taken. Please try another.",
   recipient_code_or_username_placeholder: "Code or username (e.g. K7M2QX)",

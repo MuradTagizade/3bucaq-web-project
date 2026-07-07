@@ -65,7 +65,7 @@ const fr = {
   username_checking: "Vérification...",
   username_available: "Nom d'utilisateur disponible",
   username_taken: "Ce nom d'utilisateur est déjà pris, choisissez-en un autre",
-  username_invalid: "Uniquement des lettres (A–Z), 5–20 caractères",
+  username_invalid: "Uniquement lettres minuscules et chiffres, 5–20 caractères",
   username_required: "Le nom d'utilisateur est requis",
   username_taken_retry: "Échec de l'inscription — le nom d'utilisateur vient peut-être d'être pris. Veuillez en essayer un autre.",
   recipient_code_or_username_placeholder: "Code ou nom d'utilisateur (par ex. K7M2QX)",
