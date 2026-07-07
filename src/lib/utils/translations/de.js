@@ -64,7 +64,7 @@ const de = {
   username_checking: "Wird geprüft...",
   username_available: "Benutzername ist verfügbar",
   username_taken: "Dieser Benutzername ist vergeben, wählen Sie einen anderen",
-  username_invalid: "Nur Buchstaben (A–Z), 3–20 Zeichen",
+  username_invalid: "Nur Buchstaben (A–Z), 5–20 Zeichen",
   username_required: "Benutzername ist erforderlich",
   username_taken_retry: "Registrierung fehlgeschlagen — der Benutzername wurde möglicherweise gerade vergeben. Bitte versuchen Sie einen anderen.",
   recipient_code_or_username_placeholder: "Code oder Benutzername (z. B. K7M2QX)",

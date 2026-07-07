@@ -103,7 +103,7 @@ function TransferContent() {
     if (lookupTimerRef.current) clearTimeout(lookupTimerRef.current);
     const seq = ++lookupSeqRef.current;
 
-    if (val.trim().length >= 3) {
+    if (val.trim().length >= 5) {
       setRecipientValid(null);
       lookupTimerRef.current = setTimeout(async () => {
         try {
@@ -317,7 +317,7 @@ function TransferContent() {
                 placeholder={t('recipient_code_or_username_placeholder', 'Kod və ya istifadəçi adı (məs. K7M2QX)')}
                 value={recipient}
                 onChange={handleRecipientChange}
-                error={recipient.trim().length >= 3 && recipientValid === false ? t('recipient_not_found', 'Qəbul edən tapılmadı') : errors.recipient}
+                error={recipient.trim().length >= 5 && recipientValid === false ? t('recipient_not_found', 'Qəbul edən tapılmadı') : errors.recipient}
                 success={recipientValid}
                 icon={<User size={18} />}
               />

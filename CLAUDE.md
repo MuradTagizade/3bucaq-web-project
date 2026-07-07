@@ -14,6 +14,6 @@
 5. Test hesapları `TEST_HESABLAR.local.md`'de (gitignore'lu) — dokümanlara credential yazma.
 
 ## Diğer
-- Kimlik = `user_code` (6 karakterlik kod); login YALNIZCA email ile (`display_login` artık kimlik değil). Ayrıca `profiles.username` var (kayıtta kullanıcı seçer, yalnız harf 3-20, case-insensitive unique, kayıttan sonra kullanıcı DEĞİŞTİREMEZ); transfer hem `user_code` hem `username` ile çalışır (bkz. compact §23). Telefon UI'dan kaldırıldı (DB sütunu duruyor).
+- Kimlik = `user_code` (6 karakterlik kod); login YALNIZCA email ile (`display_login` artık kimlik değil). Ayrıca `profiles.username` var (kayıtta kullanıcı seçer, yalnız harf 5-20, case-insensitive unique, kayıttan sonra kullanıcı DEĞİŞTİREMEZ); transfer hem `user_code` hem `username` ile çalışır (bkz. compact §23). Telefon UI'dan kaldırıldı (DB sütunu duruyor).
 - Kullanıcıyla Azerice/Türkçe konuş; commit mesajları da öyle.
 - Token tasarrufu: `node_modules`, `.next`, `package-lock.json` vb. okuma — `.claude/settings.json`'daki deny kuralları zaten engeller.

@@ -65,7 +65,7 @@ const tr = {
   username_checking: "Kontrol ediliyor...",
   username_available: "Kullanıcı adı uygun",
   username_taken: "Bu kullanıcı adı alınmış, başka birini seçin",
-  username_invalid: "Yalnızca harf (A–Z), 3–20 karakter",
+  username_invalid: "Yalnızca harf (A–Z), 5–20 karakter",
   username_required: "Kullanıcı adı gerekli",
   username_taken_retry: "Kayıt başarısız — kullanıcı adı az önce alınmış olabilir. Lütfen başka birini deneyin.",
   recipient_code_or_username_placeholder: "Kod veya kullanıcı adı (örn. K7M2QX)",

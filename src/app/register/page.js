@@ -71,7 +71,7 @@ function RegisterForm() {
     const seq = ++uSeqRef.current;
 
     if (!value) { setUsernameCheck({ state: 'idle' }); return; }
-    if (value.length < 3) { setUsernameCheck({ state: 'invalid' }); return; }
+    if (value.length < 5) { setUsernameCheck({ state: 'invalid' }); return; }
 
     setUsernameCheck({ state: 'checking' });
     uTimerRef.current = setTimeout(async () => {
@@ -92,7 +92,7 @@ function RegisterForm() {
       case 'checking': return t('username_checking', 'Yoxlanılır...');
       case 'available': return t('username_available', 'İstifadəçi adı əlçatandır');
       case 'taken': return t('username_taken', 'Bu istifadəçi adı artıq tutulub, başqasını seçin');
-      case 'invalid': return t('username_invalid', 'Yalnız hərflər (A–Z), 3–20 simvol');
+      case 'invalid': return t('username_invalid', 'Yalnız hərflər (A–Z), 5–20 simvol');
       default: return '';
     }
   };
@@ -128,7 +128,7 @@ function RegisterForm() {
 
     const uCode = validateUsernameCode(form.username);
     if (uCode === 'required') newErrors.username = t('username_required', 'İstifadəçi adı tələb olunur');
-    else if (uCode) newErrors.username = t('username_invalid', 'Yalnız hərflər (A–Z), 3–20 simvol');
+    else if (uCode) newErrors.username = t('username_invalid', 'Yalnız hərflər (A–Z), 5–20 simvol');
     else if (usernameCheck.state === 'taken') newErrors.username = t('username_taken', 'Bu istifadəçi adı artıq tutulub, başqasını seçin');
 
     const emailErr = validateEmail(form.email);
@@ -165,7 +165,7 @@ function RegisterForm() {
       if (!av.available) {
         setErrors({ username: av.reason === 'taken'
           ? t('username_taken', 'Bu istifadəçi adı artıq tutulub, başqasını seçin')
-          : t('username_invalid', 'Yalnız hərflər (A–Z), 3–20 simvol') });
+          : t('username_invalid', 'Yalnız hərflər (A–Z), 5–20 simvol') });
         setUsernameCheck({ state: av.reason === 'taken' ? 'taken' : 'invalid' });
         setLoading(false);
         return;

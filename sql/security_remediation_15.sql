@@ -3,7 +3,7 @@
 -- İSTİFADƏÇİ ADI (username) SİSTEMİ
 -- --------------------------------------------------------------------
 -- Yeni özəllik: qeydiyyatda istifadəçi öz istifadəçi adını seçir
---   * yalnız hərflər (A-Z, a-z), 3-20 simvol, rəqəm/simvol YOX
+--   * yalnız hərflər (A-Z, a-z), 5-20 simvol, rəqəm/simvol YOX
 --   * unikallıq böyük/kiçik hərf fərqi qoymadan (John = john)
 --   * yazıldığı kimi saxlanır (case preserved), amma unikallıq lower() ilə
 --   * qeydiyyatdan SONRA istifadəçi özü DƏYİŞƏ BİLMƏZ (yalnız admin 'users')
@@ -38,7 +38,7 @@ declare v text;
 begin
   v := trim(coalesce(p_username, ''));
   if v = '' then return json_build_object('available', false, 'reason', 'empty'); end if;
-  if v !~ '^[A-Za-z]{3,20}$' then
+  if v !~ '^[A-Za-z]{5,20}$' then
     return json_build_object('available', false, 'reason', 'invalid');
   end if;
   if exists (select 1 from public.profiles where lower(username) = lower(v)) then
@@ -62,9 +62,9 @@ begin
   ref_code := 'REF' || new_code;
   user_name := coalesce(nullif(new.raw_user_meta_data->>'full_name', ''), split_part(new.email, '@', 1));
 
-  -- username: format-guard (hərf, 3-20); uyğun deyilsə null (istifadəçi user_code ilə qalır)
+  -- username: format-guard (hərf, 5-20); uyğun deyilsə null (istifadəçi user_code ilə qalır)
   v_username := nullif(trim(new.raw_user_meta_data->>'username'), '');
-  if v_username is not null and v_username !~ '^[A-Za-z]{3,20}$' then
+  if v_username is not null and v_username !~ '^[A-Za-z]{5,20}$' then
     v_username := null;
   end if;
   -- unikallıq (case-insensitive); çakışırsa signup rollback olur (orphan auth user yaranmaz)
@@ -110,7 +110,7 @@ begin
   user_name := coalesce(nullif(curr_user.raw_user_meta_data->>'full_name', ''), split_part(curr_user.email, '@', 1));
 
   v_username := nullif(trim(curr_user.raw_user_meta_data->>'username'), '');
-  if v_username is not null and v_username !~ '^[A-Za-z]{3,20}$' then
+  if v_username is not null and v_username !~ '^[A-Za-z]{5,20}$' then
     v_username := null;
   end if;
   if v_username is not null and exists (select 1 from public.profiles where lower(username) = lower(v_username)) then

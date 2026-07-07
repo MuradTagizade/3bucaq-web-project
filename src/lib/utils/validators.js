@@ -41,13 +41,13 @@ export function validateLogin(login) {
   return null;
 }
 
-// İstifadəçi adı (username): yalnız hərf (A-Z, a-z), 3-20 simvol. Rəqəm/simvol yox.
+// İstifadəçi adı (username): yalnız hərf (A-Z, a-z), 5-20 simvol. Rəqəm/simvol yox.
 // Mesaj yerinə KOD qaytarır ('required'|'length'|'chars') — komponent t() ilə göstərir.
-export const USERNAME_RE = /^[a-zA-Z]{3,20}$/;
+export const USERNAME_RE = /^[a-zA-Z]{5,20}$/;
 export function validateUsernameCode(username) {
   const u = (username || '').trim();
   if (!u) return 'required';
-  if (u.length < 3 || u.length > 20) return 'length';
+  if (u.length < 5 || u.length > 20) return 'length';
   if (!USERNAME_RE.test(u)) return 'chars';
   return null;
 }
