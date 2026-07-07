@@ -69,6 +69,7 @@
 .btn--danger:hover { background: var(--color-error); color: #fff; box-shadow: 0 0 20px rgba(255, 42, 95, 0.4); border-color: transparent; }
 
 .btn--success { background: var(--color-success); color: #020205; }
+.btn--warning { background: var(--color-warning); color: #020205; }
 .btn--full { width: 100%; }
 
 /* Loading */

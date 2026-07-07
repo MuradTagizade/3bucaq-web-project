@@ -237,7 +237,7 @@ export default function DashboardPage() {
           return (
             <div
               key={level.level}
-              className={`${styles.levelCard} ${status.isReady ? styles.levelReady : ''} ${status.isClaimed ? styles.levelClaimed : ''}`}
+              className={`${styles.levelCard} ${status.hasPoints && !status.isClaimed ? styles.levelReady : ''} ${status.isClaimed ? styles.levelClaimed : ''}`}
             >
               <div className={styles.levelHeader}>
                 <div className={styles.levelBadge}>
@@ -282,7 +282,7 @@ export default function DashboardPage() {
                 ) : (
                   <Button
                     size="sm"
-                    variant={status.hasPoints ? 'success' : 'ghost'}
+                    variant={status.hasPoints ? 'warning' : 'ghost'}
                     onClick={() => handleReceiveClick(level)}
                     disabled={!status.hasPoints}
                   >

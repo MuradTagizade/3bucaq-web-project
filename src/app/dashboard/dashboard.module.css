@@ -225,9 +225,9 @@
 }
 
 .levelReady {
-  background: var(--color-primary-subtle) !important;
-  border-color: var(--color-primary) !important;
-  box-shadow: 0 0 20px var(--color-primary-glow) !important;
+  background: rgba(255, 210, 0, 0.06) !important;
+  border-color: var(--color-warning) !important;
+  box-shadow: 0 0 20px rgba(255, 210, 0, 0.22) !important;
 }
 
 .levelClaimed {
