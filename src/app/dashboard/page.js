@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import styles from './dashboard.module.css';
 import Button from '@/components/ui/Button';
 import Badge from '@/components/ui/Badge';
@@ -16,10 +17,12 @@ import { createLevelClaim, getUserClaimedLevels, getUserByUid } from '@/lib/supa
 
 export default function DashboardPage() {
   const [receiveModal, setReceiveModal] = useState({ open: false, level: null });
+  const [packagesModal, setPackagesModal] = useState({ open: false, level: null });
   const [toast, setToast] = useState(null);
   const [claimedLevels, setClaimedLevels] = useState([]);
   const [submitting, setSubmitting] = useState(false);
 
+  const router = useRouter();
   const { t } = useTranslation();
   const { user: authUser, setUser } = useAuthStore();
   
@@ -68,8 +71,13 @@ export default function DashboardPage() {
       showToast(t('level_claimed_already', 'Bu səviyyə artıq istifadə olunub'));
       return;
     }
-    if (!status.isReady) {
-      showToast(t('requirements_not_met', 'Şərtlər yerinə yetirilməyib'));
+    if (!status.hasPoints) {
+      showToast(t('not_enough_points', 'You do not have enough points yet'));
+      return;
+    }
+    // Xal dolub, amma tələb olunan hotbed paketi alınmayıb → popup xəbərdarlıq
+    if (!status.hasPackages) {
+      setPackagesModal({ open: true, level });
       return;
     }
     setReceiveModal({ open: true, level });
@@ -274,9 +282,9 @@ export default function DashboardPage() {
                 ) : (
                   <Button
                     size="sm"
-                    variant={status.isReady ? 'success' : 'ghost'}
+                    variant={status.hasPoints ? 'success' : 'ghost'}
                     onClick={() => handleReceiveClick(level)}
-                    disabled={!status.isReady}
+                    disabled={!status.hasPoints}
                   >
                     {t('receive', 'Al')}
                   </Button>
@@ -313,6 +321,43 @@ export default function DashboardPage() {
             >
               {t('confirm_and_activate', 'Təsdiqlə və Aktiv Et')}
             </Button>
+          </div>
+        )}
+      </Modal>
+
+      {/* Hotbed Paketi Lazımdır Popup — xal dolub, amma tələb olunan paket alınmayıb */}
+      <Modal
+        isOpen={packagesModal.open}
+        onClose={() => setPackagesModal({ open: false, level: null })}
+        title={t('packages_required_title', 'Hotbed Package Required')}
+        size="sm"
+      >
+        {packagesModal.level && (
+          <div className={styles.receiveModal}>
+            <div className={styles.receiveInfo}>
+              <Lock size={20} color="var(--color-warning)" />
+              <span>LVL {packagesModal.level.level}</span>
+            </div>
+            <p style={{ fontSize: 14, color: 'var(--text-secondary)', margin: '16px 0', textAlign: 'center' }}>
+              {t('packages_required_desc', 'To unlock this level you must first activate the required hotbed packages:')}
+              {' '}
+              <strong style={{ color: 'var(--text-primary)' }}>
+                {getRequiredPackageNames(packagesModal.level.requiredPkgs)}
+              </strong>
+            </p>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+              <Button variant="ghost" onClick={() => setPackagesModal({ open: false, level: null })}>
+                {t('cancel', 'Cancel')}
+              </Button>
+              <Button
+                onClick={() => {
+                  setPackagesModal({ open: false, level: null });
+                  router.push('/dashboard/hotbed');
+                }}
+              >
+                {t('go_to_packages', 'Go to Packages')}
+              </Button>
+            </div>
           </div>
         )}
       </Modal>
