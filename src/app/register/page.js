@@ -251,11 +251,11 @@ function RegisterForm() {
               />
             </div>
 
-            <div className={styles.formRow}>
-              <div style={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
+            <div className={styles.formRow} style={{ alignItems: 'flex-start' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
                 <Input
                   label={t('username', 'İstifadəçi adı')}
-                  placeholder={t('username_placeholder', 'İstifadəçi adı (yalnız hərflər)')}
+                  placeholder={t('username_placeholder', 'İstifadəçi adı')}
                   value={form.username}
                   maxLength={20}
                   autoCapitalize="none"
@@ -282,9 +282,7 @@ function RegisterForm() {
                   {t('username_hint', 'Qeydiyyatdan sonra dəyişdirilə bilməz.')}
                 </span>
               </div>
-            </div>
 
-            <div className={styles.formRow}>
               <Input
                 label={t('email', 'Email')}
                 type="email"

@@ -60,7 +60,7 @@ const fr = {
   password: "Mot de passe",
   username: "Nom d'utilisateur",
   username_label: "NOM D'UTILISATEUR",
-  username_placeholder: "Nom d'utilisateur (lettres uniquement)",
+  username_placeholder: "Nom d'utilisateur",
   username_hint: "Non modifiable après l'inscription.",
   username_checking: "Vérification...",
   username_available: "Nom d'utilisateur disponible",

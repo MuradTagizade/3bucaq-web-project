@@ -59,7 +59,7 @@ const de = {
   password: "Passwort",
   username: "Benutzername",
   username_label: "BENUTZERNAME",
-  username_placeholder: "Benutzername (nur Buchstaben)",
+  username_placeholder: "Benutzername",
   username_hint: "Nach der Registrierung nicht änderbar.",
   username_checking: "Wird geprüft...",
   username_available: "Benutzername ist verfügbar",

@@ -60,7 +60,7 @@ const ru = {
   password: "Пароль",
   username: "Имя пользователя",
   username_label: "ИМЯ ПОЛЬЗОВАТЕЛЯ",
-  username_placeholder: "Имя пользователя (только буквы)",
+  username_placeholder: "Имя пользователя",
   username_hint: "Нельзя изменить после регистрации.",
   username_checking: "Проверка...",
   username_available: "Имя пользователя доступно",

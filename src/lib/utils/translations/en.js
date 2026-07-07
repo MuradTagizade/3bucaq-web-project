@@ -60,7 +60,7 @@ const en = {
   password: "Password",
   username: "Username",
   username_label: "USERNAME",
-  username_placeholder: "Username (letters only)",
+  username_placeholder: "Username",
   username_hint: "Can't be changed after registration.",
   username_checking: "Checking...",
   username_available: "Username is available",

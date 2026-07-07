@@ -60,7 +60,7 @@ const tr = {
   password: "Şifre",
   username: "Kullanıcı Adı",
   username_label: "KULLANICI ADI",
-  username_placeholder: "Kullanıcı adı (yalnızca harf)",
+  username_placeholder: "Kullanıcı adı",
   username_hint: "Kayıttan sonra değiştirilemez.",
   username_checking: "Kontrol ediliyor...",
   username_available: "Kullanıcı adı uygun",
