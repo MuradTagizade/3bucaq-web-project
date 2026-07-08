@@ -108,7 +108,8 @@ export default function DashboardPage() {
           totalPoints: Number(updatedProfile.total_points),
           currentLevel: Number(updatedProfile.current_level),
           claimedLevels: updatedProfile.claimed_levels || [],
-          // Part 14: level-up bütün paketləri sıfırlayır — UI köhnə "aktiv" göstərməsin
+          // Part 19: level-up yalnız o level-in tələb etdiyi paketləri söndürür
+          // (#399/#799 tələb olunana qədər aktiv qalır) — server state olduğu kimi əks olunur
           activePackages: {
             pkg19: updatedProfile.active_packages?.pkg19 || false,
             pkg49: updatedProfile.active_packages?.pkg49 || false,

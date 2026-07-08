@@ -567,3 +567,14 @@ Bu sessiyada admin panel əhəmiyyətli genişləndirildi. Digər UI işləri: d
     * Doğrulama: Intl çıxışı hər dildə düzgün — en `Jul 8, 2026 · 06:05 PM`, ru `8 июл. 2026`, tr `8 Tem 2026`, de `8. Juli 2026`, fr `8 juil. 2026`.
 * **Audit:** user-facing dashboard səhifələrində `t('key')` açarlarının HAMISI `en.js`-də var (skript ilə yoxlandı) → İngilis rejimində sızma yox. Qalan sabit-locale yalnız `toLocaleString('en-US')` = məbləğ/rəqəm formatı (qəsdən, dildən asılı deyil). Admin səhifələri onsuz da `formatDate/formatDateTime` işlədir. `months` tərcümə açarları artıq istifadə olunmur (zərərsiz qalır).
 * SQL dəyişməz (`_18`-də). §20 LANSMAN SIFIRLAMA PLANI hələ də gözləyir.
+
+## 28. Son Sessiya (2026-07-08): Level-up QİSMƏN reset — yalnız o level-in tələb etdiyi paketlər sönür (`sql/security_remediation_19.sql` ✅ CANLIDA)
+
+İstifadəçi istəyi: §22-də "yeni levelə keçəndə BÜTÜN paketlər sönsün" demişdi; indi dəyişdi — **yalnız o level üçün tələb olunan paketlər** deaktiv olsun. Digər aktiv paketlər (məs. `#399`, `#799`) sönməsin; onlar yalnız **özlərini tələb edən levelə** çatanda sönür (#399 → L8; #799 → L10). Pul yenə geri qaytarılmır.
+
+* **`sql/security_remediation_19.sql` — TƏTBİQ EDİLDİ ✅ (psql, canlı DB; rollback-lı doğrulandı):** `create_level_claim`-i yenidən yazır (`_14`-ü əvəz edir). Fərq yalnız 2 yerdə, qalan hər şey (kumulyativ xal, xal çıxılmır, balans+bonus, claimed_levels, current_level, level_claims+unique_violation rollback, level_bonus tx, grant) eynidir:
+    * Tələb olunan paketlər tək **`req_pkgs text[]`** massivinə çıxarıldı (CASE, `LEVELS.requiredPkgs` güzgüsü: L2-4=[19,49], L5-6=[+99], L7=[+199], L8-9=[+399], L10=[+799]). Massiv HƏM validasiya (`foreach`), HƏM reset üçün istifadə olunur.
+    * Reset artıq `active_packages='{}'` deyil → **`active_packages - req_pkgs`** (yalnız bu level-in paketləri silinir; qalan paketlərin `package_activated_at` timestamp-ı toxunulmur ki, #399/#799 120-günlük geri sayımı davam etsin). Level 1 (req_pkgs boş) → no-op.
+    * **Doğrulama (rollback-lı canlı):** L2 claim → `active_packages={"pkg399":true}` (#19,#49 silindi, **#399 QALDI**, timestamp-ı da), current_level=2, claimed=[2], xal=200 dəyişmədi ✓; L8 claim → `{"pkg799":true}` (#19..#399 silindi, **#799 QALDI** — L8 onu tələb etmir) ✓✓; L1 → paketlər toxunulmadı ✓; anon → 42501 ✓.
+* **Frontend (build ✅):** funksional dəyişiklik YOX — store server state-ini olduğu kimi əks etdirir. Yalnız köhnəlmiş şərhlər yeniləndi: `dashboard/page.js` (Part 14→19), `hotbed/page.js` (aktiv paket yalnız onu tələb edən level açılanda OFF olur).
+* Aktiv SQL zənciri: `sql/`-də **_19-a qədər** (CLAUDE.md yeniləndi). §20 LANSMAN SIFIRLAMA PLANI hələ də gözləyir.

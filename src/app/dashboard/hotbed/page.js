@@ -134,7 +134,8 @@ export default function HotBedPage() {
                   {formatCurrency(pkg.price)}
                 </div>
                 {/* ON/OFF Toggle — yuxarı sağ. ON = paketi aktiv edir (alır).
-                    Aktiv paket kilidlidir; yalnız yeni levelə keçəndə avtomatik OFF olur. */}
+                    Aktiv paket kilidlidir; yalnız onu tələb edən level açılanda avtomatik OFF olur
+                    (Part 19: qismən reset — digər levellər bu paketə toxunmur). */}
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '4px' }}>
                   <Toggle
                     checked={isActive}
